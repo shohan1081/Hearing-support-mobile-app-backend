@@ -19,6 +19,7 @@ firebase_service_account.json
 *-firebase-adminsdk-*.json
 *.json
 !firebase_service_account.json.example
+!postman_collection.json
 *.pem
 *.key
 
