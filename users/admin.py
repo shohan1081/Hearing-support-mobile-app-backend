@@ -1,10 +1,17 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
-from .models import User, UserLoginHistory, AccountDeletionRequest, ProfileDataDeletionRequest
+from .models import User, UserLoginHistory, AccountDeletionRequest, ProfileDataDeletionRequest, UserOnboarding
 from django.core.mail import send_mail
 from django.urls import reverse
 from django.utils.html import format_html
+
+@admin.register(UserOnboarding)
+class UserOnboardingAdmin(admin.ModelAdmin):
+    list_display = ('user', 'hearing_journey', 'is_completed', 'created_at', 'updated_at')
+    list_filter = ('hearing_journey', 'is_completed', 'created_at')
+    search_fields = ('user__email', 'user__name')
+    readonly_fields = ('created_at', 'updated_at')
 
 @admin.register(ProfileDataDeletionRequest)
 class ProfileDataDeletionRequestAdmin(admin.ModelAdmin):
