@@ -323,7 +323,7 @@ class UserLoginView(APIView):
 
 class UserLogoutView(APIView):
     permission_classes = [IsAuthenticated]
-    authentication_classes = [JWTAuthentication]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
     """
     API endpoint for user logout
     
@@ -351,7 +351,8 @@ class UserLogoutView(APIView):
             
             # Blacklist the refresh token
             token = RefreshToken(refresh_token)
-            token.blacklist()
+            if hasattr(token, 'blacklist'):
+                token.blacklist()
             
             return standard_response(
                 success=True,
