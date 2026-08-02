@@ -24,7 +24,7 @@ from .exceptions import (
 )
 from .utils import validate_age
 
-from .models import UserOnboarding
+from .models import UserOnboarding, DailyCheckIn
 
 User = get_user_model()
 
@@ -528,3 +528,29 @@ class TokenVerifyResponseSerializer(serializers.Serializer):
     """
     valid = serializers.BooleanField(help_text="Whether token is valid")
     user_id = serializers.UUIDField(help_text="User ID from token", required=False)
+
+
+class DailyCheckInSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Daily Check-in ("How are you hearing today?")
+    """
+    hearing_status_display = serializers.CharField(source='get_hearing_status_display', read_only=True)
+
+    class Meta:
+        model = DailyCheckIn
+        fields = [
+            'id',
+            'hearing_status',
+            'hearing_status_display',
+            'checkin_date',
+            'created_at',
+        ]
+        read_only_fields = ['id', 'checkin_date', 'created_at']
+
+    def validate_hearing_status(self, value):
+        valid_choices = [choice[0] for choice in DailyCheckIn.HEARING_STATUS_CHOICES]
+        if value not in valid_choices:
+            raise serializers.ValidationError(
+                f"Invalid hearing status '{value}'. Valid choices are: {', '.join(valid_choices)}"
+            )
+        return value
