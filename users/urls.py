@@ -14,6 +14,8 @@ from .views import (
     AccountDeleteView,
     CustomTokenRefreshView,
     CustomTokenVerifyView,
+    OnboardingView,
+    OnboardingOptionsView,
     account_deletion_request_view,
     AccountDeletionAPIView,
     VerifyAccountDeletionView,
@@ -45,9 +47,11 @@ urlpatterns = [
     path('password-reset-confirm/', PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
     path('password-change/', PasswordChangeView.as_view(), name='password-change'),
     
-    # Profile management
+    # Profile & Onboarding management
     path('profile/', UserProfileView.as_view(), name='profile'),
     path('account-delete/', AccountDeleteView.as_view(), name='account-delete'),
+    path('onboarding/', OnboardingView.as_view(), name='onboarding'),
+    path('onboarding/options/', OnboardingOptionsView.as_view(), name='onboarding-options'),
 
     # Account Deletion
     path('delete-account/', account_deletion_request_view, name='delete-account-form'),
