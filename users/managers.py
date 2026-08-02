@@ -96,8 +96,8 @@ class UserManager(BaseUserManager):
         Create user from Firebase authentication (Google, Apple, etc.)
         
         Args:
-            email (str): User's email from Firebase
-            name (str): User's name from Firebase
+            email (str): User's email from Firebase or client fallback
+            name (str): User's name from Firebase or client fallback
             firebase_uid (str): Firebase UID
             auth_provider (str): Authentication provider (google, apple)
             **extra_fields: Additional fields
@@ -105,7 +105,14 @@ class UserManager(BaseUserManager):
         Returns:
             User: Created or existing user instance
         """
-        # Check if user already exists with this email
+        # 1. Check if user already exists with this firebase_uid
+        try:
+            user = self.get(firebase_uid=firebase_uid)
+            return user
+        except self.model.DoesNotExist:
+            pass
+
+        # 2. Check if user already exists with this email
         try:
             user = self.get(email=email)
             
@@ -114,12 +121,12 @@ class UserManager(BaseUserManager):
                 user.firebase_uid = firebase_uid
                 user.auth_provider = auth_provider
                 user.is_email_verified = True  # Firebase emails are pre-verified
-                user.save()
+                user.save(update_fields=['firebase_uid', 'auth_provider', 'is_email_verified'])
             
             return user
             
         except self.model.DoesNotExist:
-            # Create new user
+            # 3. Create new user
             extra_fields.setdefault('firebase_uid', firebase_uid)
             extra_fields.setdefault('auth_provider', auth_provider)
             extra_fields.setdefault('is_email_verified', True)
