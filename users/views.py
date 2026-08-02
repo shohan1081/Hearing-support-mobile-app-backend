@@ -38,7 +38,9 @@ from .serializers import (
     UserProfileUpdateSerializer,
     AccountDeleteSerializer,
     UserOnboardingSerializer,
+    DailyCheckInSerializer,
 )
+from django.db import IntegrityError
 from .utils import (
     verify_firebase_token,
     send_welcome_email,
@@ -46,7 +48,7 @@ from .utils import (
     get_client_ip,
     get_user_agent,
 )
-from .models import UserLoginHistory, AccountDeletionRequest, ProfileDataDeletionRequest, UserOnboarding
+from .models import UserLoginHistory, AccountDeletionRequest, ProfileDataDeletionRequest, UserOnboarding, DailyCheckIn
 from django.shortcuts import render
 
 @csrf_exempt
@@ -1059,6 +1061,109 @@ class OnboardingOptionsView(APIView):
                     "required_selection_count": 3,
                     "options": improvement_goals_options
                 }
+            },
+            status_code=status.HTTP_200_OK
+        )
+
+
+class DailyCheckInView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+    serializer_class = DailyCheckInSerializer
+    """
+    API endpoint for Daily Check-in ("How are you hearing today?")
+    
+    GET /api/users/checkin/ - Get today's check-in status and history
+    POST /api/users/checkin/ - Submit today's check-in (Max 1 per day)
+    """
+
+    def get(self, request):
+        """Get user check-in status for today and recent history"""
+        user = request.user
+        today = timezone.now().date()
+
+        today_checkin = DailyCheckIn.objects.filter(user=user, checkin_date=today).first()
+        recent_checkins = DailyCheckIn.objects.filter(user=user)[:30]
+
+        serializer = self.serializer_class(today_checkin) if today_checkin else None
+        history_serializer = self.serializer_class(recent_checkins, many=True)
+
+        return standard_response(
+            success=True,
+            message="Check-in status retrieved successfully",
+            data={
+                "has_checked_in_today": today_checkin is not None,
+                "today_checkin": serializer.data if serializer else None,
+                "recent_history": history_serializer.data
+            },
+            status_code=status.HTTP_200_OK
+        )
+
+    def post(self, request):
+        """Submit daily check-in (Max 1 per day)"""
+        user = request.user
+        today = timezone.now().date()
+
+        # Check if user already submitted check-in today
+        existing_checkin = DailyCheckIn.objects.filter(user=user, checkin_date=today).first()
+        if existing_checkin:
+            serializer = self.serializer_class(existing_checkin)
+            return standard_response(
+                success=False,
+                message="You have already completed your daily check-in for today.",
+                data={
+                    "already_checked_in": True,
+                    "checkin": serializer.data
+                },
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            try:
+                checkin = serializer.save(user=user, checkin_date=today)
+                return standard_response(
+                    success=True,
+                    message="Daily check-in submitted successfully.",
+                    data=self.serializer_class(checkin).data,
+                    status_code=status.HTTP_201_CREATED
+                )
+            except IntegrityError:
+                return standard_response(
+                    success=False,
+                    message="You have already completed your daily check-in for today.",
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
+
+        return standard_response(
+            success=False,
+            message="Check-in submission failed",
+            errors=serializer.errors,
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+
+
+class DailyCheckInOptionsView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    """
+    API endpoint to fetch daily check-in question and available choices
+    
+    GET /api/users/checkin/options/
+    """
+
+    def get(self, request):
+        options = [
+            {"value": key, "label": label}
+            for key, label in DailyCheckIn.HEARING_STATUS_CHOICES
+        ]
+        return standard_response(
+            success=True,
+            message="Check-in options retrieved successfully",
+            data={
+                "question": "How are you hearing today?",
+                "type": "single_choice",
+                "options": options
             },
             status_code=status.HTTP_200_OK
         )
