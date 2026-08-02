@@ -223,6 +223,11 @@ class User(AbstractBaseUser, PermissionsMixin):
         self.otp_created_at = None
         self.save(update_fields=['otp', 'otp_created_at'])
 
+    @property
+    def is_onboarding_completed(self):
+        """Check if user has completed onboarding"""
+        return hasattr(self, 'onboarding') and self.onboarding.is_completed
+
 
 
 class AccountDeletionRequest(models.Model):
@@ -303,3 +308,56 @@ class UserLoginHistory(models.Model):
     
     def __str__(self):
         return f"{self.user.email} - {self.login_time}"
+
+
+class UserOnboarding(models.Model):
+    """
+    Onboarding questionnaire responses for hearing journey & goals
+    """
+    HEARING_JOURNEY_CHOICES = [
+        ('just_received_aids', 'I just received hearing aids'),
+        ('adjusting_to_aids', 'I am adjusting to hearing aids'),
+        ('worn_aids_for_years', 'I have worn hearing aids for years'),
+        ('need_help_with_current_aids', 'I need help with my current aids'),
+        ('considering_aids', 'I am considering aids'),
+    ]
+
+    IMPROVEMENT_GOALS_CHOICES = [
+        ('family_conversations', 'Hearing family conversations'),
+        ('restaurants', 'Hearing in restaurants'),
+        ('speech_in_noise', 'Understanding speech in noise'),
+        ('tv_clearly', 'Hearing the TV clearly'),
+        ('talking_on_phone', 'Talking on the phone'),
+        ('church_or_meetings', 'Church or meetings'),
+        ('group_conversations', 'Group conversations'),
+        ('work_conversations', 'Work conversations'),
+    ]
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='onboarding',
+        help_text=_("User associated with this onboarding data")
+    )
+    hearing_journey = models.CharField(
+        max_length=50,
+        choices=HEARING_JOURNEY_CHOICES,
+        help_text=_("Where user is in their hearing journey")
+    )
+    improvement_goals = models.JSONField(
+        default=list,
+        help_text=_("List of 3 hearing improvement goals selected by user")
+    )
+    is_completed = models.BooleanField(
+        default=True,
+        help_text=_("Whether onboarding has been completed")
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('user onboarding')
+        verbose_name_plural = _('user onboardings')
+
+    def __str__(self):
+        return f"Onboarding for {self.user.email}"
