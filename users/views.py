@@ -37,6 +37,7 @@ from .serializers import (
     UserProfileSerializer,
     UserProfileUpdateSerializer,
     AccountDeleteSerializer,
+    UserOnboardingSerializer,
 )
 from .utils import (
     verify_firebase_token,
@@ -45,7 +46,7 @@ from .utils import (
     get_client_ip,
     get_user_agent,
 )
-from .models import UserLoginHistory, AccountDeletionRequest, ProfileDataDeletionRequest
+from .models import UserLoginHistory, AccountDeletionRequest, ProfileDataDeletionRequest, UserOnboarding
 from django.shortcuts import render
 
 @csrf_exempt
@@ -969,4 +970,96 @@ class CustomTokenVerifyView(TokenVerifyView):
                 errors={'detail': str(e)},
                 status_code=status.HTTP_401_UNAUTHORIZED
             )
+
+
+class OnboardingView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+    serializer_class = UserOnboardingSerializer
+    """
+    API endpoint for User Onboarding
+    
+    GET /api/users/onboarding/ - Get onboarding responses and status
+    POST /api/users/onboarding/ - Submit onboarding responses
+    """
+
+    def get(self, request):
+        """Get user onboarding data"""
+        try:
+            onboarding = request.user.onboarding
+            serializer = self.serializer_class(onboarding)
+            return standard_response(
+                success=True,
+                message="Onboarding data retrieved successfully",
+                data=serializer.data,
+                status_code=status.HTTP_200_OK
+            )
+        except UserOnboarding.DoesNotExist:
+            return standard_response(
+                success=True,
+                message="Onboarding not yet completed",
+                data={'is_completed': False},
+                status_code=status.HTTP_200_OK
+            )
+
+    def post(self, request):
+        """Submit or update user onboarding data"""
+        user = request.user
+        onboarding_instance = getattr(user, 'onboarding', None)
+        serializer = self.serializer_class(onboarding_instance, data=request.data)
+
+        if serializer.is_valid():
+            serializer.save(user=user, is_completed=True)
+            return standard_response(
+                success=True,
+                message="Onboarding responses saved successfully.",
+                data=serializer.data,
+                status_code=status.HTTP_200_OK if onboarding_instance else status.HTTP_201_CREATED
+            )
+
+        return standard_response(
+            success=False,
+            message="Onboarding submission failed",
+            errors=serializer.errors,
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+
+
+class OnboardingOptionsView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    """
+    API endpoint to fetch available question options for the onboarding questionnaire
+    
+    GET /api/users/onboarding/options/
+    """
+
+    def get(self, request):
+        hearing_journey_options = [
+            {"value": key, "label": label}
+            for key, label in UserOnboarding.HEARING_JOURNEY_CHOICES
+        ]
+        improvement_goals_options = [
+            {"value": key, "label": label}
+            for key, label in UserOnboarding.IMPROVEMENT_GOALS_CHOICES
+        ]
+
+        return standard_response(
+            success=True,
+            message="Onboarding options retrieved successfully",
+            data={
+                "question_1": {
+                    "title": "Where are you in your hearing journey?",
+                    "type": "single_choice",
+                    "options": hearing_journey_options
+                },
+                "question_2": {
+                    "title": "What do you most want to improve?",
+                    "type": "multiple_choice",
+                    "required_selection_count": 3,
+                    "options": improvement_goals_options
+                }
+            },
+            status_code=status.HTTP_200_OK
+        )
 
