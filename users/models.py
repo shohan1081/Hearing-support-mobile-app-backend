@@ -361,3 +361,43 @@ class UserOnboarding(models.Model):
 
     def __str__(self):
         return f"Onboarding for {self.user.email}"
+
+
+class DailyCheckIn(models.Model):
+    """
+    Daily Check-in for hearing status tracking ("How are you hearing today?")
+    Only one check-in allowed per user per day.
+    """
+    HEARING_STATUS_CHOICES = [
+        ('good', 'Good'),
+        ('okay', 'Okay'),
+        ('struggling', 'Struggling'),
+        ('frustrated', 'Frustrated'),
+    ]
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='daily_checkins',
+        help_text=_("User who submitted the check-in")
+    )
+    hearing_status = models.CharField(
+        max_length=20,
+        choices=HEARING_STATUS_CHOICES,
+        help_text=_("How the user is hearing today")
+    )
+    checkin_date = models.DateField(
+        default=timezone.now,
+        db_index=True,
+        help_text=_("Date of the check-in")
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('daily check-in')
+        verbose_name_plural = _('daily check-ins')
+        ordering = ['-checkin_date', '-created_at']
+        unique_together = ['user', 'checkin_date']
+
+    def __str__(self):
+        return f"{self.user.email} - {self.hearing_status} on {self.checkin_date}"
