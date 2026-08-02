@@ -410,10 +410,14 @@ class FirebaseAuthView(APIView):
                 decoded_token = verify_firebase_token(firebase_token)
                 logger.info(f"Firebase token verified successfully. Decoded token: {decoded_token}")
                 
-                # Extract user data from token
+                # Extract user data from token or request
                 firebase_uid = decoded_token.get('uid')
-                email = decoded_token.get('email')
-                name = serializer.validated_data.get('name') or decoded_token.get('name', email.split('@')[0])
+                email = decoded_token.get('email') or serializer.validated_data.get('email')
+                if not email:
+                    email = f"{firebase_uid}@privaterelay.appleid.com"
+                
+                raw_name = serializer.validated_data.get('name') or decoded_token.get('name')
+                name = raw_name if raw_name else email.split('@')[0]
                 
                 # Determine auth provider
                 firebase_provider = decoded_token.get('firebase', {}).get('sign_in_provider', 'google')
