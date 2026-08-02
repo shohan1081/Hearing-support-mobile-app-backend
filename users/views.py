@@ -37,7 +37,6 @@ from .serializers import (
     UserProfileSerializer,
     UserProfileUpdateSerializer,
     AccountDeleteSerializer,
-    LanguagePreferenceSerializer,
 )
 from .utils import (
     verify_firebase_token,
@@ -970,18 +969,4 @@ class CustomTokenVerifyView(TokenVerifyView):
                 errors={'detail': str(e)},
                 status_code=status.HTTP_401_UNAUTHORIZED
             )
-
-class SetLanguageView(APIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = LanguagePreferenceSerializer
-
-    def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
-        if serializer.is_valid():
-            language = serializer.validated_data['language']
-            user = request.user
-            user.preferred_language = language
-            user.save(update_fields=['preferred_language'])
-            return standard_response(success=True, message="Language preference updated successfully.", data={'language': language})
-        return standard_response(success=False, message="Invalid request data", errors=serializer.errors, status_code=status.HTTP_400_BAD_REQUEST)
 
