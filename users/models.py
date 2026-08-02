@@ -36,6 +36,14 @@ class User(AbstractBaseUser, PermissionsMixin):
         help_text=_("User's full name")
     )
     
+    phone_number = models.CharField(
+        _('phone number'),
+        max_length=20,
+        null=True,
+        blank=True,
+        help_text=_("User's phone number")
+    )
+    
     date_of_birth = models.DateField(
         _('date of birth'),
         null=True,
@@ -163,13 +171,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     otp_created_at = models.DateTimeField(null=True, blank=True)
 
     # journal_pin = models.CharField(max_length=128, null=True, blank=True)
-
-    preferred_language = models.CharField(
-        max_length=10,
-        choices=[('en', 'English'), ('hi', 'Hindi'), ('pt', 'Portuguese')],
-        default='en',
-        help_text=_("User's preferred language for API responses")
-    )
 
     # Set email as the unique identifier
     USERNAME_FIELD = 'email'
