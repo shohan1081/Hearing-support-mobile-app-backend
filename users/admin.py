@@ -32,6 +32,7 @@ class UserAdmin(BaseUserAdmin):
     list_display = [
         'email',
         'name',
+        'phone_number',
         'auth_provider',
         'is_email_verified',
         'is_active',
@@ -52,7 +53,7 @@ class UserAdmin(BaseUserAdmin):
     ]
     
     # Search fields
-    search_fields = ['email', 'name', 'firebase_uid']
+    search_fields = ['email', 'name', 'phone_number', 'firebase_uid']
     
     # Ordering
     ordering = ['-date_joined']
@@ -63,7 +64,7 @@ class UserAdmin(BaseUserAdmin):
             'fields': ('email', 'password')
         }),
         (_('Personal Info'), {
-            'fields': ('name', 'date_of_birth', 'profile_picture')
+            'fields': ('name', 'phone_number', 'date_of_birth', 'profile_picture')
         }),
         (_('Authentication'), {
             'fields': (
