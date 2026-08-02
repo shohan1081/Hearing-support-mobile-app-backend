@@ -572,6 +572,89 @@
           }
         }
       ]
+    },
+    {
+      "name": "Onboarding",
+      "item": [
+        {
+          "name": "Get Onboarding Options",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/users/onboarding/options/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "onboarding",
+                "options",
+                ""
+              ]
+            },
+            "description": "Fetch all question 1 and question 2 choices and labels for rendering the onboarding UI."
+          }
+        },
+        {
+          "name": "Submit Onboarding Responses",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hearing_journey\": \"just_received_aids\",\n  \"improvement_goals\": [\n    \"family_conversations\",\n    \"restaurants\",\n    \"speech_in_noise\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/onboarding/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "onboarding",
+                ""
+              ]
+            },
+            "description": "Submit onboarding responses. hearing_journey takes 1 option, improvement_goals takes exactly 3 options."
+          }
+        },
+        {
+          "name": "Get User Onboarding Data",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/onboarding/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "onboarding",
+                ""
+              ]
+            },
+            "description": "Retrieve currently authenticated user's onboarding responses and completion status."
+          }
+        }
+      ]
     }
   ]
 }
