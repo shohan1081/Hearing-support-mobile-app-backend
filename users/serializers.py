@@ -34,7 +34,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     Required fields:
     - name: User's full name
     - email: User's email address
-    - date_of_birth: User's date of birth
     - password: User's password
     - confirm_password: Password confirmation
     """
@@ -56,11 +55,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['name', 'email', 'date_of_birth', 'password', 'confirm_password']
+        fields = ['name', 'email', 'password', 'confirm_password']
         extra_kwargs = {
             'name': {'required': True},
             'email': {'required': True},
-            'date_of_birth': {'required': True},
         }
     
     def validate_name(self, value):
@@ -84,21 +82,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("An account with this email already exists.")
         
         return value.lower()
-    
-    def validate_date_of_birth(self, value):
-        """Validate date of birth"""
-        try:
-            validate_date_of_birth(value)
-            
-            # Additional age validation
-            if not validate_age(value, min_age=13):
-                raise serializers.ValidationError(
-                    "You must be at least 13 years old to register."
-                )
-            
-            return value
-        except DjangoValidationError as e:
-            raise serializers.ValidationError(str(e))
     
     def validate_password(self, value):
         """Validate password strength"""
@@ -129,7 +112,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             email=validated_data['email'],
             name=validated_data['name'],
             password=validated_data['password'],
-            date_of_birth=validated_data.get('date_of_birth'),
             is_active=False  # User is inactive until OTP verification
         )
         
