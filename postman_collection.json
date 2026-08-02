@@ -655,6 +655,89 @@
           }
         }
       ]
+    },
+    {
+      "name": "Daily Check-in",
+      "item": [
+        {
+          "name": "Get Daily Check-in Options",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/users/checkin/options/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "checkin",
+                "options",
+                ""
+              ]
+            },
+            "description": "Fetch daily check-in question ('How are you hearing today?') and available choices."
+          }
+        },
+        {
+          "name": "Submit Daily Check-in",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hearing_status\": \"good\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/checkin/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "checkin",
+                ""
+              ]
+            },
+            "description": "Submit today's daily check-in. Options: 'good', 'okay', 'struggling', 'frustrated'. User can only submit 1 time per day."
+          }
+        },
+        {
+          "name": "Get Today Check-in Status & History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/checkin/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "checkin",
+                ""
+              ]
+            },
+            "description": "Retrieve whether user checked in today, today's check-in response, and recent check-in history."
+          }
+        }
+      ]
     }
   ]
 }
