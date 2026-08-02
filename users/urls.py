@@ -14,7 +14,6 @@ from .views import (
     AccountDeleteView,
     CustomTokenRefreshView,
     CustomTokenVerifyView,
-    SetLanguageView,
     account_deletion_request_view,
     AccountDeletionAPIView,
     VerifyAccountDeletionView,
@@ -49,7 +48,6 @@ urlpatterns = [
     # Profile management
     path('profile/', UserProfileView.as_view(), name='profile'),
     path('account-delete/', AccountDeleteView.as_view(), name='account-delete'),
-    path('set-language/', SetLanguageView.as_view(), name='set-language'),
 
     # Account Deletion
     path('delete-account/', account_deletion_request_view, name='delete-account-form'),
