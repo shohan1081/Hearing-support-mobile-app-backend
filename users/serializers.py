@@ -212,6 +212,11 @@ class FirebaseAuthSerializer(serializers.Serializer):
     )
     
     # Optional fields for additional user data
+    email = serializers.EmailField(
+        required=False,
+        help_text="User's email address (optional, fallback if Apple login conceals email)"
+    )
+
     name = serializers.CharField(
         required=False,
         help_text="User's full name (optional, will use Firebase data if not provided)"
