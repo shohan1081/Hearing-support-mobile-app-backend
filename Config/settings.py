@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     #third party apps can be added here
     'rest_framework',
+    'rest_framework_simplejwt.token_blacklist',
     # coustom apps can be added here
     'users.apps.UsersConfig',
     'legal_pages.apps.LegalPagesConfig',
