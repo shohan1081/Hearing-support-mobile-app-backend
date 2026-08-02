@@ -24,6 +24,8 @@ from .exceptions import (
 )
 from .utils import validate_age
 
+from .models import UserOnboarding
+
 User = get_user_model()
 
 
@@ -338,6 +340,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     """
     Serializer for user profile (read and update)
     """
+    is_onboarding_completed = serializers.BooleanField(read_only=True)
     
     class Meta:
         model = User
@@ -350,6 +353,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'auth_provider',
             'is_email_verified',
             'is_subscribed',
+            'is_onboarding_completed',
             'date_joined',
             'last_login',
         ]
@@ -359,9 +363,63 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'auth_provider',
             'is_email_verified',
             'is_subscribed',
+            'is_onboarding_completed',
             'date_joined',
             'last_login',
         ]
+
+
+class UserOnboardingSerializer(serializers.ModelSerializer):
+    """
+    Serializer for onboarding responses (Hearing Journey & 3 Improvement Goals)
+    """
+    hearing_journey_display = serializers.CharField(source='get_hearing_journey_display', read_only=True)
+    improvement_goals_display = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = UserOnboarding
+        fields = [
+            'hearing_journey',
+            'hearing_journey_display',
+            'improvement_goals',
+            'improvement_goals_display',
+            'is_completed',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = ['is_completed', 'created_at', 'updated_at']
+
+    def get_improvement_goals_display(self, obj):
+        """Map goal choices to human-readable strings"""
+        goals_map = dict(UserOnboarding.IMPROVEMENT_GOALS_CHOICES)
+        return [goals_map.get(goal, goal) for goal in obj.improvement_goals]
+
+    def validate_hearing_journey(self, value):
+        valid_choices = [choice[0] for choice in UserOnboarding.HEARING_JOURNEY_CHOICES]
+        if value not in valid_choices:
+            raise serializers.ValidationError(
+                f"Invalid hearing journey option '{value}'. Valid choices are: {', '.join(valid_choices)}"
+            )
+        return value
+
+    def validate_improvement_goals(self, value):
+        if not isinstance(value, list):
+            raise serializers.ValidationError("improvement_goals must be a list of options.")
+        
+        if len(value) != 3:
+            raise serializers.ValidationError("You must select exactly 3 improvement goals.")
+        
+        valid_choices = [choice[0] for choice in UserOnboarding.IMPROVEMENT_GOALS_CHOICES]
+        invalid_goals = [goal for goal in value if goal not in valid_choices]
+        if invalid_goals:
+            raise serializers.ValidationError(
+                f"Invalid goal(s): {', '.join(invalid_goals)}. Valid choices are: {', '.join(valid_choices)}"
+            )
+        
+        if len(set(value)) != 3:
+            raise serializers.ValidationError("Duplicate improvement goals are not allowed.")
+        
+        return value
     
     def validate_name(self, value):
         """Validate name"""
