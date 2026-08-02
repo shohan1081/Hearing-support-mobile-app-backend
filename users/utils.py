@@ -17,15 +17,34 @@ def initialize_firebase():
     Initialize Firebase Admin SDK with service account credentials
     This should be called once when Django starts
     """
+    import os
+    import glob
     if not firebase_admin._apps:
         firebase_credentials_path = getattr(settings, 'FIREBASE_CREDENTIALS_PATH', None)
-        if not firebase_credentials_path:
-            print("Warning: FIREBASE_CREDENTIALS_PATH is not set in settings. Firebase Admin SDK will not be initialized.")
+        target_path = None
+
+        if firebase_credentials_path:
+            if os.path.isabs(firebase_credentials_path):
+                target_path = firebase_credentials_path
+            else:
+                target_path = os.path.join(settings.BASE_DIR, firebase_credentials_path)
+
+        if not target_path or not os.path.exists(target_path):
+            # Attempt to auto-detect service account JSON file in BASE_DIR
+            matching_files = glob.glob(os.path.join(settings.BASE_DIR, "*firebase-adminsdk*.json"))
+            if matching_files:
+                target_path = matching_files[0]
+
+        if not target_path or not os.path.exists(target_path):
+            print("Warning: Firebase credentials JSON file not found. Firebase Admin SDK will not be initialized.")
             return
 
-        cred = credentials.Certificate(firebase_credentials_path)
-        firebase_admin.initialize_app(cred)
-        print("Firebase Admin SDK initialized successfully")
+        try:
+            cred = credentials.Certificate(target_path)
+            firebase_admin.initialize_app(cred)
+            print(f"Firebase Admin SDK initialized successfully using {os.path.basename(target_path)}")
+        except Exception as e:
+            print(f"Error initializing Firebase Admin SDK: {str(e)}")
 
 
 def generate_otp(length=4):
