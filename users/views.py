@@ -210,7 +210,6 @@ class UserRegistrationView(APIView):
     {
         "name": "John Doe",
         "email": "john@example.com",
-        "date_of_birth": "1990-01-15",
         "password": "SecurePass123!",
         "confirm_password": "SecurePass123!"
     }
