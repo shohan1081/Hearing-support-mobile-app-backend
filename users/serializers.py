@@ -339,25 +339,13 @@ class UserProfileSerializer(serializers.ModelSerializer):
     Serializer for user profile (read and update)
     """
     
-    age = serializers.SerializerMethodField(
-        read_only=True,
-        help_text="User's age calculated from date of birth"
-    )
-
-    # (mood tracker removed) - current_mood field intentionally omitted
-    
     class Meta:
         model = User
         fields = [
             'id',
             'email',
             'name',
-            'date_of_birth',
-            'gender',
-            'occupation',
-            'country',
-            'age',
-            'bio',
+            'phone_number',
             'profile_picture',
             'auth_provider',
             'is_email_verified',
@@ -375,32 +363,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'last_login',
         ]
     
-    def get_age(self, obj):
-        """Calculate age from date of birth"""
-        from .utils import calculate_age
-        return calculate_age(obj.date_of_birth)
-
-    # Mood tracking removed from the project. Any mood-related data/relations
-    # have been intentionally omitted from the serializer.
-    
     def validate_name(self, value):
         """Validate name"""
         try:
             validate_name(value)
-            return value
-        except DjangoValidationError as e:
-            raise serializers.ValidationError(str(e))
-    
-    def validate_date_of_birth(self, value):
-        """Validate date of birth"""
-        try:
-            validate_date_of_birth(value)
-            
-            if not validate_age(value, min_age=13):
-                raise serializers.ValidationError(
-                    "You must be at least 13 years old."
-                )
-            
             return value
         except DjangoValidationError as e:
             raise serializers.ValidationError(str(e))
@@ -418,31 +384,17 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 class UserProfileUpdateSerializer(serializers.ModelSerializer):
     """
-    Serializer for updating user profile (partial updates allowed)
+    Serializer for updating user profile (only full name, phone number, and profile picture)
     """
     
     class Meta:
         model = User
-        fields = ['name', 'date_of_birth', 'gender', 'occupation', 'country', 'bio', 'profile_picture']
+        fields = ['name', 'phone_number', 'profile_picture']
     
     def validate_name(self, value):
         """Validate name"""
         try:
             validate_name(value)
-            return value
-        except DjangoValidationError as e:
-            raise serializers.ValidationError(str(e))
-    
-    def validate_date_of_birth(self, value):
-        """Validate date of birth"""
-        try:
-            validate_date_of_birth(value)
-            
-            if not validate_age(value, min_age=13):
-                raise serializers.ValidationError(
-                    "You must be at least 13 years old."
-                )
-            
             return value
         except DjangoValidationError as e:
             raise serializers.ValidationError(str(e))
@@ -518,6 +470,3 @@ class TokenVerifyResponseSerializer(serializers.Serializer):
     """
     valid = serializers.BooleanField(help_text="Whether token is valid")
     user_id = serializers.UUIDField(help_text="User ID from token", required=False)
-
-class LanguagePreferenceSerializer(serializers.Serializer):
-    language = serializers.ChoiceField(choices=[('en', 'English'), ('hi', 'Hindi'), ('pt', 'Portuguese')])
