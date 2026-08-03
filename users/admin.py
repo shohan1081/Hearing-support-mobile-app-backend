@@ -8,9 +8,9 @@ from django.utils.html import format_html
 
 @admin.register(DailyCheckIn)
 class DailyCheckInAdmin(admin.ModelAdmin):
-    list_display = ('user', 'hearing_status', 'checkin_date', 'created_at')
+    list_display = ('user', 'hearing_status', 'what_went_well', 'checkin_date', 'created_at')
     list_filter = ('hearing_status', 'checkin_date')
-    search_fields = ('user__email', 'user__name')
+    search_fields = ('user__email', 'user__name', 'what_went_well')
     readonly_fields = ('created_at',)
 
 @admin.register(UserOnboarding)
