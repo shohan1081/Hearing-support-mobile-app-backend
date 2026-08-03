@@ -24,7 +24,7 @@ from .exceptions import (
 )
 from .utils import validate_age
 
-from .models import UserOnboarding, DailyCheckIn, CheckInTutorial
+from .models import UserOnboarding, DailyCheckIn, CheckInTutorial, CheckInTutorialFeedback
 
 User = get_user_model()
 
@@ -566,6 +566,7 @@ class CheckInTutorialSerializer(serializers.ModelSerializer):
     """
     video_stream_url = serializers.SerializerMethodField()
     thumbnail_url = serializers.SerializerMethodField()
+    still_feels_wrong_options = serializers.SerializerMethodField()
 
     class Meta:
         model = CheckInTutorial
@@ -580,6 +581,7 @@ class CheckInTutorialSerializer(serializers.ModelSerializer):
             'thumbnail_url',
             'duration_seconds',
             'order',
+            'still_feels_wrong_options',
             'is_active',
             'created_at',
             'updated_at',
@@ -597,3 +599,45 @@ class CheckInTutorialSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.thumbnail.url)
             return obj.thumbnail.url
         return None
+
+    def get_still_feels_wrong_options(self, obj):
+        """Return 'This still feels wrong' options for mobile UI rendering"""
+        options = [
+            {"value": key, "label": label}
+            for key, label in CheckInTutorialFeedback.ISSUE_DURATION_CHOICES
+        ]
+        return {
+            "button_text": "This still feels wrong",
+            "question": "How long has this issue been going on?",
+            "type": "single_choice",
+            "options": options
+        }
+
+
+class CheckInTutorialFeedbackSerializer(serializers.ModelSerializer):
+    """
+    Serializer for submitting 'This still feels wrong' feedback on tutorials
+    """
+    issue_duration_display = serializers.CharField(source='get_issue_duration_display', read_only=True)
+    tutorial_title = serializers.CharField(source='tutorial.title', read_only=True)
+
+    class Meta:
+        model = CheckInTutorialFeedback
+        fields = [
+            'id',
+            'tutorial',
+            'tutorial_title',
+            'issue_duration',
+            'issue_duration_display',
+            'notes',
+            'created_at',
+        ]
+        read_only_fields = ['id', 'created_at']
+
+    def validate_issue_duration(self, value):
+        valid_choices = [choice[0] for choice in CheckInTutorialFeedback.ISSUE_DURATION_CHOICES]
+        if value not in valid_choices:
+            raise serializers.ValidationError(
+                f"Invalid issue_duration '{value}'. Valid choices are: {', '.join(valid_choices)}"
+            )
+        return value
