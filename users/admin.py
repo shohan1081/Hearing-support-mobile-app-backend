@@ -1,10 +1,17 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
-from .models import User, UserLoginHistory, AccountDeletionRequest, ProfileDataDeletionRequest, UserOnboarding, DailyCheckIn, CheckInTutorial
+from .models import User, UserLoginHistory, AccountDeletionRequest, ProfileDataDeletionRequest, UserOnboarding, DailyCheckIn, CheckInTutorial, CheckInTutorialFeedback
 from django.core.mail import send_mail
 from django.urls import reverse
 from django.utils.html import format_html
+
+@admin.register(CheckInTutorialFeedback)
+class CheckInTutorialFeedbackAdmin(admin.ModelAdmin):
+    list_display = ('user', 'tutorial', 'issue_duration', 'created_at')
+    list_filter = ('issue_duration', 'created_at')
+    search_fields = ('user__email', 'user__name', 'tutorial__title', 'notes')
+    readonly_fields = ('created_at',)
 
 @admin.register(CheckInTutorial)
 class CheckInTutorialAdmin(admin.ModelAdmin):
