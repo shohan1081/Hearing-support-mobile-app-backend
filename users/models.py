@@ -401,6 +401,11 @@ class DailyCheckIn(models.Model):
         blank=True,
         help_text=_("What went okay today (for 'okay' hearing status)")
     )
+    why_struggling = models.TextField(
+        null=True,
+        blank=True,
+        help_text=_("Reason why user is struggling or frustrated (for 'struggling' / 'frustrated' hearing status)")
+    )
     notes = models.TextField(
         null=True,
         blank=True,
