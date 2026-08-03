@@ -24,7 +24,7 @@ from .exceptions import (
 )
 from .utils import validate_age
 
-from .models import UserOnboarding, DailyCheckIn
+from .models import UserOnboarding, DailyCheckIn, CheckInTutorial
 
 User = get_user_model()
 
@@ -558,3 +558,42 @@ class DailyCheckInSerializer(serializers.ModelSerializer):
                 f"Invalid hearing status '{value}'. Valid choices are: {', '.join(valid_choices)}"
             )
         return value
+
+
+class CheckInTutorialSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Check-in Tutorial / Troubleshooting videos
+    """
+    video_stream_url = serializers.SerializerMethodField()
+    thumbnail_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CheckInTutorial
+        fields = [
+            'id',
+            'title',
+            'slug',
+            'category',
+            'description',
+            'video_stream_url',
+            'video_url',
+            'thumbnail_url',
+            'duration_seconds',
+            'order',
+            'is_active',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def get_video_stream_url(self, obj):
+        request = self.context.get('request')
+        return obj.get_video_stream_url(request=request)
+
+    def get_thumbnail_url(self, obj):
+        if obj.thumbnail:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.thumbnail.url)
+            return obj.thumbnail.url
+        return None
