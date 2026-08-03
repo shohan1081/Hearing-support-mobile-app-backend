@@ -18,6 +18,8 @@ from .views import (
     OnboardingOptionsView,
     DailyCheckInView,
     DailyCheckInOptionsView,
+    CheckInTutorialListView,
+    CheckInTutorialDetailView,
     account_deletion_request_view,
     AccountDeletionAPIView,
     VerifyAccountDeletionView,
@@ -56,6 +58,10 @@ urlpatterns = [
     path('onboarding/options/', OnboardingOptionsView.as_view(), name='onboarding-options'),
     path('checkin/', DailyCheckInView.as_view(), name='daily-checkin'),
     path('checkin/options/', DailyCheckInOptionsView.as_view(), name='daily-checkin-options'),
+
+    # Tutorials
+    path('tutorials/', CheckInTutorialListView.as_view(), name='tutorial-list'),
+    path('tutorials/<slug:slug>/', CheckInTutorialDetailView.as_view(), name='tutorial-detail'),
 
     # Account Deletion
     path('delete-account/', account_deletion_request_view, name='delete-account-form'),
