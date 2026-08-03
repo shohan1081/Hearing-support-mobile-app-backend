@@ -680,7 +680,7 @@
           }
         },
         {
-          "name": "Submit Daily Check-in",
+          "name": "Submit Daily Check-in (Good + What Went Well)",
           "request": {
             "method": "POST",
             "header": [
@@ -695,7 +695,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"hearing_status\": \"good\"\n}"
+              "raw": "{\n  \"hearing_status\": \"good\",\n  \"what_went_well\": \"I could hear my family clearly at dinner today!\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/users/checkin/",
@@ -709,7 +709,40 @@
                 ""
               ]
             },
-            "description": "Submit today's daily check-in. Options: 'good', 'okay', 'struggling', 'frustrated'. User can only submit 1 time per day."
+            "description": "Submit or update today's daily check-in. When status is 'good', what_went_well text can be included."
+          }
+        },
+        {
+          "name": "Update Today Check-in (PATCH Follow-up)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"what_went_well\": \"Updated: I could hear my family clearly at dinner today!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/checkin/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "checkin",
+                ""
+              ]
+            },
+            "description": "Partial update of today's check-in (e.g. submitting what_went_well after status selection)."
           }
         },
         {
