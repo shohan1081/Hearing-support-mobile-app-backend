@@ -544,6 +544,7 @@ class DailyCheckInSerializer(serializers.ModelSerializer):
             'hearing_status_display',
             'what_went_well',
             'what_went_okay',
+            'why_struggling',
             'notes',
             'checkin_date',
             'created_at',
