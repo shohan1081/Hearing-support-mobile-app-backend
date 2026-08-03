@@ -421,3 +421,76 @@ class DailyCheckIn(models.Model):
 
     def __str__(self):
         return f"{self.user.email} - {self.hearing_status} on {self.checkin_date}"
+
+
+class CheckInTutorial(models.Model):
+    """
+    Check-in Tutorial / Troubleshooting videos and instructions for users
+    (e.g., "Sounds are too loud")
+    """
+    title = models.CharField(
+        max_length=255,
+        help_text=_("Tutorial title (e.g. 'Sounds are too loud')")
+    )
+    slug = models.SlugField(
+        max_length=255,
+        unique=True,
+        help_text=_("Unique identifier slug")
+    )
+    category = models.CharField(
+        max_length=100,
+        default="Sound Adjustment",
+        help_text=_("Category/topic of the tutorial")
+    )
+    description = models.TextField(
+        blank=True,
+        help_text=_("Detailed troubleshooting text / instructions")
+    )
+    video_file = models.FileField(
+        upload_to='tutorials/videos/',
+        null=True,
+        blank=True,
+        help_text=_("Upload video file directly (MP4, MOV, etc.)")
+    )
+    video_url = models.URLField(
+        max_length=500,
+        null=True,
+        blank=True,
+        help_text=_("External video URL (e.g. Cloudinary, S3, YouTube, Vimeo)")
+    )
+    thumbnail = models.ImageField(
+        upload_to='tutorials/thumbnails/',
+        null=True,
+        blank=True,
+        help_text=_("Thumbnail image for the video")
+    )
+    duration_seconds = models.PositiveIntegerField(
+        default=0,
+        help_text=_("Duration of the video in seconds")
+    )
+    order = models.PositiveIntegerField(
+        default=0,
+        help_text=_("Display order sequence")
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text=_("Whether tutorial is active and visible in the app")
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('check-in tutorial')
+        verbose_name_plural = _('check-in tutorials')
+        ordering = ['order', '-created_at']
+
+    def __str__(self):
+        return self.title
+
+    def get_video_stream_url(self, request=None):
+        """Return uploaded video file URL or external video_url"""
+        if self.video_file:
+            if request:
+                return request.build_absolute_uri(self.video_file.url)
+            return self.video_file.url
+        return self.video_url or ""
