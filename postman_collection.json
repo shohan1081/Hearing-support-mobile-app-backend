@@ -713,6 +713,39 @@
           }
         },
         {
+          "name": "Submit Daily Check-in (Okay + What Went Okay)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hearing_status\": \"okay\",\n  \"what_went_okay\": \"Hearing was mostly fine today with mild background noise.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/checkin/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "checkin",
+                ""
+              ]
+            },
+            "description": "Submit or update today's daily check-in. When status is 'okay', what_went_okay text can be included."
+          }
+        },
+        {
           "name": "Update Today Check-in (PATCH Follow-up)",
           "request": {
             "method": "PATCH",
