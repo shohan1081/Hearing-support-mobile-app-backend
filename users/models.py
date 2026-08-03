@@ -391,6 +391,16 @@ class DailyCheckIn(models.Model):
         db_index=True,
         help_text=_("Date of the check-in")
     )
+    what_went_well = models.TextField(
+        null=True,
+        blank=True,
+        help_text=_("What went well today (for 'good' hearing status)")
+    )
+    notes = models.TextField(
+        null=True,
+        blank=True,
+        help_text=_("Additional notes or follow-up details")
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
