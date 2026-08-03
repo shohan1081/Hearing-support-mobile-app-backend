@@ -20,6 +20,7 @@ from .views import (
     DailyCheckInOptionsView,
     CheckInTutorialListView,
     CheckInTutorialDetailView,
+    CheckInTutorialFeedbackView,
     account_deletion_request_view,
     AccountDeletionAPIView,
     VerifyAccountDeletionView,
@@ -61,6 +62,7 @@ urlpatterns = [
 
     # Check-in Tutorials
     path('checkin-tutorials/', CheckInTutorialListView.as_view(), name='checkin-tutorial-list'),
+    path('checkin-tutorials/feedback/', CheckInTutorialFeedbackView.as_view(), name='checkin-tutorial-feedback'),
     path('checkin-tutorials/<slug:slug>/', CheckInTutorialDetailView.as_view(), name='checkin-tutorial-detail'),
     path('checkin-tutorial/', CheckInTutorialListView.as_view(), name='checkin-tutorial-alias'),
     path('checkin-tutorial/<slug:slug>/', CheckInTutorialDetailView.as_view(), name='checkin-tutorial-detail-alias'),
