@@ -542,6 +542,8 @@ class DailyCheckInSerializer(serializers.ModelSerializer):
             'id',
             'hearing_status',
             'hearing_status_display',
+            'what_went_well',
+            'notes',
             'checkin_date',
             'created_at',
         ]
