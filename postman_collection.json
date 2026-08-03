@@ -912,6 +912,40 @@
             },
             "description": "Fetch tutorial details, troubleshooting text, and video stream URL by slug or ID."
           }
+        },
+        {
+          "name": "Submit Tutorial Feedback (This Still Feels Wrong)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tutorial\": 1,\n  \"issue_duration\": \"more_than_1_week\",\n  \"notes\": \"Volume is still painfully loud during high pitched sounds.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/checkin-tutorials/feedback/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "checkin-tutorials",
+                "feedback",
+                ""
+              ]
+            },
+            "description": "Submit 'This still feels wrong' feedback when a tutorial doesn't fix the user's issue. Options: 'just_today', 'a_few_days', 'more_than_1_week', 'getting_worse'."
+          }
         }
       ]
     }
