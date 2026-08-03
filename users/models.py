@@ -396,6 +396,11 @@ class DailyCheckIn(models.Model):
         blank=True,
         help_text=_("What went well today (for 'good' hearing status)")
     )
+    what_went_okay = models.TextField(
+        null=True,
+        blank=True,
+        help_text=_("What went okay today (for 'okay' hearing status)")
+    )
     notes = models.TextField(
         null=True,
         blank=True,
