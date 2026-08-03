@@ -39,6 +39,7 @@ from .serializers import (
     AccountDeleteSerializer,
     UserOnboardingSerializer,
     DailyCheckInSerializer,
+    CheckInTutorialSerializer,
 )
 from django.db import IntegrityError
 from .utils import (
@@ -48,7 +49,7 @@ from .utils import (
     get_client_ip,
     get_user_agent,
 )
-from .models import UserLoginHistory, AccountDeletionRequest, ProfileDataDeletionRequest, UserOnboarding, DailyCheckIn
+from .models import UserLoginHistory, AccountDeletionRequest, ProfileDataDeletionRequest, UserOnboarding, DailyCheckIn, CheckInTutorial
 from django.shortcuts import render
 
 @csrf_exempt
@@ -1223,6 +1224,64 @@ class DailyCheckInOptionsView(APIView):
                 "type": "single_choice",
                 "options": options
             },
+            status_code=status.HTTP_200_OK
+        )
+
+
+class CheckInTutorialListView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    serializer_class = CheckInTutorialSerializer
+    """
+    API endpoint to list active check-in tutorial videos and instructions
+    
+    GET /api/users/tutorials/
+    GET /api/users/tutorials/?category=Sound Adjustment
+    """
+
+    def get(self, request):
+        category = request.query_params.get('category')
+        queryset = CheckInTutorial.objects.filter(is_active=True)
+        if category:
+            queryset = queryset.filter(category__iexact=category)
+
+        serializer = self.serializer_class(queryset, many=True, context={'request': request})
+        return standard_response(
+            success=True,
+            message="Check-in tutorials retrieved successfully",
+            data=serializer.data,
+            status_code=status.HTTP_200_OK
+        )
+
+
+class CheckInTutorialDetailView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    serializer_class = CheckInTutorialSerializer
+    """
+    API endpoint to retrieve single check-in tutorial by slug or ID
+    
+    GET /api/users/tutorials/<slug_or_id>/
+    """
+
+    def get(self, request, slug):
+        if slug.isdigit():
+            tutorial = CheckInTutorial.objects.filter(id=int(slug), is_active=True).first()
+        else:
+            tutorial = CheckInTutorial.objects.filter(slug=slug, is_active=True).first()
+
+        if not tutorial:
+            return standard_response(
+                success=False,
+                message="Tutorial not found",
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = self.serializer_class(tutorial, context={'request': request})
+        return standard_response(
+            success=True,
+            message="Tutorial details retrieved successfully",
+            data=serializer.data,
             status_code=status.HTTP_200_OK
         )
 
