@@ -1198,14 +1198,20 @@ class DailyCheckInOptionsView(APIView):
                 "value": "struggling",
                 "label": "Struggling",
                 "followup": {
-                    "has_followup": False
+                    "has_followup": True,
+                    "prompt": "Tell us why you're struggling",
+                    "field_name": "why_struggling",
+                    "input_type": "text"
                 }
             },
             {
                 "value": "frustrated",
                 "label": "Frustrated",
                 "followup": {
-                    "has_followup": False
+                    "has_followup": True,
+                    "prompt": "Tell us why you're struggling",
+                    "field_name": "why_struggling",
+                    "input_type": "text"
                 }
             }
         ]
