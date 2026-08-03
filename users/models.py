@@ -494,3 +494,47 @@ class CheckInTutorial(models.Model):
                 return request.build_absolute_uri(self.video_file.url)
             return self.video_file.url
         return self.video_url or ""
+
+
+class CheckInTutorialFeedback(models.Model):
+    """
+    Feedback logged when a user selects "This still feels wrong" on any tutorial
+    """
+    ISSUE_DURATION_CHOICES = [
+        ('just_today', 'Just today'),
+        ('a_few_days', 'A few days'),
+        ('more_than_1_week', 'More than 1 week'),
+        ('getting_worse', "It's getting worse"),
+    ]
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='tutorial_feedbacks',
+        help_text=_("User who submitted feedback")
+    )
+    tutorial = models.ForeignKey(
+        CheckInTutorial,
+        on_delete=models.CASCADE,
+        related_name='feedbacks',
+        help_text=_("Tutorial this feedback belongs to")
+    )
+    issue_duration = models.CharField(
+        max_length=50,
+        choices=ISSUE_DURATION_CHOICES,
+        help_text=_("How long the issue has been occurring")
+    )
+    notes = models.TextField(
+        null=True,
+        blank=True,
+        help_text=_("Optional additional notes")
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('check-in tutorial feedback')
+        verbose_name_plural = _('check-in tutorial feedbacks')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.email} - {self.tutorial.title} ({self.get_issue_duration_display()})"
