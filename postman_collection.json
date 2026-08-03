@@ -746,6 +746,72 @@
           }
         },
         {
+          "name": "Submit Daily Check-in (Struggling + Reason)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hearing_status\": \"struggling\",\n  \"why_struggling\": \"Too much background noise in noisy restaurants.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/checkin/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "checkin",
+                ""
+              ]
+            },
+            "description": "Submit or update today's daily check-in. When status is 'struggling' or 'frustrated', why_struggling text can be included."
+          }
+        },
+        {
+          "name": "Submit Daily Check-in (Frustrated + Reason)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hearing_status\": \"frustrated\",\n  \"why_struggling\": \"Difficulty hearing conversations clearly on phone calls.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/checkin/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "checkin",
+                ""
+              ]
+            },
+            "description": "Submit or update today's daily check-in for frustrated status with reason why struggling."
+          }
+        },
+        {
           "name": "Update Today Check-in (PATCH Follow-up)",
           "request": {
             "method": "PATCH",
