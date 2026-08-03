@@ -40,6 +40,7 @@ from .serializers import (
     UserOnboardingSerializer,
     DailyCheckInSerializer,
     CheckInTutorialSerializer,
+    CheckInTutorialFeedbackSerializer,
 )
 from django.db import IntegrityError
 from .utils import (
@@ -49,7 +50,7 @@ from .utils import (
     get_client_ip,
     get_user_agent,
 )
-from .models import UserLoginHistory, AccountDeletionRequest, ProfileDataDeletionRequest, UserOnboarding, DailyCheckIn, CheckInTutorial
+from .models import UserLoginHistory, AccountDeletionRequest, ProfileDataDeletionRequest, UserOnboarding, DailyCheckIn, CheckInTutorial, CheckInTutorialFeedback
 from django.shortcuts import render
 
 @csrf_exempt
@@ -1283,5 +1284,34 @@ class CheckInTutorialDetailView(APIView):
             message="Tutorial details retrieved successfully",
             data=serializer.data,
             status_code=status.HTTP_200_OK
+        )
+
+
+class CheckInTutorialFeedbackView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+    serializer_class = CheckInTutorialFeedbackSerializer
+    """
+    API endpoint for submitting 'This still feels wrong' feedback on tutorials
+    
+    POST /api/users/checkin-tutorials/feedback/
+    """
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            feedback = serializer.save(user=request.user)
+            return standard_response(
+                success=True,
+                message="Feedback submitted successfully.",
+                data=self.serializer_class(feedback).data,
+                status_code=status.HTTP_201_CREATED
+            )
+
+        return standard_response(
+            success=False,
+            message="Feedback submission failed",
+            errors=serializer.errors,
+            status_code=status.HTTP_400_BAD_REQUEST
         )
 
