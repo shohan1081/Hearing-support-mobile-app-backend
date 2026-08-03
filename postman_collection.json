@@ -879,14 +879,14 @@
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{base_url}}/api/users/tutorials/",
+              "raw": "{{base_url}}/api/users/checkin-tutorials/",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "users",
-                "tutorials",
+                "checkin-tutorials",
                 ""
               ]
             },
@@ -898,14 +898,14 @@
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{base_url}}/api/users/tutorials/sounds-are-too-loud/",
+              "raw": "{{base_url}}/api/users/checkin-tutorials/sounds-are-too-loud/",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "users",
-                "tutorials",
+                "checkin-tutorials",
                 "sounds-are-too-loud",
                 ""
               ]
