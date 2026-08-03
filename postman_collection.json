@@ -870,6 +870,50 @@
           }
         }
       ]
+    },
+    {
+      "name": "Check-in Tutorials",
+      "item": [
+        {
+          "name": "Get All Tutorials",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/users/tutorials/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "tutorials",
+                ""
+              ]
+            },
+            "description": "Fetch list of active check-in tutorials, instructions, and video URLs."
+          }
+        },
+        {
+          "name": "Get Tutorial Details (Sounds Are Too Loud)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/users/tutorials/sounds-are-too-loud/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "tutorials",
+                "sounds-are-too-loud",
+                ""
+              ]
+            },
+            "description": "Fetch tutorial details, troubleshooting text, and video stream URL by slug or ID."
+          }
+        }
+      ]
     }
   ]
 }
