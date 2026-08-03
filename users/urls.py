@@ -59,9 +59,11 @@ urlpatterns = [
     path('checkin/', DailyCheckInView.as_view(), name='daily-checkin'),
     path('checkin/options/', DailyCheckInOptionsView.as_view(), name='daily-checkin-options'),
 
-    # Tutorials
-    path('tutorials/', CheckInTutorialListView.as_view(), name='tutorial-list'),
-    path('tutorials/<slug:slug>/', CheckInTutorialDetailView.as_view(), name='tutorial-detail'),
+    # Check-in Tutorials
+    path('checkin-tutorials/', CheckInTutorialListView.as_view(), name='checkin-tutorial-list'),
+    path('checkin-tutorials/<slug:slug>/', CheckInTutorialDetailView.as_view(), name='checkin-tutorial-detail'),
+    path('checkin-tutorial/', CheckInTutorialListView.as_view(), name='checkin-tutorial-alias'),
+    path('checkin-tutorial/<slug:slug>/', CheckInTutorialDetailView.as_view(), name='checkin-tutorial-detail-alias'),
 
     # Account Deletion
     path('delete-account/', account_deletion_request_view, name='delete-account-form'),
