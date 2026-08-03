@@ -1188,7 +1188,10 @@ class DailyCheckInOptionsView(APIView):
                 "value": "okay",
                 "label": "Okay",
                 "followup": {
-                    "has_followup": False
+                    "has_followup": True,
+                    "prompt": "What went okay today?",
+                    "field_name": "what_went_okay",
+                    "input_type": "text"
                 }
             },
             {
