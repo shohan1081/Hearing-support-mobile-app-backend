@@ -1074,7 +1074,8 @@ class DailyCheckInView(APIView):
     API endpoint for Daily Check-in ("How are you hearing today?")
     
     GET /api/users/checkin/ - Get today's check-in status and history
-    POST /api/users/checkin/ - Submit today's check-in (Max 1 per day)
+    POST /api/users/checkin/ - Submit or update today's check-in
+    PATCH /api/users/checkin/ - Partial update today's check-in (e.g. adding 'what_went_well')
     """
 
     def get(self, request):
@@ -1100,38 +1101,27 @@ class DailyCheckInView(APIView):
         )
 
     def post(self, request):
-        """Submit daily check-in (Max 1 per day)"""
+        """Submit or update today's daily check-in"""
         user = request.user
         today = timezone.now().date()
 
-        # Check if user already submitted check-in today
         existing_checkin = DailyCheckIn.objects.filter(user=user, checkin_date=today).first()
-        if existing_checkin:
-            serializer = self.serializer_class(existing_checkin)
-            return standard_response(
-                success=False,
-                message="You have already completed your daily check-in for today.",
-                data={
-                    "already_checked_in": True,
-                    "checkin": serializer.data
-                },
-                status_code=status.HTTP_400_BAD_REQUEST
-            )
+        serializer = self.serializer_class(existing_checkin, data=request.data, partial=True) if existing_checkin else self.serializer_class(data=request.data)
 
-        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             try:
                 checkin = serializer.save(user=user, checkin_date=today)
+                is_update = existing_checkin is not None
                 return standard_response(
                     success=True,
-                    message="Daily check-in submitted successfully.",
+                    message="Daily check-in updated successfully." if is_update else "Daily check-in submitted successfully.",
                     data=self.serializer_class(checkin).data,
-                    status_code=status.HTTP_201_CREATED
+                    status_code=status.HTTP_200_OK if is_update else status.HTTP_201_CREATED
                 )
             except IntegrityError:
                 return standard_response(
                     success=False,
-                    message="You have already completed your daily check-in for today.",
+                    message="An error occurred while saving your daily check-in.",
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
 
@@ -1142,20 +1132,79 @@ class DailyCheckInView(APIView):
             status_code=status.HTTP_400_BAD_REQUEST
         )
 
+    def patch(self, request):
+        """Update today's check-in details (e.g. what_went_well)"""
+        user = request.user
+        today = timezone.now().date()
+
+        today_checkin = DailyCheckIn.objects.filter(user=user, checkin_date=today).first()
+        if not today_checkin:
+            return standard_response(
+                success=False,
+                message="No check-in found for today. Please start your daily check-in first.",
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = self.serializer_class(today_checkin, data=request.data, partial=True)
+        if serializer.is_valid():
+            checkin = serializer.save()
+            return standard_response(
+                success=True,
+                message="Daily check-in updated successfully.",
+                data=self.serializer_class(checkin).data,
+                status_code=status.HTTP_200_OK
+            )
+
+        return standard_response(
+            success=False,
+            message="Check-in update failed",
+            errors=serializer.errors,
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+
 
 class DailyCheckInOptionsView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
     """
-    API endpoint to fetch daily check-in question and available choices
+    API endpoint to fetch daily check-in question, available choices, and follow-up flows
     
     GET /api/users/checkin/options/
     """
 
     def get(self, request):
         options = [
-            {"value": key, "label": label}
-            for key, label in DailyCheckIn.HEARING_STATUS_CHOICES
+            {
+                "value": "good",
+                "label": "Good",
+                "followup": {
+                    "has_followup": True,
+                    "prompt": "What went well today?",
+                    "field_name": "what_went_well",
+                    "input_type": "text"
+                }
+            },
+            {
+                "value": "okay",
+                "label": "Okay",
+                "followup": {
+                    "has_followup": False
+                }
+            },
+            {
+                "value": "struggling",
+                "label": "Struggling",
+                "followup": {
+                    "has_followup": False
+                }
+            },
+            {
+                "value": "frustrated",
+                "label": "Frustrated",
+                "followup": {
+                    "has_followup": False
+                }
+            }
         ]
         return standard_response(
             success=True,
