@@ -567,6 +567,7 @@ class CheckInTutorialSerializer(serializers.ModelSerializer):
     video_stream_url = serializers.SerializerMethodField()
     thumbnail_url = serializers.SerializerMethodField()
     still_feels_wrong_options = serializers.SerializerMethodField()
+    other_option_flow = serializers.SerializerMethodField()
 
     class Meta:
         model = CheckInTutorial
@@ -582,6 +583,7 @@ class CheckInTutorialSerializer(serializers.ModelSerializer):
             'duration_seconds',
             'order',
             'still_feels_wrong_options',
+            'other_option_flow',
             'is_active',
             'created_at',
             'updated_at',
@@ -613,11 +615,23 @@ class CheckInTutorialSerializer(serializers.ModelSerializer):
             "options": options
         }
 
+    def get_other_option_flow(self, obj):
+        """Return 'Other' challenge text flow metadata for mobile UI rendering if tutorial is 'other'"""
+        if obj.slug == 'other' or obj.title.lower() == 'other':
+            return {
+                "has_text_input": True,
+                "prompt": "What about other has been most challenging for you?",
+                "field_name": "other_challenge_text",
+                "input_type": "text"
+            }
+        return None
+
 
 class CheckInTutorialFeedbackSerializer(serializers.ModelSerializer):
     """
-    Serializer for submitting 'This still feels wrong' feedback on tutorials
+    Serializer for submitting 'This still feels wrong' or 'Other' option feedback on tutorials
     """
+    issue_duration = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     issue_duration_display = serializers.CharField(source='get_issue_duration_display', read_only=True)
     tutorial_title = serializers.CharField(source='tutorial.title', read_only=True)
 
@@ -629,12 +643,15 @@ class CheckInTutorialFeedbackSerializer(serializers.ModelSerializer):
             'tutorial_title',
             'issue_duration',
             'issue_duration_display',
+            'other_challenge_text',
             'notes',
             'created_at',
         ]
         read_only_fields = ['id', 'created_at']
 
     def validate_issue_duration(self, value):
+        if not value:
+            return None
         valid_choices = [choice[0] for choice in CheckInTutorialFeedback.ISSUE_DURATION_CHOICES]
         if value not in valid_choices:
             raise serializers.ValidationError(
