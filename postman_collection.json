@@ -934,6 +934,86 @@
           }
         },
         {
+          "name": "Get Tutorial Details (Background Noise Is Distracting)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/users/checkin-tutorials/background-noise-is-distracting/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "checkin-tutorials",
+                "background-noise-is-distracting",
+                ""
+              ]
+            },
+            "description": "Fetch tutorial details and video stream URL for 'Background noise is distracting'."
+          }
+        },
+        {
+          "name": "Get Tutorial Details (Restaurants Are Hard)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/users/checkin-tutorials/restaurants-are-hard/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "checkin-tutorials",
+                "restaurants-are-hard",
+                ""
+              ]
+            },
+            "description": "Fetch tutorial details and video stream URL for 'Restaurants are hard'."
+          }
+        },
+        {
+          "name": "Get Tutorial Details (TV Is Unclear)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/users/checkin-tutorials/tv-is-unclear/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "checkin-tutorials",
+                "tv-is-unclear",
+                ""
+              ]
+            },
+            "description": "Fetch tutorial details and video stream URL for 'TV is unclear'."
+          }
+        },
+        {
+          "name": "Get Tutorial Details (I Feel Overwhelmed)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/users/checkin-tutorials/i-feel-overwhelmed/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "checkin-tutorials",
+                "i-feel-overwhelmed",
+                ""
+              ]
+            },
+            "description": "Fetch tutorial details and video stream URL for 'I feel overwhelmed'."
+          }
+        },
+        {
           "name": "Submit Tutorial Feedback (This Still Feels Wrong)",
           "request": {
             "method": "POST",
