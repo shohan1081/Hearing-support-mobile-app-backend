@@ -1014,6 +1014,60 @@
           }
         },
         {
+          "name": "Get Tutorial Details (Other)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/users/checkin-tutorials/other/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "checkin-tutorials",
+                "other",
+                ""
+              ]
+            },
+            "description": "Fetch tutorial details and text prompt flow metadata for 'Other' option."
+          }
+        },
+        {
+          "name": "Submit Tutorial Feedback (Other Challenge Text)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tutorial\": 8,\n  \"other_challenge_text\": \"I struggle hearing whispers and soft voices in quiet rooms.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/checkin-tutorials/feedback/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "checkin-tutorials",
+                "feedback",
+                ""
+              ]
+            },
+            "description": "Submit user's custom challenge text response when selecting the 'Other' tutorial option."
+          }
+        },
+        {
           "name": "Submit Tutorial Feedback (This Still Feels Wrong)",
           "request": {
             "method": "POST",
