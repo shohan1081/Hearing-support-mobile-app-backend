@@ -8,9 +8,9 @@ from django.utils.html import format_html
 
 @admin.register(CheckInTutorialFeedback)
 class CheckInTutorialFeedbackAdmin(admin.ModelAdmin):
-    list_display = ('user', 'tutorial', 'issue_duration', 'created_at')
+    list_display = ('user', 'tutorial', 'issue_duration', 'other_challenge_text', 'created_at')
     list_filter = ('issue_duration', 'created_at')
-    search_fields = ('user__email', 'user__name', 'tutorial__title', 'notes')
+    search_fields = ('user__email', 'user__name', 'tutorial__title', 'other_challenge_text', 'notes')
     readonly_fields = ('created_at',)
 
 @admin.register(CheckInTutorial)
