@@ -914,6 +914,26 @@
           }
         },
         {
+          "name": "Get Tutorial Details (I Hear But Don't Understand)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/users/checkin-tutorials/i-hear-but-dont-understand/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "checkin-tutorials",
+                "i-hear-but-dont-understand",
+                ""
+              ]
+            },
+            "description": "Fetch tutorial details, video stream URL, and 'This still feels wrong' options for 'I hear but don't understand'."
+          }
+        },
+        {
           "name": "Submit Tutorial Feedback (This Still Feels Wrong)",
           "request": {
             "method": "POST",
