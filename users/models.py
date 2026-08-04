@@ -522,7 +522,14 @@ class CheckInTutorialFeedback(models.Model):
     issue_duration = models.CharField(
         max_length=50,
         choices=ISSUE_DURATION_CHOICES,
+        null=True,
+        blank=True,
         help_text=_("How long the issue has been occurring")
+    )
+    other_challenge_text = models.TextField(
+        null=True,
+        blank=True,
+        help_text=_("User response sharing what has been most challenging for 'Other' tutorial option")
     )
     notes = models.TextField(
         null=True,
