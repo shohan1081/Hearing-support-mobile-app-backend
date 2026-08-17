@@ -5,12 +5,19 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from users.authentication import FirebaseAuthentication
 
-from .models import DailyLesson, WelcomeTutorial, CheckInOverviewVideo, CareTeamSupportVideo
+from .models import (
+    DailyLesson,
+    WelcomeTutorial,
+    CheckInOverviewVideo,
+    CareTeamSupportVideo,
+    ProgressOverviewVideo,
+)
 from .serializers import (
     DailyLessonSerializer,
     WelcomeTutorialSerializer,
     CheckInOverviewVideoSerializer,
     CareTeamSupportVideoSerializer,
+    ProgressOverviewVideoSerializer,
     UserLessonProgressSerializer,
 )
 from .utils import (
@@ -19,6 +26,7 @@ from .utils import (
     seed_default_welcome_tutorial,
     seed_default_checkin_overview_video,
     seed_default_care_team_support_video,
+    seed_default_progress_overview_video,
 )
 
 
@@ -119,6 +127,35 @@ class CareTeamSupportVideoView(APIView):
         return standard_response(
             success=True,
             message="Care team support video retrieved successfully",
+            data=serializer.data,
+            status_code=status.HTTP_200_OK
+        )
+
+
+class ProgressOverviewVideoView(APIView):
+    """
+    API endpoint to fetch Progress Overview Video
+    
+    GET /api/learn/progress-overview-video/
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+
+    def get(self, request):
+        seed_default_progress_overview_video()
+        video = ProgressOverviewVideo.objects.filter(is_active=True).first()
+
+        if not video:
+            return standard_response(
+                success=False,
+                message="Progress overview video not found",
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = ProgressOverviewVideoSerializer(video, context={'request': request})
+        return standard_response(
+            success=True,
+            message="Progress overview video retrieved successfully",
             data=serializer.data,
             status_code=status.HTTP_200_OK
         )
