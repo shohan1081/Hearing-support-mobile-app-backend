@@ -1102,6 +1102,199 @@
           }
         }
       ]
+    },
+    {
+      "name": "Weekly Tutorials (6-Week Program)",
+      "item": [
+        {
+          "name": "Get Current Week Tutorial & Banner",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/weekly-tutorials/current/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "weekly-tutorials",
+                "current",
+                ""
+              ]
+            },
+            "description": "Fetch user's current week number (1 to 6), dashboard banner message, and active weekly tutorial details."
+          }
+        },
+        {
+          "name": "Get All 6 Weekly Tutorials List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/weekly-tutorials/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "weekly-tutorials",
+                ""
+              ]
+            },
+            "description": "Fetch overview list of all 6 weekly tutorials with unlock, active, and completion status per week."
+          }
+        },
+        {
+          "name": "Get Week 1 Tutorial Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/weekly-tutorials/1/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "weekly-tutorials",
+                "1",
+                ""
+              ]
+            },
+            "description": "Get detailed tutorial content for Week 1 (Awareness)."
+          }
+        },
+        {
+          "name": "Get Week 2 Tutorial Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/weekly-tutorials/2/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "weekly-tutorials",
+                "2",
+                ""
+              ]
+            },
+            "description": "Get detailed tutorial content for Week 2 (Adjustment)."
+          }
+        },
+        {
+          "name": "Mark Week 1 as Completed",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/weekly-tutorials/1/complete/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "weekly-tutorials",
+                "1",
+                "complete",
+                ""
+              ]
+            },
+            "description": "Mark Week 1 as completed for the authenticated user."
+          }
+        },
+        {
+          "name": "Set Journey Start Date",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"journey_start_date\": \"2026-08-01\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/weekly-tutorials/set-start-date/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "weekly-tutorials",
+                "set-start-date",
+                ""
+              ]
+            },
+            "description": "Set user's 6-week journey start date (useful for testing week progression)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Daily Learning & Lessons",
+      "item": [
+        {
+          "name": "Get Today's Lesson (Video & Audio)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/learn/today/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "learn",
+                "today",
+                ""
+              ]
+            },
+            "description": "Fetch Today's sequential daily lesson containing video URL, audio URL, title, subtitle, description, and key takeaways."
+          }
+        }
+      ]
     }
   ]
 }
