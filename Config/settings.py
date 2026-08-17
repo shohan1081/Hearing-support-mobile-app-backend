@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'legal_pages.apps.LegalPagesConfig',
     'weekly_tutorials.apps.WeeklyTutorialsConfig',
     'learn.apps.LearnConfig',
+    'what_normal.apps.WhatNormalConfig',
 ]
 
 from django.urls import reverse_lazy
@@ -89,6 +90,23 @@ UNFOLD = {
                         "title": "User Learning Progress",
                         "icon": "auto_graph",
                         "link": reverse_lazy("admin:learn_userlessonprogress_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": "What's Normal Section",
+                "separator": True,
+                "collapsible": False,
+                "items": [
+                    {
+                        "title": "What's Normal Videos",
+                        "icon": "video_library",
+                        "link": reverse_lazy("admin:what_normal_whatnormalvideo_changelist"),
+                    },
+                    {
+                        "title": "What's Normal Audios",
+                        "icon": "library_music",
+                        "link": reverse_lazy("admin:what_normal_whatnormalaudio_changelist"),
                     },
                 ],
             },
