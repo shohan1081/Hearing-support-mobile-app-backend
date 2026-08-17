@@ -1395,6 +1395,113 @@
           }
         }
       ]
+    },
+    {
+      "name": "What's Normal (Videos & Audios)",
+      "item": [
+        {
+          "name": "Get What's Normal Video List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/what-normal/videos/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "what-normal",
+                "videos",
+                ""
+              ]
+            },
+            "description": "Returns list of all active What's Normal videos (id, title, subtitle, thumbnail, duration, order)."
+          }
+        },
+        {
+          "name": "Get What's Normal Video Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/what-normal/videos/1/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "what-normal",
+                "videos",
+                "1",
+                ""
+              ]
+            },
+            "description": "Detail view for a specific video containing video_url, description, thumbnail, and duration."
+          }
+        },
+        {
+          "name": "Get What's Normal Audio List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/what-normal/audios/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "what-normal",
+                "audios",
+                ""
+              ]
+            },
+            "description": "Returns list of all active What's Normal audio tracks (id, title, subtitle, thumbnail, duration, order)."
+          }
+        },
+        {
+          "name": "Get What's Normal Audio Details / Play",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/what-normal/audios/1/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "what-normal",
+                "audios",
+                "1",
+                ""
+              ]
+            },
+            "description": "Detail view & play URL for a specific audio track containing audio_url, description, thumbnail, and duration."
+          }
+        }
+      ]
     }
   ]
 }
