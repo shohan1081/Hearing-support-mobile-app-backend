@@ -104,6 +104,77 @@ class DailyLesson(models.Model):
         return ""
 
 
+class WelcomeTutorial(models.Model):
+    """
+    Admin-managed Welcome Tutorial video for introducing users to the learning program
+    """
+    title = models.CharField(
+        _('title'),
+        max_length=255,
+        default="Welcome to Your Hearing Journey",
+        help_text=_("Welcome video title")
+    )
+    subtitle = models.CharField(
+        _('subtitle'),
+        max_length=500,
+        blank=True,
+        default="Get started with your daily hearing improvement plan",
+        help_text=_("Short tagline or subtitle")
+    )
+    description = models.TextField(
+        _('description'),
+        blank=True,
+        default="Watch this welcome video to learn how to get the most out of your daily lessons and hearing exercises.",
+        help_text=_("Welcome video description and guidance notes")
+    )
+    video_file = models.FileField(
+        _('video file'),
+        upload_to='learn/welcome_videos/',
+        null=True,
+        blank=True,
+        help_text=_("Upload welcome tutorial video file (MP4, MOV, etc.) or link")
+    )
+    thumbnail = models.ImageField(
+        _('thumbnail'),
+        upload_to='learn/welcome_thumbnails/',
+        null=True,
+        blank=True,
+        help_text=_("Cover thumbnail image for welcome video")
+    )
+    duration_seconds = models.PositiveIntegerField(
+        _('duration in seconds'),
+        default=0,
+        help_text=_("Duration of the video in seconds")
+    )
+    is_active = models.BooleanField(
+        _('is active'),
+        default=True,
+        help_text=_("Whether this welcome video is active and displayed to users")
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('welcome tutorial')
+        verbose_name_plural = _('welcome tutorials')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title
+
+    def get_video_stream_url(self, request=None):
+        """Return absolute video stream URL"""
+        if self.video_file:
+            try:
+                url = self.video_file.url
+                if request and not url.startswith('http'):
+                    return request.build_absolute_uri(url)
+                return url
+            except Exception:
+                return str(self.video_file)
+        return ""
+
+
 class UserLessonProgress(models.Model):
     """
     Tracks user's current day and completed days in their daily sequential learning journey
