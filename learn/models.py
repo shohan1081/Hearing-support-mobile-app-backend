@@ -36,28 +36,14 @@ class DailyLesson(models.Model):
         upload_to='learn/videos/',
         null=True,
         blank=True,
-        help_text=_("Upload video file directly (MP4, MOV, etc.)")
-    )
-    video_url = models.URLField(
-        _('video url'),
-        max_length=500,
-        null=True,
-        blank=True,
-        help_text=_("External video URL (e.g. YouTube, Vimeo, Cloudinary, S3)")
+        help_text=_("Upload video file (MP4, MOV, etc.) or external link")
     )
     audio_file = models.FileField(
         _('audio file'),
         upload_to='learn/audios/',
         null=True,
         blank=True,
-        help_text=_("Upload audio file directly (MP3, WAV, AAC, etc.)")
-    )
-    audio_url = models.URLField(
-        _('audio url'),
-        max_length=500,
-        null=True,
-        blank=True,
-        help_text=_("External audio URL (e.g. Cloudinary, S3, Podcast URL)")
+        help_text=_("Upload audio file (MP3, WAV, AAC, etc.) or external link")
     )
     thumbnail = models.ImageField(
         _('thumbnail'),
@@ -94,20 +80,28 @@ class DailyLesson(models.Model):
         return f"Day {self.day_number}: {self.title}"
 
     def get_video_stream_url(self, request=None):
-        """Return absolute uploaded video file URL or external video_url"""
+        """Return absolute video file URL"""
         if self.video_file:
-            if request:
-                return request.build_absolute_uri(self.video_file.url)
-            return self.video_file.url
-        return self.video_url or ""
+            try:
+                url = self.video_file.url
+                if request and not url.startswith('http'):
+                    return request.build_absolute_uri(url)
+                return url
+            except Exception:
+                return str(self.video_file)
+        return ""
 
     def get_audio_stream_url(self, request=None):
-        """Return absolute uploaded audio file URL or external audio_url"""
+        """Return absolute audio file URL"""
         if self.audio_file:
-            if request:
-                return request.build_absolute_uri(self.audio_file.url)
-            return self.audio_file.url
-        return self.audio_url or ""
+            try:
+                url = self.audio_file.url
+                if request and not url.startswith('http'):
+                    return request.build_absolute_uri(url)
+                return url
+            except Exception:
+                return str(self.audio_file)
+        return ""
 
 
 class UserLessonProgress(models.Model):
