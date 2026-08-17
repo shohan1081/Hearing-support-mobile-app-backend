@@ -7,12 +7,20 @@ from rest_framework.test import APIClient
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import DailyLesson, WelcomeTutorial, CheckInOverviewVideo, CareTeamSupportVideo, UserLessonProgress
+from .models import (
+    DailyLesson,
+    WelcomeTutorial,
+    CheckInOverviewVideo,
+    CareTeamSupportVideo,
+    ProgressOverviewVideo,
+    UserLessonProgress,
+)
 from .utils import (
     seed_default_daily_lessons,
     seed_default_welcome_tutorial,
     seed_default_checkin_overview_video,
     seed_default_care_team_support_video,
+    seed_default_progress_overview_video,
     get_or_create_user_lesson_progress,
 )
 
@@ -33,6 +41,7 @@ class LearnAppTestCase(TestCase):
         seed_default_welcome_tutorial()
         seed_default_checkin_overview_video()
         seed_default_care_team_support_video()
+        seed_default_progress_overview_video()
 
     def test_welcome_tutorial_api(self):
         url = reverse('learn:welcome-tutorial')
@@ -59,6 +68,15 @@ class LearnAppTestCase(TestCase):
         data = response.json()
         self.assertTrue(data['success'])
         self.assertEqual(data['data']['title'], "Care Team Support Guide")
+        self.assertIn("video_url", data['data'])
+
+    def test_progress_overview_video_api(self):
+        url = reverse('learn:progress-overview-video')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertTrue(data['success'])
+        self.assertEqual(data['data']['title'], "Progress Tracking Overview")
         self.assertIn("video_url", data['data'])
 
     def test_today_lesson_api(self):
