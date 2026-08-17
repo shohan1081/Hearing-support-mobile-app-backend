@@ -76,6 +76,11 @@ UNFOLD = {
                         "link": reverse_lazy("admin:learn_careteamsupportvideo_changelist"),
                     },
                     {
+                        "title": "Progress Overview Video",
+                        "icon": "insights",
+                        "link": reverse_lazy("admin:learn_progressoverviewvideo_changelist"),
+                    },
+                    {
                         "title": "Daily Lessons (Upload Video & Audio)",
                         "icon": "school",
                         "link": reverse_lazy("admin:learn_dailylesson_changelist"),
