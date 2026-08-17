@@ -61,6 +61,11 @@ UNFOLD = {
                 "collapsible": False,
                 "items": [
                     {
+                        "title": "Welcome Tutorial Video",
+                        "icon": "smart_display",
+                        "link": reverse_lazy("admin:learn_welcometutorial_changelist"),
+                    },
+                    {
                         "title": "Daily Lessons (Upload Video & Audio)",
                         "icon": "school",
                         "link": reverse_lazy("admin:learn_dailylesson_changelist"),
