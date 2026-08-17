@@ -1,62 +1,72 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
+from unfold.admin import ModelAdmin
+from unfold.forms import UserChangeForm, UserCreationForm
 from .models import User, UserLoginHistory, AccountDeletionRequest, ProfileDataDeletionRequest, UserOnboarding, DailyCheckIn, CheckInTutorial, CheckInTutorialFeedback
 from django.core.mail import send_mail
 from django.urls import reverse
 from django.utils.html import format_html
 
+
 @admin.register(CheckInTutorialFeedback)
-class CheckInTutorialFeedbackAdmin(admin.ModelAdmin):
+class CheckInTutorialFeedbackAdmin(ModelAdmin):
     list_display = ('user', 'tutorial', 'issue_duration', 'other_challenge_text', 'created_at')
     list_filter = ('issue_duration', 'created_at')
     search_fields = ('user__email', 'user__name', 'tutorial__title', 'other_challenge_text', 'notes')
     readonly_fields = ('created_at',)
 
+
 @admin.register(CheckInTutorial)
-class CheckInTutorialAdmin(admin.ModelAdmin):
+class CheckInTutorialAdmin(ModelAdmin):
     list_display = ('title', 'category', 'order', 'is_active', 'created_at')
     list_filter = ('category', 'is_active')
     search_fields = ('title', 'category', 'description')
     prepopulated_fields = {'slug': ('title',)}
     list_editable = ('order', 'is_active')
 
+
 @admin.register(DailyCheckIn)
-class DailyCheckInAdmin(admin.ModelAdmin):
+class DailyCheckInAdmin(ModelAdmin):
     list_display = ('user', 'hearing_status', 'what_went_well', 'what_went_okay', 'why_struggling', 'checkin_date', 'created_at')
     list_filter = ('hearing_status', 'checkin_date')
     search_fields = ('user__email', 'user__name', 'what_went_well', 'what_went_okay', 'why_struggling')
     readonly_fields = ('created_at',)
 
+
 @admin.register(UserOnboarding)
-class UserOnboardingAdmin(admin.ModelAdmin):
+class UserOnboardingAdmin(ModelAdmin):
     list_display = ('user', 'hearing_journey', 'is_completed', 'created_at', 'updated_at')
     list_filter = ('hearing_journey', 'is_completed', 'created_at')
     search_fields = ('user__email', 'user__name')
     readonly_fields = ('created_at', 'updated_at')
 
+
 @admin.register(ProfileDataDeletionRequest)
-class ProfileDataDeletionRequestAdmin(admin.ModelAdmin):
+class ProfileDataDeletionRequestAdmin(ModelAdmin):
     list_display = ('email', 'status', 'created_at')
     list_filter = ('status',)
     search_fields = ('email',)
     readonly_fields = ('email', 'user', 'created_at', 'updated_at', 'verification_token')
 
+
 @admin.register(AccountDeletionRequest)
-class AccountDeletionRequestAdmin(admin.ModelAdmin):
+class AccountDeletionRequestAdmin(ModelAdmin):
     list_display = ('name', 'email', 'status', 'created_at')
     list_filter = ('status',)
     search_fields = ('name', 'email')
     readonly_fields = ('name', 'email', 'user', 'created_at', 'updated_at', 'verification_token')
 
 
-
 @admin.register(User)
-class UserAdmin(BaseUserAdmin):
+class UserAdmin(BaseUserAdmin, ModelAdmin):
     """
-    Custom User Admin with enhanced display and filters
+    Custom User Admin with Unfold theme support
     """
-    
+    form = UserChangeForm
+    add_form = UserCreationForm
+    change_password_form = UserChangeForm
+
     # Display fields in list view
     list_display = [
         'email',
@@ -173,7 +183,7 @@ class UserAdmin(BaseUserAdmin):
 
 
 @admin.register(UserLoginHistory)
-class UserLoginHistoryAdmin(admin.ModelAdmin):
+class UserLoginHistoryAdmin(ModelAdmin):
     """
     Admin interface for User Login History
     """
@@ -237,9 +247,3 @@ class UserLoginHistoryAdmin(admin.ModelAdmin):
             return obj.user_agent[:50] + '...' if len(obj.user_agent) > 50 else obj.user_agent
         return '-'
     get_user_agent_preview.short_description = 'User Agent'
-
-
-# Customize admin site header and title
-admin.site.site_header = 'User Authentication Admin'
-admin.site.site_title = 'Admin Portal'
-admin.site.index_title = 'Welcome to User Authentication Administration'
