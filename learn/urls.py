@@ -1,5 +1,10 @@
 from django.urls import path
-from .views import TodayLessonView, WelcomeTutorialView
+from .views import (
+    TodayLessonView,
+    WelcomeTutorialView,
+    CheckInOverviewVideoView,
+    CareTeamSupportVideoView,
+)
 
 app_name = 'learn'
 
@@ -7,6 +12,14 @@ urlpatterns = [
     # Welcome Tutorial Video API
     path('welcome-tutorial/', WelcomeTutorialView.as_view(), name='welcome-tutorial'),
     path('welcome/', WelcomeTutorialView.as_view(), name='welcome-tutorial-alias'),
+
+    # Check-in Overview Video API
+    path('checkin-overview-video/', CheckInOverviewVideoView.as_view(), name='checkin-overview-video'),
+    path('checkin-overview/', CheckInOverviewVideoView.as_view(), name='checkin-overview-video-alias'),
+
+    # Care Team Support Video API
+    path('care-team-support-video/', CareTeamSupportVideoView.as_view(), name='care-team-support-video'),
+    path('care-team-support/', CareTeamSupportVideoView.as_view(), name='care-team-support-video-alias'),
 
     # API for Today's Lesson (video & audio)
     path('', TodayLessonView.as_view(), name='learn-index'),
