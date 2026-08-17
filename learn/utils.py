@@ -1,4 +1,11 @@
-from .models import DailyLesson, WelcomeTutorial, CheckInOverviewVideo, CareTeamSupportVideo, UserLessonProgress
+from .models import (
+    DailyLesson,
+    WelcomeTutorial,
+    CheckInOverviewVideo,
+    CareTeamSupportVideo,
+    ProgressOverviewVideo,
+    UserLessonProgress,
+)
 from django.utils import timezone
 
 
@@ -58,6 +65,21 @@ def seed_default_care_team_support_video():
             description="Watch this video to learn how our expert care team supports your hearing progress and answers your questions.",
             video_file="https://www.w3schools.com/html/mov_bbb.mp4",
             duration_seconds=105,
+            is_active=True
+        )
+
+
+def seed_default_progress_overview_video():
+    """
+    Populate default ProgressOverviewVideo if none exists
+    """
+    if not ProgressOverviewVideo.objects.exists():
+        ProgressOverviewVideo.objects.create(
+            title="Progress Tracking Overview",
+            subtitle="Learn how your hearing progress and improvements are measured over time",
+            description="Watch this video to understand how your overall progress, streaks, and milestones are tracked.",
+            video_file="https://www.w3schools.com/html/mov_bbb.mp4",
+            duration_seconds=110,
             is_active=True
         )
 
