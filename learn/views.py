@@ -5,9 +5,21 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from users.authentication import FirebaseAuthentication
 
-from .models import DailyLesson, WelcomeTutorial
-from .serializers import DailyLessonSerializer, WelcomeTutorialSerializer, UserLessonProgressSerializer
-from .utils import get_or_create_user_lesson_progress, seed_default_daily_lessons, seed_default_welcome_tutorial
+from .models import DailyLesson, WelcomeTutorial, CheckInOverviewVideo, CareTeamSupportVideo
+from .serializers import (
+    DailyLessonSerializer,
+    WelcomeTutorialSerializer,
+    CheckInOverviewVideoSerializer,
+    CareTeamSupportVideoSerializer,
+    UserLessonProgressSerializer,
+)
+from .utils import (
+    get_or_create_user_lesson_progress,
+    seed_default_daily_lessons,
+    seed_default_welcome_tutorial,
+    seed_default_checkin_overview_video,
+    seed_default_care_team_support_video,
+)
 
 
 def standard_response(success=True, message="", data=None, errors=None, status_code=status.HTTP_200_OK):
@@ -49,6 +61,64 @@ class WelcomeTutorialView(APIView):
         return standard_response(
             success=True,
             message="Welcome tutorial video retrieved successfully",
+            data=serializer.data,
+            status_code=status.HTTP_200_OK
+        )
+
+
+class CheckInOverviewVideoView(APIView):
+    """
+    API endpoint to fetch Check-in Overview Video
+    
+    GET /api/learn/checkin-overview-video/
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+
+    def get(self, request):
+        seed_default_checkin_overview_video()
+        video = CheckInOverviewVideo.objects.filter(is_active=True).first()
+
+        if not video:
+            return standard_response(
+                success=False,
+                message="Check-in overview video not found",
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = CheckInOverviewVideoSerializer(video, context={'request': request})
+        return standard_response(
+            success=True,
+            message="Check-in overview video retrieved successfully",
+            data=serializer.data,
+            status_code=status.HTTP_200_OK
+        )
+
+
+class CareTeamSupportVideoView(APIView):
+    """
+    API endpoint to fetch Care Team Support Video
+    
+    GET /api/learn/care-team-support-video/
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+
+    def get(self, request):
+        seed_default_care_team_support_video()
+        video = CareTeamSupportVideo.objects.filter(is_active=True).first()
+
+        if not video:
+            return standard_response(
+                success=False,
+                message="Care team support video not found",
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = CareTeamSupportVideoSerializer(video, context={'request': request})
+        return standard_response(
+            success=True,
+            message="Care team support video retrieved successfully",
             data=serializer.data,
             status_code=status.HTTP_200_OK
         )
