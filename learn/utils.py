@@ -1,4 +1,4 @@
-from .models import DailyLesson, UserLessonProgress
+from .models import DailyLesson, WelcomeTutorial, UserLessonProgress
 from django.utils import timezone
 
 
@@ -15,6 +15,21 @@ def get_or_create_user_lesson_progress(user):
         }
     )
     return progress
+
+
+def seed_default_welcome_tutorial():
+    """
+    Populate default WelcomeTutorial if none exists
+    """
+    if not WelcomeTutorial.objects.exists():
+        WelcomeTutorial.objects.create(
+            title="Welcome to Your Hearing Journey",
+            subtitle="Get started with your daily hearing improvement plan",
+            description="Watch this welcome video to learn how to get the most out of your daily lessons and hearing exercises.",
+            video_file="https://www.w3schools.com/html/mov_bbb.mp4",
+            duration_seconds=120,
+            is_active=True
+        )
 
 
 def seed_default_daily_lessons():
