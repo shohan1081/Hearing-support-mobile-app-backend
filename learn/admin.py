@@ -1,6 +1,6 @@
 from django.contrib import admin
 from unfold.admin import ModelAdmin
-from .models import DailyLesson, WelcomeTutorial, UserLessonProgress
+from .models import DailyLesson, WelcomeTutorial, CheckInOverviewVideo, CareTeamSupportVideo, UserLessonProgress
 
 
 @admin.register(DailyLesson)
@@ -42,6 +42,44 @@ class WelcomeTutorialAdmin(ModelAdmin):
             'fields': ('description',)
         }),
         ('Upload Welcome Video & Thumbnail', {
+            'fields': ('video_file', 'thumbnail', 'duration_seconds')
+        }),
+    )
+
+
+@admin.register(CheckInOverviewVideo)
+class CheckInOverviewVideoAdmin(ModelAdmin):
+    list_display = ('title', 'subtitle', 'is_active', 'updated_at')
+    list_editable = ('is_active',)
+    list_filter = ('is_active',)
+    search_fields = ('title', 'subtitle', 'description')
+    fieldsets = (
+        (None, {
+            'fields': ('title', 'subtitle', 'is_active')
+        }),
+        ('Video Description & Guidance', {
+            'fields': ('description',)
+        }),
+        ('Upload Check-in Overview Video & Thumbnail', {
+            'fields': ('video_file', 'thumbnail', 'duration_seconds')
+        }),
+    )
+
+
+@admin.register(CareTeamSupportVideo)
+class CareTeamSupportVideoAdmin(ModelAdmin):
+    list_display = ('title', 'subtitle', 'is_active', 'updated_at')
+    list_editable = ('is_active',)
+    list_filter = ('is_active',)
+    search_fields = ('title', 'subtitle', 'description')
+    fieldsets = (
+        (None, {
+            'fields': ('title', 'subtitle', 'is_active')
+        }),
+        ('Video Description & Guidance', {
+            'fields': ('description',)
+        }),
+        ('Upload Care Team Video & Thumbnail', {
             'fields': ('video_file', 'thumbnail', 'duration_seconds')
         }),
     )
