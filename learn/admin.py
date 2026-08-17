@@ -17,12 +17,10 @@ class DailyLessonAdmin(ModelAdmin):
         ('Lesson Text & Content', {
             'fields': ('description', 'key_takeaways')
         }),
-        ('Media Content (Video & Audio)', {
+        ('Upload Video & Audio', {
             'fields': (
                 'video_file',
-                'video_url',
                 'audio_file',
-                'audio_url',
                 'thumbnail',
                 'duration_seconds',
             )
