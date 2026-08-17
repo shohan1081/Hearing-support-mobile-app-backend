@@ -1,4 +1,4 @@
-from .models import DailyLesson, WelcomeTutorial, UserLessonProgress
+from .models import DailyLesson, WelcomeTutorial, CheckInOverviewVideo, CareTeamSupportVideo, UserLessonProgress
 from django.utils import timezone
 
 
@@ -28,6 +28,36 @@ def seed_default_welcome_tutorial():
             description="Watch this welcome video to learn how to get the most out of your daily lessons and hearing exercises.",
             video_file="https://www.w3schools.com/html/mov_bbb.mp4",
             duration_seconds=120,
+            is_active=True
+        )
+
+
+def seed_default_checkin_overview_video():
+    """
+    Populate default CheckInOverviewVideo if none exists
+    """
+    if not CheckInOverviewVideo.objects.exists():
+        CheckInOverviewVideo.objects.create(
+            title="Daily Check-in Overview",
+            subtitle="Learn how tracking your hearing daily helps your progress",
+            description="Watch this video to understand how daily check-ins record your hearing status and personalize your journey.",
+            video_file="https://www.w3schools.com/html/mov_bbb.mp4",
+            duration_seconds=90,
+            is_active=True
+        )
+
+
+def seed_default_care_team_support_video():
+    """
+    Populate default CareTeamSupportVideo if none exists
+    """
+    if not CareTeamSupportVideo.objects.exists():
+        CareTeamSupportVideo.objects.create(
+            title="Care Team Support Guide",
+            subtitle="Connect with your dedicated hearing care specialists",
+            description="Watch this video to learn how our expert care team supports your hearing progress and answers your questions.",
+            video_file="https://www.w3schools.com/html/mov_bbb.mp4",
+            duration_seconds=105,
             is_active=True
         )
 
