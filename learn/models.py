@@ -175,6 +175,148 @@ class WelcomeTutorial(models.Model):
         return ""
 
 
+class CheckInOverviewVideo(models.Model):
+    """
+    Admin-managed Check-in Overview Video explaining how daily check-ins work
+    """
+    title = models.CharField(
+        _('title'),
+        max_length=255,
+        default="Daily Check-in Overview",
+        help_text=_("Video title")
+    )
+    subtitle = models.CharField(
+        _('subtitle'),
+        max_length=500,
+        blank=True,
+        default="Learn how tracking your hearing daily helps your progress",
+        help_text=_("Short tagline or subtitle")
+    )
+    description = models.TextField(
+        _('description'),
+        blank=True,
+        default="Watch this video to understand how daily check-ins record your hearing status and personalize your journey.",
+        help_text=_("Video description and guidance notes")
+    )
+    video_file = models.FileField(
+        _('video file'),
+        upload_to='learn/checkin_overview_videos/',
+        null=True,
+        blank=True,
+        help_text=_("Upload check-in overview video file (MP4, MOV, etc.) or link")
+    )
+    thumbnail = models.ImageField(
+        _('thumbnail'),
+        upload_to='learn/checkin_overview_thumbnails/',
+        null=True,
+        blank=True,
+        help_text=_("Cover thumbnail image")
+    )
+    duration_seconds = models.PositiveIntegerField(
+        _('duration in seconds'),
+        default=0,
+        help_text=_("Duration of the video in seconds")
+    )
+    is_active = models.BooleanField(
+        _('is active'),
+        default=True,
+        help_text=_("Whether this video is active and displayed to users")
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('check-in overview video')
+        verbose_name_plural = _('check-in overview videos')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title
+
+    def get_video_stream_url(self, request=None):
+        """Return absolute video stream URL"""
+        if self.video_file:
+            try:
+                url = self.video_file.url
+                if request and not url.startswith('http'):
+                    return request.build_absolute_uri(url)
+                return url
+            except Exception:
+                return str(self.video_file)
+        return ""
+
+
+class CareTeamSupportVideo(models.Model):
+    """
+    Admin-managed Care Team Support Video explaining how audiologists & care team assist the user
+    """
+    title = models.CharField(
+        _('title'),
+        max_length=255,
+        default="Care Team Support Guide",
+        help_text=_("Video title")
+    )
+    subtitle = models.CharField(
+        _('subtitle'),
+        max_length=500,
+        blank=True,
+        default="Connect with your dedicated hearing care specialists",
+        help_text=_("Short tagline or subtitle")
+    )
+    description = models.TextField(
+        _('description'),
+        blank=True,
+        default="Watch this video to learn how our expert care team supports your hearing progress and answers your questions.",
+        help_text=_("Video description and guidance notes")
+    )
+    video_file = models.FileField(
+        _('video file'),
+        upload_to='learn/care_team_videos/',
+        null=True,
+        blank=True,
+        help_text=_("Upload care team support video file (MP4, MOV, etc.) or link")
+    )
+    thumbnail = models.ImageField(
+        _('thumbnail'),
+        upload_to='learn/care_team_thumbnails/',
+        null=True,
+        blank=True,
+        help_text=_("Cover thumbnail image")
+    )
+    duration_seconds = models.PositiveIntegerField(
+        _('duration in seconds'),
+        default=0,
+        help_text=_("Duration of the video in seconds")
+    )
+    is_active = models.BooleanField(
+        _('is active'),
+        default=True,
+        help_text=_("Whether this video is active and displayed to users")
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('care team support video')
+        verbose_name_plural = _('care team support videos')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title
+
+    def get_video_stream_url(self, request=None):
+        """Return absolute video stream URL"""
+        if self.video_file:
+            try:
+                url = self.video_file.url
+                if request and not url.startswith('http'):
+                    return request.build_absolute_uri(url)
+                return url
+            except Exception:
+                return str(self.video_file)
+        return ""
+
+
 class UserLessonProgress(models.Model):
     """
     Tracks user's current day and completed days in their daily sequential learning journey
