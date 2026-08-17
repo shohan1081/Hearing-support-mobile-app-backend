@@ -36,8 +36,8 @@ def seed_default_daily_lessons():
                 "Consistency in wearing your hearing aids is key.",
                 "Start with quiet environments on Day 1."
             ],
-            "video_url": "https://www.w3schools.com/html/mov_bbb.mp4",
-            "audio_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+            "video_file": "https://www.w3schools.com/html/mov_bbb.mp4",
+            "audio_file": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
             "duration_seconds": 180,
         },
         {
@@ -53,8 +53,8 @@ def seed_default_daily_lessons():
                 "Focus on the speaker's face and lip movements.",
                 "Take short listening breaks if you feel fatigued."
             ],
-            "video_url": "https://www.w3schools.com/html/mov_bbb.mp4",
-            "audio_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+            "video_file": "https://www.w3schools.com/html/mov_bbb.mp4",
+            "audio_file": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
             "duration_seconds": 210,
         },
         {
@@ -70,8 +70,8 @@ def seed_default_daily_lessons():
                 "Maintain direct line-of-sight during conversations.",
                 "Ask speakers to slow down slightly rather than speak louder."
             ],
-            "video_url": "https://www.w3schools.com/html/mov_bbb.mp4",
-            "audio_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+            "video_file": "https://www.w3schools.com/html/mov_bbb.mp4",
+            "audio_file": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
             "duration_seconds": 195,
         },
         {
@@ -87,8 +87,8 @@ def seed_default_daily_lessons():
                 "Position yourself directly facing the television speakers.",
                 "Explore direct bluetooth streaming if available."
             ],
-            "video_url": "https://www.w3schools.com/html/mov_bbb.mp4",
-            "audio_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
+            "video_file": "https://www.w3schools.com/html/mov_bbb.mp4",
+            "audio_file": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
             "duration_seconds": 240,
         },
         {
@@ -104,8 +104,8 @@ def seed_default_daily_lessons():
                 "Choose well-lit tables in restaurants.",
                 "Focus on key conversation anchors."
             ],
-            "video_url": "https://www.w3schools.com/html/mov_bbb.mp4",
-            "audio_url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
+            "video_file": "https://www.w3schools.com/html/mov_bbb.mp4",
+            "audio_file": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
             "duration_seconds": 225,
         },
     ]
@@ -118,8 +118,8 @@ def seed_default_daily_lessons():
                 'subtitle': data['subtitle'],
                 'description': data['description'],
                 'key_takeaways': data['key_takeaways'],
-                'video_url': data['video_url'],
-                'audio_url': data['audio_url'],
+                'video_file': data['video_file'],
+                'audio_file': data['audio_file'],
                 'duration_seconds': data['duration_seconds'],
                 'is_active': True
             }
