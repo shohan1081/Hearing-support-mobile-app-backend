@@ -1,6 +1,13 @@
 from django.contrib import admin
 from unfold.admin import ModelAdmin
-from .models import DailyLesson, WelcomeTutorial, CheckInOverviewVideo, CareTeamSupportVideo, UserLessonProgress
+from .models import (
+    DailyLesson,
+    WelcomeTutorial,
+    CheckInOverviewVideo,
+    CareTeamSupportVideo,
+    ProgressOverviewVideo,
+    UserLessonProgress,
+)
 
 
 @admin.register(DailyLesson)
@@ -80,6 +87,25 @@ class CareTeamSupportVideoAdmin(ModelAdmin):
             'fields': ('description',)
         }),
         ('Upload Care Team Video & Thumbnail', {
+            'fields': ('video_file', 'thumbnail', 'duration_seconds')
+        }),
+    )
+
+
+@admin.register(ProgressOverviewVideo)
+class ProgressOverviewVideoAdmin(ModelAdmin):
+    list_display = ('title', 'subtitle', 'is_active', 'updated_at')
+    list_editable = ('is_active',)
+    list_filter = ('is_active',)
+    search_fields = ('title', 'subtitle', 'description')
+    fieldsets = (
+        (None, {
+            'fields': ('title', 'subtitle', 'is_active')
+        }),
+        ('Video Description & Guidance', {
+            'fields': ('description',)
+        }),
+        ('Upload Progress Overview Video & Thumbnail', {
             'fields': ('video_file', 'thumbnail', 'duration_seconds')
         }),
     )
