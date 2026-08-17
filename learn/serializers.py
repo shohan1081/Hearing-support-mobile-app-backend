@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import DailyLesson, UserLessonProgress
+from .models import DailyLesson, WelcomeTutorial, UserLessonProgress
 
 
 class DailyLessonSerializer(serializers.ModelSerializer):
@@ -43,6 +43,36 @@ class DailyLessonSerializer(serializers.ModelSerializer):
 
     def get_has_audio(self, obj):
         return bool(obj.audio_file)
+
+
+class WelcomeTutorialSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Welcome Tutorial Video
+    """
+    video_url = serializers.SerializerMethodField()
+    has_video = serializers.SerializerMethodField()
+
+    class Meta:
+        model = WelcomeTutorial
+        fields = [
+            'id',
+            'title',
+            'subtitle',
+            'description',
+            'video_url',
+            'has_video',
+            'thumbnail',
+            'duration_seconds',
+            'created_at',
+            'updated_at',
+        ]
+
+    def get_video_url(self, obj):
+        request = self.context.get('request')
+        return obj.get_video_stream_url(request=request)
+
+    def get_has_video(self, obj):
+        return bool(obj.video_file)
 
 
 class UserLessonProgressSerializer(serializers.ModelSerializer):
