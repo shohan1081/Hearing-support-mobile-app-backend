@@ -4,6 +4,7 @@ from .views import (
     WelcomeTutorialView,
     CheckInOverviewVideoView,
     CareTeamSupportVideoView,
+    ProgressOverviewVideoView,
 )
 
 app_name = 'learn'
@@ -20,6 +21,10 @@ urlpatterns = [
     # Care Team Support Video API
     path('care-team-support-video/', CareTeamSupportVideoView.as_view(), name='care-team-support-video'),
     path('care-team-support/', CareTeamSupportVideoView.as_view(), name='care-team-support-video-alias'),
+
+    # Progress Overview Video API
+    path('progress-overview-video/', ProgressOverviewVideoView.as_view(), name='progress-overview-video'),
+    path('progress-overview/', ProgressOverviewVideoView.as_view(), name='progress-overview-video-alias'),
 
     # API for Today's Lesson (video & audio)
     path('', TodayLessonView.as_view(), name='learn-index'),
