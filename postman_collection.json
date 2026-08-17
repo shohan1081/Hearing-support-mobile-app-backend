@@ -1295,6 +1295,56 @@
           }
         },
         {
+          "name": "Get Check-in Overview Video",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/learn/checkin-overview-video/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "learn",
+                "checkin-overview-video",
+                ""
+              ]
+            },
+            "description": "Fetch the Check-in Overview Video (title, subtitle, description, video_url, thumbnail, and duration) uploaded by admin."
+          }
+        },
+        {
+          "name": "Get Care Team Support Video",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/learn/care-team-support-video/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "learn",
+                "care-team-support-video",
+                ""
+              ]
+            },
+            "description": "Fetch the Care Team Support Video (title, subtitle, description, video_url, thumbnail, and duration) uploaded by admin."
+          }
+        },
+        {
           "name": "Get Today's Lesson (Video & Audio)",
           "request": {
             "method": "GET",
