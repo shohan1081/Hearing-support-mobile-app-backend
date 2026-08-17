@@ -5,9 +5,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from users.authentication import FirebaseAuthentication
 
-from .models import DailyLesson
-from .serializers import DailyLessonSerializer, UserLessonProgressSerializer
-from .utils import get_or_create_user_lesson_progress, seed_default_daily_lessons
+from .models import DailyLesson, WelcomeTutorial
+from .serializers import DailyLessonSerializer, WelcomeTutorialSerializer, UserLessonProgressSerializer
+from .utils import get_or_create_user_lesson_progress, seed_default_daily_lessons, seed_default_welcome_tutorial
 
 
 def standard_response(success=True, message="", data=None, errors=None, status_code=status.HTTP_200_OK):
@@ -23,6 +23,35 @@ def standard_response(success=True, message="", data=None, errors=None, status_c
     if errors is not None:
         response_data['errors'] = errors
     return Response(response_data, status=status_code)
+
+
+class WelcomeTutorialView(APIView):
+    """
+    API endpoint to fetch Welcome Tutorial Video for introducing users to the learning program
+    
+    GET /api/learn/welcome-tutorial/
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+
+    def get(self, request):
+        seed_default_welcome_tutorial()
+        welcome_tutorial = WelcomeTutorial.objects.filter(is_active=True).first()
+
+        if not welcome_tutorial:
+            return standard_response(
+                success=False,
+                message="Welcome tutorial video not found",
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = WelcomeTutorialSerializer(welcome_tutorial, context={'request': request})
+        return standard_response(
+            success=True,
+            message="Welcome tutorial video retrieved successfully",
+            data=serializer.data,
+            status_code=status.HTTP_200_OK
+        )
 
 
 class TodayLessonView(APIView):
