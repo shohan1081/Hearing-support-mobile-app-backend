@@ -7,8 +7,8 @@ from rest_framework.test import APIClient
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import DailyLesson, UserLessonProgress
-from .utils import seed_default_daily_lessons, get_or_create_user_lesson_progress
+from .models import DailyLesson, WelcomeTutorial, UserLessonProgress
+from .utils import seed_default_daily_lessons, seed_default_welcome_tutorial, get_or_create_user_lesson_progress
 
 User = get_user_model()
 
@@ -24,6 +24,16 @@ class LearnTodayLessonTestCase(TestCase):
         refresh = RefreshToken.for_user(self.user)
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
         seed_default_daily_lessons()
+        seed_default_welcome_tutorial()
+
+    def test_welcome_tutorial_api(self):
+        url = reverse('learn:welcome-tutorial')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertTrue(data['success'])
+        self.assertEqual(data['data']['title'], "Welcome to Your Hearing Journey")
+        self.assertIn("video_url", data['data'])
 
     def test_today_lesson_api(self):
         url = reverse('learn:today-lesson')
