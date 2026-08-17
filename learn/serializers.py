@@ -1,5 +1,12 @@
 from rest_framework import serializers
-from .models import DailyLesson, WelcomeTutorial, CheckInOverviewVideo, CareTeamSupportVideo, UserLessonProgress
+from .models import (
+    DailyLesson,
+    WelcomeTutorial,
+    CheckInOverviewVideo,
+    CareTeamSupportVideo,
+    ProgressOverviewVideo,
+    UserLessonProgress,
+)
 
 
 class DailyLessonSerializer(serializers.ModelSerializer):
@@ -114,6 +121,36 @@ class CareTeamSupportVideoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CareTeamSupportVideo
+        fields = [
+            'id',
+            'title',
+            'subtitle',
+            'description',
+            'video_url',
+            'has_video',
+            'thumbnail',
+            'duration_seconds',
+            'created_at',
+            'updated_at',
+        ]
+
+    def get_video_url(self, obj):
+        request = self.context.get('request')
+        return obj.get_video_stream_url(request=request)
+
+    def get_has_video(self, obj):
+        return bool(obj.video_file)
+
+
+class ProgressOverviewVideoSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Progress Overview Video
+    """
+    video_url = serializers.SerializerMethodField()
+    has_video = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ProgressOverviewVideo
         fields = [
             'id',
             'title',
