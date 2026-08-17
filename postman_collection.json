@@ -1270,6 +1270,31 @@
       "name": "Daily Learning & Lessons",
       "item": [
         {
+          "name": "Get Welcome Tutorial Video",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/learn/welcome-tutorial/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "learn",
+                "welcome-tutorial",
+                ""
+              ]
+            },
+            "description": "Fetch the Welcome Tutorial Video (title, subtitle, description, video_url, thumbnail, and duration) uploaded by admin."
+          }
+        },
+        {
           "name": "Get Today's Lesson (Video & Audio)",
           "request": {
             "method": "GET",
