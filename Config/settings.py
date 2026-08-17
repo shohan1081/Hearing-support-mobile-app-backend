@@ -23,6 +23,10 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'unfold',
+    'unfold.contrib.filters',
+    'unfold.contrib.forms',
+    'unfold.contrib.inlines',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -35,7 +39,108 @@ INSTALLED_APPS = [
     # coustom apps can be added here
     'users.apps.UsersConfig',
     'legal_pages.apps.LegalPagesConfig',
+    'weekly_tutorials.apps.WeeklyTutorialsConfig',
+    'learn.apps.LearnConfig',
 ]
+
+from django.urls import reverse_lazy
+
+UNFOLD = {
+    "SITE_TITLE": "Hearing Improvement Admin",
+    "SITE_HEADER": "Hearing Improvement Portal",
+    "SITE_INDEX_TITLE": "Hearing App Administration",
+    "THEME": "auto",
+    "SHOW_HISTORY": True,
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": False,
+        "navigation": [
+            {
+                "title": "Learn & Daily Lessons",
+                "separator": True,
+                "collapsible": False,
+                "items": [
+                    {
+                        "title": "Daily Lessons (Upload Video & Audio)",
+                        "icon": "school",
+                        "link": reverse_lazy("admin:learn_dailylesson_changelist"),
+                    },
+                    {
+                        "title": "User Learning Progress",
+                        "icon": "auto_graph",
+                        "link": reverse_lazy("admin:learn_userlessonprogress_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": "Weekly 6-Week Program",
+                "separator": True,
+                "collapsible": False,
+                "items": [
+                    {
+                        "title": "Weekly Tutorials & Tips",
+                        "icon": "calendar_view_week",
+                        "link": reverse_lazy("admin:weekly_tutorials_weeklytutorial_changelist"),
+                    },
+                    {
+                        "title": "User Weekly Progress",
+                        "icon": "date_range",
+                        "link": reverse_lazy("admin:weekly_tutorials_userweeklyprogress_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": "Users & Account Management",
+                "separator": True,
+                "collapsible": False,
+                "items": [
+                    {
+                        "title": "Users Accounts",
+                        "icon": "person",
+                        "link": reverse_lazy("admin:users_user_changelist"),
+                    },
+                    {
+                        "title": "Daily Check-Ins",
+                        "icon": "fact_check",
+                        "link": reverse_lazy("admin:users_dailycheckin_changelist"),
+                    },
+                    {
+                        "title": "Onboarding Survey Data",
+                        "icon": "assignment",
+                        "link": reverse_lazy("admin:users_useronboarding_changelist"),
+                    },
+                    {
+                        "title": "Troubleshooting Tutorials",
+                        "icon": "live_help",
+                        "link": reverse_lazy("admin:users_checkintutorial_changelist"),
+                    },
+                    {
+                        "title": "Tutorial Feedback",
+                        "icon": "feedback",
+                        "link": reverse_lazy("admin:users_checkintutorialfeedback_changelist"),
+                    },
+                    {
+                        "title": "Login History",
+                        "icon": "history",
+                        "link": reverse_lazy("admin:users_userloginhistory_changelist"),
+                    },
+                    {
+                        "title": "Account Deletion Requests",
+                        "icon": "delete_forever",
+                        "link": reverse_lazy("admin:users_accountdeletionrequest_changelist"),
+                    },
+                    {
+                        "title": "Profile Data Deletion Requests",
+                        "icon": "no_accounts",
+                        "link": reverse_lazy("admin:users_profiledatadeletionrequest_changelist"),
+                    },
+                ],
+            },
+        ],
+    },
+}
+
+
 
 AUTH_USER_MODEL = 'users.User'
 
