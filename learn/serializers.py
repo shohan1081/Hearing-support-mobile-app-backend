@@ -39,10 +39,10 @@ class DailyLessonSerializer(serializers.ModelSerializer):
         return obj.get_audio_stream_url(request=request)
 
     def get_has_video(self, obj):
-        return bool(obj.video_file or obj.video_url)
+        return bool(obj.video_file)
 
     def get_has_audio(self, obj):
-        return bool(obj.audio_file or obj.audio_url)
+        return bool(obj.audio_file)
 
 
 class UserLessonProgressSerializer(serializers.ModelSerializer):
