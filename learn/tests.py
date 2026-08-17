@@ -7,13 +7,19 @@ from rest_framework.test import APIClient
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import DailyLesson, WelcomeTutorial, UserLessonProgress
-from .utils import seed_default_daily_lessons, seed_default_welcome_tutorial, get_or_create_user_lesson_progress
+from .models import DailyLesson, WelcomeTutorial, CheckInOverviewVideo, CareTeamSupportVideo, UserLessonProgress
+from .utils import (
+    seed_default_daily_lessons,
+    seed_default_welcome_tutorial,
+    seed_default_checkin_overview_video,
+    seed_default_care_team_support_video,
+    get_or_create_user_lesson_progress,
+)
 
 User = get_user_model()
 
 
-class LearnTodayLessonTestCase(TestCase):
+class LearnAppTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = User.objects.create_user(
@@ -25,6 +31,8 @@ class LearnTodayLessonTestCase(TestCase):
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
         seed_default_daily_lessons()
         seed_default_welcome_tutorial()
+        seed_default_checkin_overview_video()
+        seed_default_care_team_support_video()
 
     def test_welcome_tutorial_api(self):
         url = reverse('learn:welcome-tutorial')
@@ -33,6 +41,24 @@ class LearnTodayLessonTestCase(TestCase):
         data = response.json()
         self.assertTrue(data['success'])
         self.assertEqual(data['data']['title'], "Welcome to Your Hearing Journey")
+        self.assertIn("video_url", data['data'])
+
+    def test_checkin_overview_video_api(self):
+        url = reverse('learn:checkin-overview-video')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertTrue(data['success'])
+        self.assertEqual(data['data']['title'], "Daily Check-in Overview")
+        self.assertIn("video_url", data['data'])
+
+    def test_care_team_support_video_api(self):
+        url = reverse('learn:care-team-support-video')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertTrue(data['success'])
+        self.assertEqual(data['data']['title'], "Care Team Support Guide")
         self.assertIn("video_url", data['data'])
 
     def test_today_lesson_api(self):
