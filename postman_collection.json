@@ -1502,6 +1502,166 @@
           }
         }
       ]
+    },
+    {
+      "name": "Skills & Strategies (Everyday Listening Tips)",
+      "item": [
+        {
+          "name": "Get All Everyday Listening Tips Audio List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/skills-strategies/everyday-listening-tips/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "skills-strategies",
+                "everyday-listening-tips",
+                ""
+              ]
+            },
+            "description": "Returns list of all 5 Everyday Listening Tips containing audio stream URLs, titles, subtitles, thumbnails, and slugs."
+          }
+        },
+        {
+          "name": "1. Tip: Reduce Background Noise Audio",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/skills-strategies/everyday-listening-tips/reduce-background-noise/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "skills-strategies",
+                "everyday-listening-tips",
+                "reduce-background-noise",
+                ""
+              ]
+            },
+            "description": "Fetch and play audio for '1. Reduce Background Noise'."
+          }
+        },
+        {
+          "name": "2. Tip: Face The Speaker Audio",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/skills-strategies/everyday-listening-tips/face-the-speaker/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "skills-strategies",
+                "everyday-listening-tips",
+                "face-the-speaker",
+                ""
+              ]
+            },
+            "description": "Fetch and play audio for '2. Face The Speaker'."
+          }
+        },
+        {
+          "name": "3. Tip: Take Breaks Audio",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/skills-strategies/everyday-listening-tips/take-breaks/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "skills-strategies",
+                "everyday-listening-tips",
+                "take-breaks",
+                ""
+              ]
+            },
+            "description": "Fetch and play audio for '3. Take Breaks'."
+          }
+        },
+        {
+          "name": "4. Tip: Use Visual Cues Audio",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/skills-strategies/everyday-listening-tips/use-visual-cues/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "skills-strategies",
+                "everyday-listening-tips",
+                "use-visual-cues",
+                ""
+              ]
+            },
+            "description": "Fetch and play audio for '4. Use Visual Cues'."
+          }
+        },
+        {
+          "name": "5. Tip: Ask For Repetition Audio",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/skills-strategies/everyday-listening-tips/ask-for-repetition/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "skills-strategies",
+                "everyday-listening-tips",
+                "ask-for-repetition",
+                ""
+              ]
+            },
+            "description": "Fetch and play audio for '5. Ask For Repetition'."
+          }
+        }
+      ]
     }
   ]
 }
