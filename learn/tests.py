@@ -103,3 +103,15 @@ class LearnAppTestCase(TestCase):
         self.assertTrue(data['success'])
         self.assertEqual(data['data']['current_day'], 3)
         self.assertEqual(data['data']['today_lesson']['day_number'], 3)
+
+    def test_all_video_playlists_api(self):
+        url = reverse('learn:all-video-playlists')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertTrue(data['success'])
+        self.assertIn('overview_videos', data['data'])
+        self.assertIn('daily_lessons_playlist', data['data'])
+        self.assertIn('whats_normal_playlist', data['data'])
+        self.assertIn('device_care_tutorials_playlist', data['data'])
+        self.assertIn('weekly_tutorials_playlist', data['data'])
