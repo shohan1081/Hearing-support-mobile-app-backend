@@ -592,7 +592,7 @@
           }
         },
         {
-          "name": "Get Single Hearing Score Number (1-100)",
+          "name": "Get Hearing Score (1-100) & Status (Excellent, Good, Average, Poor, Bad)",
           "request": {
             "method": "GET",
             "header": [
@@ -613,7 +613,7 @@
                 ""
               ]
             },
-            "description": "Returns a single Hearing Score number strictly between 1 and 100 calculated dynamically from daily wear time, lesson progress, check-in consistency, and strategy engagement."
+            "description": "Returns single Hearing Score number (1-100) along with status classification (Excellent, Good, Average, Poor, Bad) acknowledging user's progress."
           }
         }
       ]
