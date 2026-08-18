@@ -101,6 +101,11 @@ UNFOLD = {
                         "icon": "ondemand_video",
                         "link": reverse_lazy("admin:device_care_devicecarevideo_changelist"),
                     },
+                    {
+                        "title": "User Wear Time Logs",
+                        "icon": "schedule",
+                        "link": reverse_lazy("admin:users_hearingaidweartime_changelist"),
+                    },
                 ],
             },
             {
