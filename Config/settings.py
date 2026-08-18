@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'what_normal.apps.WhatNormalConfig',
     'skills_strategies.apps.SkillsStrategiesConfig',
     'device_care.apps.DeviceCareConfig',
+    'support_chat.apps.SupportChatConfig',
 ]
 
 from django.urls import reverse_lazy
@@ -58,6 +59,23 @@ UNFOLD = {
         "show_search": True,
         "show_all_applications": False,
         "navigation": [
+            {
+                "title": "Care Team Support Chat",
+                "separator": True,
+                "collapsible": False,
+                "items": [
+                    {
+                        "title": "User Support Conversations",
+                        "icon": "forum",
+                        "link": reverse_lazy("admin:support_chat_supportconversation_changelist"),
+                    },
+                    {
+                        "title": "Support Messages & Attachments",
+                        "icon": "mark_chat_unread",
+                        "link": reverse_lazy("admin:support_chat_supportmessage_changelist"),
+                    },
+                ],
+            },
             {
                 "title": "Device Care (Brands, Models & Guides)",
                 "separator": True,
