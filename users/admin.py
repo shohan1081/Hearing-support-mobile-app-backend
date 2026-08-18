@@ -3,10 +3,18 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
 from unfold.admin import ModelAdmin
 from unfold.forms import UserChangeForm, UserCreationForm
-from .models import User, UserLoginHistory, AccountDeletionRequest, ProfileDataDeletionRequest, UserOnboarding, DailyCheckIn, CheckInTutorial, CheckInTutorialFeedback
+from .models import User, UserLoginHistory, AccountDeletionRequest, ProfileDataDeletionRequest, UserOnboarding, DailyCheckIn, CheckInTutorial, CheckInTutorialFeedback, HearingAidWearTime
 from django.core.mail import send_mail
 from django.urls import reverse
 from django.utils.html import format_html
+
+
+@admin.register(HearingAidWearTime)
+class HearingAidWearTimeAdmin(ModelAdmin):
+    list_display = ('user', 'date', 'hours', 'minutes', 'total_hours', 'created_at')
+    list_filter = ('date', 'created_at')
+    search_fields = ('user__email', 'user__name', 'notes')
+    ordering = ('-date', '-created_at')
 
 
 @admin.register(CheckInTutorialFeedback)
