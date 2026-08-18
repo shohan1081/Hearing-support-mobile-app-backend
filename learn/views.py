@@ -200,3 +200,66 @@ class TodayLessonView(APIView):
             },
             status_code=status.HTTP_200_OK
         )
+
+
+class AllVideoPlaylistsView(APIView):
+    """
+    Consolidated API endpoint to fetch all video playlists and tutorial videos across the application in one single call.
+    Includes Overview Videos, Daily Lessons playlist, What's Normal video playlist, Device Care tutorial videos, and Weekly program tutorials.
+
+    GET /api/learn/video-playlists/
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+
+    def get(self, request):
+        # 1. Seed defaults to ensure DB is populated
+        seed_default_welcome_tutorial()
+        seed_default_checkin_overview_video()
+        seed_default_care_team_support_video()
+        seed_default_progress_overview_video()
+        seed_default_daily_lessons()
+
+        # 2. Fetch Overview Videos
+        welcome_tutorial = WelcomeTutorial.objects.filter(is_active=True).first()
+        checkin_video = CheckInOverviewVideo.objects.filter(is_active=True).first()
+        care_team_video = CareTeamSupportVideo.objects.filter(is_active=True).first()
+        progress_video = ProgressOverviewVideo.objects.filter(is_active=True).first()
+
+        # 3. Fetch Daily Lessons Playlist
+        daily_lessons = DailyLesson.objects.filter(is_active=True).exclude(video_file="").order_by('day_number')
+
+        # 4. Fetch What's Normal Video Playlist
+        from what_normal.models import WhatNormalVideo
+        from what_normal.serializers import WhatNormalVideoListSerializer
+        whats_normal_videos = WhatNormalVideo.objects.filter(is_active=True).order_by('order', 'created_at')
+
+        # 5. Fetch Device Care Tutorial Videos
+        from device_care.models import DeviceCareVideo
+        from device_care.serializers import DeviceCareVideoSerializer
+        device_care_videos = DeviceCareVideo.objects.filter(is_active=True).order_by('order', 'created_at')
+
+        # 6. Fetch Weekly Program Tutorials Playlist
+        from weekly_tutorials.models import WeeklyTutorial
+        from weekly_tutorials.serializers import WeeklyTutorialListSerializer
+        weekly_tutorials = WeeklyTutorial.objects.filter(is_active=True).order_by('week_number')
+
+        data = {
+            "overview_videos": {
+                "welcome_tutorial": WelcomeTutorialSerializer(welcome_tutorial, context={'request': request}).data if welcome_tutorial else None,
+                "checkin_overview": CheckInOverviewVideoSerializer(checkin_video, context={'request': request}).data if checkin_video else None,
+                "care_team_support": CareTeamSupportVideoSerializer(care_team_video, context={'request': request}).data if care_team_video else None,
+                "progress_overview": ProgressOverviewVideoSerializer(progress_video, context={'request': request}).data if progress_video else None,
+            },
+            "daily_lessons_playlist": DailyLessonSerializer(daily_lessons, many=True, context={'request': request}).data,
+            "whats_normal_playlist": WhatNormalVideoListSerializer(whats_normal_videos, many=True, context={'request': request}).data,
+            "device_care_tutorials_playlist": DeviceCareVideoSerializer(device_care_videos, many=True, context={'request': request}).data,
+            "weekly_tutorials_playlist": WeeklyTutorialListSerializer(weekly_tutorials, many=True, context={'request': request}).data,
+        }
+
+        return standard_response(
+            success=True,
+            message="All video playlists retrieved successfully",
+            data=data,
+            status_code=status.HTTP_200_OK
+        )
