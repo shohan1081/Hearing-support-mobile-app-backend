@@ -545,3 +545,55 @@ class CheckInTutorialFeedback(models.Model):
 
     def __str__(self):
         return f"{self.user.email} - {self.tutorial.title} ({self.get_issue_duration_display()})"
+
+
+class HearingAidWearTime(models.Model):
+    """
+    Daily hearing machine / hearing aid wear time log in hours and minutes
+    """
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='wear_time_logs',
+        verbose_name=_('user'),
+        help_text=_("User logging wear time")
+    )
+    date = models.DateField(
+        _('date'),
+        default=timezone.now,
+        help_text=_("Date of wear time entry")
+    )
+    hours = models.PositiveIntegerField(
+        _('hours'),
+        default=0,
+        help_text=_("Number of hours worn (0-24)")
+    )
+    minutes = models.PositiveIntegerField(
+        _('minutes'),
+        default=0,
+        help_text=_("Number of minutes worn (0-59)")
+    )
+    notes = models.TextField(
+        _('notes'),
+        blank=True,
+        help_text=_("Optional notes or environmental context")
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('hearing aid wear time log')
+        verbose_name_plural = _('hearing aid wear time logs')
+        ordering = ['-date', '-created_at']
+        unique_together = ['user', 'date']
+
+    def __str__(self):
+        return f"{self.user.email} - {self.date}: {self.hours}h {self.minutes}m"
+
+    @property
+    def total_minutes(self):
+        return (self.hours * 60) + self.minutes
+
+    @property
+    def total_hours(self):
+        return round(self.hours + (self.minutes / 60.0), 2)
