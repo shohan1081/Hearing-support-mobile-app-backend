@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'weekly_tutorials.apps.WeeklyTutorialsConfig',
     'learn.apps.LearnConfig',
     'what_normal.apps.WhatNormalConfig',
+    'skills_strategies.apps.SkillsStrategiesConfig',
 ]
 
 from django.urls import reverse_lazy
@@ -90,6 +91,18 @@ UNFOLD = {
                         "title": "User Learning Progress",
                         "icon": "auto_graph",
                         "link": reverse_lazy("admin:learn_userlessonprogress_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": "Skills & Strategies",
+                "separator": True,
+                "collapsible": False,
+                "items": [
+                    {
+                        "title": "Everyday Listening Tips (Audio Upload)",
+                        "icon": "hearing",
+                        "link": reverse_lazy("admin:skills_strategies_everydaylisteningtip_changelist"),
                     },
                 ],
             },
