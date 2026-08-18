@@ -1322,15 +1322,11 @@ from .serializers import HearingAidWearTimeSerializer, HearingAidWearTimeInputSe
 
 def calculate_user_hearing_score(user):
     """
-    Calculate an objective, scientific Hearing Health Score (0 - 100) based on real user data:
-    1. Wear Time Consistency (Max 40 Points):
-       Target = 8-10 hours/day of hearing machine usage.
-    2. Daily Lesson & Training Completion (Max 30 Points):
-       Active participation in rehabilitation program.
-    3. Daily Check-in & Symptom Tracking (Max 20 Points):
-       Regular logging of sound quality and adaptation.
-    4. Listening Strategies & Practice (Max 10 Points):
-       Active engagement with listening strategies & device care.
+    Calculate a single objective Hearing Score number between 1 and 100 based on real user data:
+    1. Wear Time Consistency (Max 40 Points): Target = 8+ hours/day of hearing machine usage.
+    2. Daily Lesson Completion (Max 30 Points): Active participation in rehabilitation program.
+    3. Daily Check-in Consistency (Max 20 Points): Sound comfort & symptom tracking.
+    4. Strategy & Onboarding Engagement (Max 10 Points): Profile & listening habit setup.
     """
     today = timezone.now().date()
     fourteen_days_ago = today - timezone.timedelta(days=14)
@@ -1340,9 +1336,8 @@ def calculate_user_hearing_score(user):
     if wear_logs.exists():
         total_hours = sum([log.total_hours for log in wear_logs])
         avg_daily_hours = total_hours / max(wear_logs.count(), 1)
-        wear_time_score = round(min(40.0, (avg_daily_hours / 8.0) * 40.0), 1)
+        wear_time_score = min(40.0, (avg_daily_hours / 8.0) * 40.0)
     else:
-        avg_daily_hours = 0.0
         wear_time_score = 0.0
 
     # 2. Daily Lesson Completion Score (30 Points Max)
@@ -1352,75 +1347,23 @@ def calculate_user_hearing_score(user):
         total_lessons = DailyLesson.objects.filter(is_active=True).count() or 1
         if progress and progress.completed_days:
             completed_count = len(progress.completed_days)
-            lesson_score = round(min(30.0, (completed_count / total_lessons) * 30.0), 1)
+            lesson_score = min(30.0, (completed_count / total_lessons) * 30.0)
         else:
-            completed_count = 0
             lesson_score = 0.0
     except Exception:
-        completed_count = 0
         lesson_score = 0.0
 
     # 3. Check-in Consistency Score (20 Points Max)
     checkin_count = DailyCheckIn.objects.filter(user=user, checkin_date__gte=fourteen_days_ago).count()
-    checkin_score = round(min(20.0, (checkin_count / 7.0) * 20.0), 1)
+    checkin_score = min(20.0, (checkin_count / 7.0) * 20.0)
 
     # 4. Strategy & Onboarding Engagement Score (10 Points Max)
     has_onboarding = hasattr(user, 'onboarding') and user.onboarding.is_completed
     strategy_score = 10.0 if has_onboarding else 5.0
 
-    # Calculate Total Score (0 - 100)
-    total_score = int(round(wear_time_score + lesson_score + checkin_score + strategy_score))
-    total_score = max(0, min(100, total_score))
-
-    # Level classification & clinical feedback
-    if total_score >= 85:
-        level = "Optimal Adaptation"
-        badge = "🌟 Excellent"
-        summary = "Your brain auditory cortex is receiving consistent stimulation with optimal daily wear time."
-    elif total_score >= 70:
-        level = "Active Progress"
-        badge = "📈 Good"
-        summary = "Great habit consistency! Keep wearing your hearing aid for at least 8 hours daily."
-    elif total_score >= 50:
-        level = "Building Habit"
-        badge = "⚡ Moderate"
-        summary = "You are building your daily routine. Try increasing daily wear time by 1-2 hours."
-    else:
-        level = "Getting Started"
-        badge = "🌱 Needs Attention"
-        summary = "Wear time or check-in frequency is low. Consistent daily use accelerates hearing improvement."
-
-    # Personalized Recommendations
-    recommendations = []
-    if avg_daily_hours < 8.0:
-        needed_hrs = round(8.0 - avg_daily_hours, 1)
-        recommendations.append(f"Increase daily wear time by {needed_hrs} hrs to reach the recommended 8+ hrs/day.")
-    if checkin_count < 7:
-        recommendations.append("Log daily check-ins at least 4-5 times a week to track sound clarity improvements.")
-    if lesson_score < 20.0:
-        recommendations.append("Complete your daily listening lessons to accelerate speech comprehension adaptation.")
-
-    if not recommendations:
-        recommendations.append("Outstanding work! Maintain your daily wear time and lesson routine.")
-
-    return {
-        "hearing_score": total_score,
-        "level": level,
-        "badge": badge,
-        "summary": summary,
-        "breakdown": {
-            "wear_time_score": wear_time_score,
-            "max_wear_time_score": 40.0,
-            "average_daily_wear_hours": round(avg_daily_hours, 1),
-            "lesson_progress_score": lesson_score,
-            "max_lesson_progress_score": 30.0,
-            "checkin_consistency_score": checkin_score,
-            "max_checkin_consistency_score": 20.0,
-            "strategy_engagement_score": strategy_score,
-            "max_strategy_engagement_score": 10.0,
-        },
-        "recommendations": recommendations,
-    }
+    # Total score integer strictly bounded between 1 and 100
+    score = int(round(wear_time_score + lesson_score + checkin_score + strategy_score))
+    return max(1, min(100, score))
 
 
 class HearingAidWearTimeView(APIView):
@@ -1499,7 +1442,7 @@ class HearingAidWearTimeView(APIView):
 
 class HearingScoreView(APIView):
     """
-    API endpoint to fetch the user's real, scientifically calculated Hearing Health Score (0 - 100)
+    API endpoint to fetch user's single Hearing Score number (between 1 and 100)
     
     GET /api/users/hearing-score/
     """
@@ -1507,11 +1450,14 @@ class HearingScoreView(APIView):
     authentication_classes = [JWTAuthentication, FirebaseAuthentication]
 
     def get(self, request):
-        score_data = calculate_user_hearing_score(request.user)
+        hearing_score = calculate_user_hearing_score(request.user)
         return standard_response(
             success=True,
-            message="Hearing health score retrieved successfully",
-            data=score_data,
+            message="Hearing score retrieved successfully",
+            data={
+                "hearing_score": hearing_score,
+                "score": hearing_score
+            },
             status_code=status.HTTP_200_OK
         )
 
