@@ -1662,6 +1662,139 @@
           }
         }
       ]
+    },
+    {
+      "name": "Device Care (Brands, Models, Cleaning & Manuals)",
+      "item": [
+        {
+          "name": "Get All Hearing Aid Brands List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/device-care/brands/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "device-care",
+                "brands",
+                ""
+              ]
+            },
+            "description": "Returns list of all active hearing aid brands (Phonak, Oticon, ReSound, Widex, Starkey, etc.) with brand logos and model counts."
+          }
+        },
+        {
+          "name": "Get Brand Details & Device Models List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/device-care/brands/phonak/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "device-care",
+                "brands",
+                "phonak",
+                ""
+              ]
+            },
+            "description": "Get brand details and all hearing aid models belonging to Phonak."
+          }
+        },
+        {
+          "name": "Get All Hearing Aid Models List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/device-care/models/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "device-care",
+                "models",
+                ""
+              ]
+            },
+            "description": "Returns list of all hearing aid device models across all brands."
+          }
+        },
+        {
+          "name": "Get Model Details with 4 Sections (Cleaning, Care, Troubleshooting, Manual)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/device-care/models/audeo-lumity/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "device-care",
+                "models",
+                "audeo-lumity",
+                ""
+              ]
+            },
+            "description": "Complete device model detail containing all 4 sections (Cleaning Guide, Care Tips, Troubleshooting, User Manual) with text, manual link, and multiple tutorial videos."
+          }
+        },
+        {
+          "name": "Get Device Care Section Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/device-care/sections/1/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "device-care",
+                "sections",
+                "1",
+                ""
+              ]
+            },
+            "description": "Detail view for a specific care section containing text instructions, live user manual URL, and tutorial videos."
+          }
+        }
+      ]
     }
   ]
 }
