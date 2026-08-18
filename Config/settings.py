@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'learn.apps.LearnConfig',
     'what_normal.apps.WhatNormalConfig',
     'skills_strategies.apps.SkillsStrategiesConfig',
+    'device_care.apps.DeviceCareConfig',
 ]
 
 from django.urls import reverse_lazy
@@ -57,6 +58,33 @@ UNFOLD = {
         "show_search": True,
         "show_all_applications": False,
         "navigation": [
+            {
+                "title": "Device Care (Brands, Models & Guides)",
+                "separator": True,
+                "collapsible": False,
+                "items": [
+                    {
+                        "title": "Hearing Aid Brands",
+                        "icon": "branding_watermark",
+                        "link": reverse_lazy("admin:device_care_hearingaidbrand_changelist"),
+                    },
+                    {
+                        "title": "Hearing Aid Device Models",
+                        "icon": "devices",
+                        "link": reverse_lazy("admin:device_care_hearingaidmodel_changelist"),
+                    },
+                    {
+                        "title": "Device Care Sections & Guides",
+                        "icon": "cleaning_services",
+                        "link": reverse_lazy("admin:device_care_devicecaresection_changelist"),
+                    },
+                    {
+                        "title": "Tutorial Videos",
+                        "icon": "ondemand_video",
+                        "link": reverse_lazy("admin:device_care_devicecarevideo_changelist"),
+                    },
+                ],
+            },
             {
                 "title": "Learn & Daily Lessons",
                 "separator": True,
