@@ -27,11 +27,17 @@ from .views import (
     delete_profile_data_request_view,
     ProfileDataDeletionAPIView,
     VerifyProfileDataDeletionView,
+    HearingAidWearTimeView,
+    HearingScoreView,
 )
 
 app_name = 'users'
 
 urlpatterns = [
+    # Wear Time & Hearing Health Score APIs
+    path('wear-time/', HearingAidWearTimeView.as_view(), name='wear-time'),
+    path('hearing-score/', HearingScoreView.as_view(), name='hearing-score'),
+
     # Authentication endpoints
     path('signup/', UserRegistrationView.as_view(), name='signup'),
     path('login/', UserLoginView.as_view(), name='login'),
