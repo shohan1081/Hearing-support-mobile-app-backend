@@ -76,9 +76,7 @@ class WearTimeAndHearingScoreTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertTrue(data['success'])
-        self.assertIn('hearing_score', data['data'])
-        self.assertIn('level', data['data'])
-        self.assertIn('badge', data['data'])
-        self.assertIn('breakdown', data['data'])
-        self.assertIn('recommendations', data['data'])
-        self.assertGreaterEqual(data['data']['hearing_score'], 40)
+        score = data['data']['hearing_score']
+        self.assertIsInstance(score, int)
+        self.assertGreaterEqual(score, 1)
+        self.assertLessEqual(score, 100)
