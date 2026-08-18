@@ -1366,6 +1366,37 @@ def calculate_user_hearing_score(user):
     return max(1, min(100, score))
 
 
+def get_hearing_score_status_data(user):
+    """
+    Calculate hearing score number (1-100) and status (Excellent, Good, Average, Poor, Bad) with acknowledgment text
+    """
+    score = calculate_user_hearing_score(user)
+
+    # Determine status & acknowledgment based on score
+    if score >= 85:
+        status_label = "Excellent"
+        acknowledgment = "Optimal hearing machine usage and auditory cortex adaptation."
+    elif score >= 70:
+        status_label = "Good"
+        acknowledgment = "Good hearing habit and consistent daily wear time."
+    elif score >= 50:
+        status_label = "Average"
+        acknowledgment = "Moderate consistency. Try increasing your daily wear time and check-ins."
+    elif score >= 30:
+        status_label = "Poor"
+        acknowledgment = "Low wear time or check-in frequency. Increasing daily device wear will improve your score."
+    else:
+        status_label = "Bad"
+        acknowledgment = "Needs attention. Daily hearing machine wear and lessons are essential for progress."
+
+    return {
+        "hearing_score": score,
+        "score": score,
+        "status": status_label,
+        "acknowledgment": acknowledgment
+    }
+
+
 class HearingAidWearTimeView(APIView):
     """
     API endpoint for logging and retrieving daily hearing machine wear time in hours and minutes
@@ -1442,7 +1473,7 @@ class HearingAidWearTimeView(APIView):
 
 class HearingScoreView(APIView):
     """
-    API endpoint to fetch user's single Hearing Score number (between 1 and 100)
+    API endpoint to fetch user's Hearing Score number (1-100) and status (Excellent, Good, Average, Poor, Bad)
     
     GET /api/users/hearing-score/
     """
@@ -1450,14 +1481,11 @@ class HearingScoreView(APIView):
     authentication_classes = [JWTAuthentication, FirebaseAuthentication]
 
     def get(self, request):
-        hearing_score = calculate_user_hearing_score(request.user)
+        score_data = get_hearing_score_status_data(request.user)
         return standard_response(
             success=True,
             message="Hearing score retrieved successfully",
-            data={
-                "hearing_score": hearing_score,
-                "score": hearing_score
-            },
+            data=score_data,
             status_code=status.HTTP_200_OK
         )
 
