@@ -80,3 +80,6 @@ class WearTimeAndHearingScoreTestCase(TestCase):
         self.assertIsInstance(score, int)
         self.assertGreaterEqual(score, 1)
         self.assertLessEqual(score, 100)
+        self.assertIn('status', data['data'])
+        self.assertIn('acknowledgment', data['data'])
+        self.assertIn(data['data']['status'], ['Excellent', 'Good', 'Average', 'Poor', 'Bad'])
