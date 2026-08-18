@@ -9,4 +9,5 @@ urlpatterns = [
     path('api/weekly-tips/', include(('weekly_tutorials.urls', 'weekly_tips'), namespace='weekly_tips')),
     path('api/learn/', include(('learn.urls', 'learn'), namespace='learn')),
     path('api/what-normal/', include(('what_normal.urls', 'what_normal'), namespace='what_normal')),
+    path('api/skills-strategies/', include(('skills_strategies.urls', 'skills_strategies'), namespace='skills_strategies')),
 ]
