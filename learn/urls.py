@@ -5,11 +5,15 @@ from .views import (
     CheckInOverviewVideoView,
     CareTeamSupportVideoView,
     ProgressOverviewVideoView,
+    AllVideoPlaylistsView,
 )
 
 app_name = 'learn'
 
 urlpatterns = [
+    # All Video Playlists Consolidated API
+    path('video-playlists/', AllVideoPlaylistsView.as_view(), name='all-video-playlists'),
+
     # Welcome Tutorial Video API
     path('welcome-tutorial/', WelcomeTutorialView.as_view(), name='welcome-tutorial'),
     path('welcome/', WelcomeTutorialView.as_view(), name='welcome-tutorial-alias'),
