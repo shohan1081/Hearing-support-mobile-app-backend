@@ -306,8 +306,7 @@ class UserLoginView(APIView):
                         'email': user.email,
                         'name': user.name,
                         'is_email_verified': user.is_email_verified,
-                        'profile_picture': user.profile_picture.url if user.profile_picture else None,
-                        'is_onboarding_completed': user.is_onboarding_completed,
+                        'profile_picture': user.profile_picture.url if user.profile_picture else None, # noqa
                     },
                     'tokens': {
                         'access': access_token,
@@ -478,7 +477,6 @@ class FirebaseAuthView(APIView):
                             'is_email_verified': user.is_email_verified,
                             'auth_provider': user.auth_provider,
                             'profile_picture': user.profile_picture.url if user.profile_picture else None,
-                            'is_onboarding_completed': user.is_onboarding_completed,
                         },
                         'tokens': {
                             'access': access_token,
