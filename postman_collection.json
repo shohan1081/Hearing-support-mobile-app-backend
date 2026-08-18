@@ -1270,6 +1270,31 @@
       "name": "Daily Learning & Lessons",
       "item": [
         {
+          "name": "Get All Video Playlists (Consolidated)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/learn/video-playlists/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "learn",
+                "video-playlists",
+                ""
+              ]
+            },
+            "description": "Returns all video playlists and tutorial videos across the entire application in one single API call (Overview videos, Daily Lessons playlist, What's Normal video playlist, Device Care tutorial videos, and Weekly program tutorials)."
+          }
+        },
+        {
           "name": "Get Welcome Tutorial Video",
           "request": {
             "method": "GET",
