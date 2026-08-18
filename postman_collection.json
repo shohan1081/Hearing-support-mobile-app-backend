@@ -592,7 +592,7 @@
           }
         },
         {
-          "name": "Get Scientific Hearing Health Score (0-100)",
+          "name": "Get Single Hearing Score Number (1-100)",
           "request": {
             "method": "GET",
             "header": [
@@ -613,7 +613,7 @@
                 ""
               ]
             },
-            "description": "Returns objective Hearing Health Score (0-100) calculated dynamically from wear time consistency (40 pts), lesson completion (30 pts), check-in consistency (20 pts), and strategy engagement (10 pts), with clinical recommendations."
+            "description": "Returns a single Hearing Score number strictly between 1 and 100 calculated dynamically from daily wear time, lesson progress, check-in consistency, and strategy engagement."
           }
         }
       ]
