@@ -23,6 +23,7 @@ from .exceptions import (
     EmailAlreadyExistsException,
 )
 from .utils import validate_age
+from .models import HearingAidWearTime, CheckInTutorialFeedback, CheckInTutorial, DailyCheckIn, UserOnboarding
 
 from .models import UserOnboarding, DailyCheckIn, CheckInTutorial, CheckInTutorialFeedback
 
@@ -658,3 +659,45 @@ class CheckInTutorialFeedbackSerializer(serializers.ModelSerializer):
                 f"Invalid issue_duration '{value}'. Valid choices are: {', '.join(valid_choices)}"
             )
         return value
+
+
+class HearingAidWearTimeSerializer(serializers.ModelSerializer):
+    """
+    Serializer for daily hearing aid wear time log
+    """
+    total_minutes = serializers.IntegerField(read_only=True)
+    total_hours = serializers.FloatField(read_only=True)
+
+    class Meta:
+        model = HearingAidWearTime
+        fields = [
+            'id',
+            'date',
+            'hours',
+            'minutes',
+            'total_minutes',
+            'total_hours',
+            'notes',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class HearingAidWearTimeInputSerializer(serializers.Serializer):
+    """
+    Input serializer for submitting or logging daily wear time in hours and minutes
+    """
+    date = serializers.DateField(required=False)
+    hours = serializers.IntegerField(min_value=0, max_value=24, default=0)
+    minutes = serializers.IntegerField(min_value=0, max_value=59, default=0)
+    notes = serializers.CharField(required=False, allow_blank=True, default="")
+
+    def validate(self, data):
+        hrs = data.get('hours', 0)
+        mins = data.get('minutes', 0)
+        if hrs == 0 and mins == 0:
+            raise serializers.ValidationError("Wear time duration must be greater than 0 minutes.")
+        if hrs == 24 and mins > 0:
+            raise serializers.ValidationError("Wear time cannot exceed 24 hours per day.")
+        return data
