@@ -511,7 +511,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"password\": \"SecurePassword123!\",\n  \"confirm_deletion\": true\n}"
+              "raw": "{\n  \"password\": \"SecurePassword123!\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/users/account-delete/",
@@ -525,7 +525,95 @@
                 ""
               ]
             },
-            "description": "In-app account deletion requiring password confirmation."
+            "description": "Delete user account from within the mobile app (requires password verification)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Hearing Aid Wear Time & Hearing Health Score",
+      "item": [
+        {
+          "name": "Submit Daily Hearing Aid Wear Time (Hours & Minutes)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hours\": 7,\n  \"minutes\": 30,\n  \"date\": \"2026-08-18\",\n  \"notes\": \"Wore machine during work and evening family dinner\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/wear-time/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "wear-time",
+                ""
+              ]
+            },
+            "description": "Log or update daily hearing machine wear time duration in hours and minutes."
+          }
+        },
+        {
+          "name": "Get Daily Wear Time History & Averages",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/wear-time/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "wear-time",
+                ""
+              ]
+            },
+            "description": "Get today's logged wear time, weekly and monthly average wear hours, and daily log history."
+          }
+        },
+        {
+          "name": "Get Scientific Hearing Health Score (0-100)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/hearing-score/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "hearing-score",
+                ""
+              ]
+            },
+            "description": "Returns objective Hearing Health Score (0-100) calculated dynamically from wear time consistency (40 pts), lesson completion (30 pts), check-in consistency (20 pts), and strategy engagement (10 pts), with clinical recommendations."
           }
         }
       ]
