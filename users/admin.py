@@ -79,6 +79,7 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
     list_display = [
         'email',
         'name',
+        'daily_wear_goal_hours',
         'phone_number',
         'auth_provider',
         'is_email_verified',
@@ -87,6 +88,7 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
         'date_joined',
         'last_login',
     ]
+    list_editable = ['daily_wear_goal_hours']
     
     # Filters in sidebar
     list_filter = [
@@ -112,6 +114,9 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
         }),
         (_('Personal Info'), {
             'fields': ('name', 'phone_number', 'date_of_birth', 'profile_picture')
+        }),
+        (_('Hearing Machine Goal Settings'), {
+            'fields': ('daily_wear_goal_hours',)
         }),
         (_('Authentication'), {
             'fields': (
