@@ -1783,3 +1783,163 @@ class UserWearGoalView(APIView):
         )
 
 
+class ConsistencyReportView(APIView):
+    """
+    API endpoint returning weekly and monthly wear time vs goal time report for frontend Bar Charts
+    
+    GET /api/users/consistency-report/?period=weekly
+    GET /api/users/consistency-report/?period=monthly&year=2026&month=8
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+
+    def get(self, request):
+        user = request.user
+        period = request.query_params.get('period', 'weekly').lower()
+        daily_goal = getattr(user, 'daily_wear_goal_hours', 8) or 8
+        today = timezone.now().date()
+
+        if period == 'monthly':
+            try:
+                year = int(request.query_params.get('year', today.year))
+            except (ValueError, TypeError):
+                year = today.year
+
+            try:
+                month = int(request.query_params.get('month', today.month))
+            except (ValueError, TypeError):
+                month = today.month
+
+            num_days = calendar.monthrange(year, month)[1]
+            month_start = timezone.datetime(year, month, 1).date()
+            month_end = timezone.datetime(year, month, num_days).date()
+
+            weeks_data = []
+            curr_start = month_start
+            week_idx = 1
+
+            total_month_wear = 0.0
+            total_month_goal = 0.0
+
+            while curr_start <= month_end:
+                curr_end = min(curr_start + timezone.timedelta(days=6), month_end)
+                days_in_chunk = (curr_end - curr_start).days + 1
+
+                logs = HearingAidWearTime.objects.filter(user=user, date__range=[curr_start, curr_end])
+                total_w = sum([l.total_hours for l in logs])
+                total_g = float(daily_goal * days_in_chunk)
+
+                avg_w = round(total_w / float(days_in_chunk), 1)
+                comp_pct = round(min(100.0, (total_w / max(total_g, 1.0)) * 100.0), 1)
+
+                total_month_wear += total_w
+                total_month_goal += total_g
+
+                weeks_data.append({
+                    "label": f"Week {week_idx}",
+                    "week_number": week_idx,
+                    "start_date": str(curr_start),
+                    "end_date": str(curr_end),
+                    "days_count": days_in_chunk,
+                    "average_daily_wear_hours": avg_w,
+                    "daily_goal_hours": float(daily_goal),
+                    "total_wear_hours": round(total_w, 1),
+                    "total_goal_hours": round(total_g, 1),
+                    "completion_percentage": comp_pct,
+                    "is_goal_met": total_w >= total_g
+                })
+
+                curr_start = curr_end + timezone.timedelta(days=1)
+                week_idx += 1
+
+            monthly_comp_pct = round(min(100.0, (total_month_wear / max(total_month_goal, 1.0)) * 100.0), 1)
+            summary = {
+                "period": "monthly",
+                "year": year,
+                "month": month,
+                "month_name": calendar.month_name[month],
+                "daily_goal_hours": daily_goal,
+                "total_wear_hours": round(total_month_wear, 1),
+                "total_goal_hours": round(total_month_goal, 1),
+                "monthly_completion_percentage": monthly_comp_pct,
+                "weeks_count": len(weeks_data)
+            }
+
+            return standard_response(
+                success=True,
+                message="Monthly wear time vs goal consistency report retrieved",
+                data={
+                    "period": "monthly",
+                    "daily_goal_hours": daily_goal,
+                    "summary": summary,
+                    "bar_chart_data": weeks_data
+                },
+                status_code=status.HTTP_200_OK
+            )
+        else:
+            start_date_str = request.query_params.get('start_date')
+            if start_date_str:
+                try:
+                    week_start = timezone.datetime.strptime(start_date_str, "%Y-%m-%d").date()
+                except ValueError:
+                    week_start = today - timezone.timedelta(days=today.weekday())
+            else:
+                week_start = today - timezone.timedelta(days=today.weekday())
+
+            daily_data = []
+            total_week_wear = 0.0
+            total_week_goal = 0.0
+            days_met = 0
+
+            for i in range(7):
+                cur_d = week_start + timezone.timedelta(days=i)
+                day_name = cur_d.strftime("%a")
+
+                w_log = HearingAidWearTime.objects.filter(user=user, date=cur_d).first()
+                w_hrs = w_log.total_hours if w_log else 0.0
+                g_hrs = float(daily_goal)
+
+                is_met = w_hrs >= g_hrs
+                if is_met:
+                    days_met += 1
+
+                comp_pct = round(min(100.0, (w_hrs / max(g_hrs, 1.0)) * 100.0), 1)
+
+                total_week_wear += w_hrs
+                total_week_goal += g_hrs
+
+                daily_data.append({
+                    "label": day_name,
+                    "date": str(cur_d),
+                    "wear_hours": round(w_hrs, 1),
+                    "goal_hours": g_hrs,
+                    "is_goal_met": is_met,
+                    "completion_percentage": comp_pct
+                })
+
+            weekly_comp_pct = round(min(100.0, (total_week_wear / max(total_week_goal, 1.0)) * 100.0), 1)
+            summary = {
+                "period": "weekly",
+                "week_start": str(week_start),
+                "week_end": str(week_start + timezone.timedelta(days=6)),
+                "daily_goal_hours": daily_goal,
+                "total_wear_hours": round(total_week_wear, 1),
+                "total_goal_hours": round(total_week_goal, 1),
+                "weekly_completion_percentage": weekly_comp_pct,
+                "days_goal_met": days_met,
+                "total_days": 7
+            }
+
+            return standard_response(
+                success=True,
+                message="Weekly wear time vs goal consistency report retrieved",
+                data={
+                    "period": "weekly",
+                    "daily_goal_hours": daily_goal,
+                    "summary": summary,
+                    "bar_chart_data": daily_data
+                },
+                status_code=status.HTTP_200_OK
+            )
+
+
