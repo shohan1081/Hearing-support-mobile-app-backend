@@ -12,5 +12,8 @@ A robust Django REST API backend for the Hearing Improvement Mobile Application,
 ## Tech Stack
 - **Framework**: Django 5.2 & Django REST Framework
 - **Auth**: SimpleJWT, Firebase Admin SDK
-- **Database**: SQLite3
-- **Dependencies**: Python 3.x, `python-decouple`, `Pillow`, `deep-translator`
+- **Database**: PostgreSQL 16 & SQLite3
+- **Containerization & DevOps**: Docker, Docker Compose, Nginx, AWS ECR, AWS EC2, GitLab CI/CD
+
+## Deployment
+Automated production container deployment to AWS ECR & AWS EC2 via `.gitlab-ci.yml`.
