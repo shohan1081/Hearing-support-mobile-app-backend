@@ -154,3 +154,31 @@ class WearTimeAndHearingScoreTestCase(TestCase):
         update_response = self.client.put(url, {"daily_wear_goal_hours": 10}, format='json')
         self.assertEqual(update_response.status_code, status.HTTP_200_OK)
         self.assertEqual(update_response.json()['data']['daily_wear_goal_hours'], 10)
+
+    def test_consistency_report_weekly_api(self):
+        HearingAidWearTime.objects.create(
+            user=self.user,
+            date=timezone.now().date(),
+            hours=8,
+            minutes=30
+        )
+        url = reverse('users:consistency-report') + '?period=weekly'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertTrue(data['success'])
+        self.assertEqual(data['data']['period'], 'weekly')
+        self.assertEqual(len(data['data']['bar_chart_data']), 7)
+        self.assertIn('wear_hours', data['data']['bar_chart_data'][0])
+        self.assertIn('goal_hours', data['data']['bar_chart_data'][0])
+
+    def test_consistency_report_monthly_api(self):
+        url = reverse('users:consistency-report') + '?period=monthly'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertTrue(data['success'])
+        self.assertEqual(data['data']['period'], 'monthly')
+        self.assertGreaterEqual(len(data['data']['bar_chart_data']), 4)
+        self.assertIn('average_daily_wear_hours', data['data']['bar_chart_data'][0])
+        self.assertIn('daily_goal_hours', data['data']['bar_chart_data'][0])
