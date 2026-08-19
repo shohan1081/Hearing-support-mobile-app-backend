@@ -139,6 +139,13 @@ class User(AbstractBaseUser, PermissionsMixin):
         help_text=_("User's profile picture")
     )
 
+    # Daily hearing machine wear time goal
+    daily_wear_goal_hours = models.PositiveIntegerField(
+        _('daily wear goal (hours)'),
+        default=8,
+        help_text=_("Target daily hearing aid wear time goal in hours (default: 8 hours, customizable by admin)")
+    )
+
     bio = models.TextField(
         _('bio'),
         null=True,
