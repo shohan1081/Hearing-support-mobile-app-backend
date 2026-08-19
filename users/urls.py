@@ -29,14 +29,22 @@ from .views import (
     VerifyProfileDataDeletionView,
     HearingAidWearTimeView,
     HearingScoreView,
+    TodayWearTimeView,
+    DailyActivityScoreView,
+    ProgressChartView,
+    UserWearGoalView,
 )
 
 app_name = 'users'
 
 urlpatterns = [
-    # Wear Time & Hearing Health Score APIs
+    # Wear Time, Activity Score & Progress Chart APIs
     path('wear-time/', HearingAidWearTimeView.as_view(), name='wear-time'),
+    path('today-wear-time/', TodayWearTimeView.as_view(), name='today-wear-time'),
     path('hearing-score/', HearingScoreView.as_view(), name='hearing-score'),
+    path('daily-activity-score/', DailyActivityScoreView.as_view(), name='daily-activity-score'),
+    path('progress-chart/', ProgressChartView.as_view(), name='progress-chart'),
+    path('wear-goal/', UserWearGoalView.as_view(), name='wear-goal'),
 
     # Authentication endpoints
     path('signup/', UserRegistrationView.as_view(), name='signup'),
