@@ -33,6 +33,7 @@ from .views import (
     DailyActivityScoreView,
     ProgressChartView,
     UserWearGoalView,
+    ConsistencyReportView,
 )
 
 app_name = 'users'
@@ -44,6 +45,7 @@ urlpatterns = [
     path('hearing-score/', HearingScoreView.as_view(), name='hearing-score'),
     path('daily-activity-score/', DailyActivityScoreView.as_view(), name='daily-activity-score'),
     path('progress-chart/', ProgressChartView.as_view(), name='progress-chart'),
+    path('consistency-report/', ConsistencyReportView.as_view(), name='consistency-report'),
     path('wear-goal/', UserWearGoalView.as_view(), name='wear-goal'),
 
     # Authentication endpoints
