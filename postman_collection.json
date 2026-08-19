@@ -730,6 +730,38 @@
             },
             "description": "Get or update target daily wear goal hours for the user."
           }
+        },
+        {
+          "name": "Get Wear Time vs Goal Consistency Report (Bar Chart Format - Weekly & Monthly)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/consistency-report/?period=weekly",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "consistency-report",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "weekly",
+                  "description": "weekly or monthly"
+                }
+              ]
+            },
+            "description": "Returns wear time vs target goal time breakdown formatted specifically for frontend Bar Charts. Period: weekly (every day of the week) or monthly (every week of the month)."
+          }
         }
       ]
     },
