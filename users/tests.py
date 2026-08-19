@@ -83,3 +83,74 @@ class WearTimeAndHearingScoreTestCase(TestCase):
         self.assertIn('status', data['data'])
         self.assertIn('acknowledgment', data['data'])
         self.assertIn(data['data']['status'], ['Excellent', 'Good', 'Average', 'Poor', 'Bad'])
+
+    def test_today_wear_time_api(self):
+        HearingAidWearTime.objects.create(
+            user=self.user,
+            date=timezone.now().date(),
+            hours=7,
+            minutes=30
+        )
+        url = reverse('users:today-wear-time')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertTrue(data['success'])
+        self.assertEqual(data['data']['hours_worn'], 7)
+        self.assertEqual(data['data']['minutes_worn'], 30)
+        self.assertEqual(data['data']['total_hours'], 7.5)
+        self.assertEqual(data['data']['daily_goal_hours'], 8)
+        self.assertEqual(data['data']['goal_completion_percentage'], 93.8)
+
+    def test_daily_activity_score_api(self):
+        HearingAidWearTime.objects.create(
+            user=self.user,
+            date=timezone.now().date(),
+            hours=8,
+            minutes=0
+        )
+        DailyCheckIn.objects.create(
+            user=self.user,
+            hearing_status="great",
+            what_went_well="Good sound quality",
+            checkin_date=timezone.now().date()
+        )
+        url = reverse('users:daily-activity-score')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertTrue(data['success'])
+        activity_score = data['data']['activity_score']
+        self.assertIsInstance(activity_score, int)
+        self.assertGreaterEqual(activity_score, 1)
+        self.assertLessEqual(activity_score, 5)
+
+    def test_progress_chart_monthly_api(self):
+        url = reverse('users:progress-chart') + '?period=monthly'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertTrue(data['success'])
+        self.assertEqual(data['data']['period'], 'monthly')
+        self.assertIn('chart_data', data['data'])
+        self.assertGreater(len(data['data']['chart_data']), 25)
+
+    def test_progress_chart_yearly_api(self):
+        url = reverse('users:progress-chart') + '?period=yearly'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertTrue(data['success'])
+        self.assertEqual(data['data']['period'], 'yearly')
+        self.assertEqual(len(data['data']['chart_data']), 12)
+
+    def test_user_wear_goal_api(self):
+        url = reverse('users:wear-goal')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()['data']['daily_wear_goal_hours'], 8)
+
+        # Update goal to 10 hours
+        update_response = self.client.put(url, {"daily_wear_goal_hours": 10}, format='json')
+        self.assertEqual(update_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(update_response.json()['data']['daily_wear_goal_hours'], 10)
