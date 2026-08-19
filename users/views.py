@@ -1490,3 +1490,296 @@ class HearingScoreView(APIView):
         )
 
 
+import calendar
+
+
+def calculate_daily_activity_score(user, target_date=None):
+    """
+    Calculate a daily activity score strictly scaled between 1 and 5 for a given date.
+    
+    Points Criteria (Max 5 Points):
+    - Wear Time: +2 pts if worn >= daily_wear_goal_hours, +1 pt if worn > 0 hrs
+    - Daily Check-in: +1 pt if logged check-in today
+    - Daily Lesson: +1 pt if completed lesson today
+    - Profile/Onboarding/Strategy Practice: +1 pt if onboarding is completed
+    """
+    if target_date is None:
+        target_date = timezone.now().date()
+
+    wear_goal = getattr(user, 'daily_wear_goal_hours', 8) or 8
+    wear_log = HearingAidWearTime.objects.filter(user=user, date=target_date).first()
+
+    wear_hours = wear_log.total_hours if wear_log else 0.0
+    wear_logged = wear_log is not None and wear_hours > 0
+
+    if wear_hours >= wear_goal:
+        wear_pts = 2
+    elif wear_hours > 0:
+        wear_pts = 1
+    else:
+        wear_pts = 0
+
+    # Check-in logged today
+    checkin_logged = DailyCheckIn.objects.filter(user=user, checkin_date=target_date).exists()
+    checkin_pts = 1 if checkin_logged else 0
+
+    # Daily lesson completed today
+    try:
+        from learn.models import UserLessonProgress
+        progress = UserLessonProgress.objects.filter(user=user).first()
+        lesson_pts = 1 if (progress and progress.updated_at.date() == target_date and progress.completed_days) else 0
+    except Exception:
+        lesson_pts = 0
+
+    # Strategy / Onboarding
+    onboarding_pts = 1 if (hasattr(user, 'onboarding') and user.onboarding.is_completed) else 0
+
+    total_pts = wear_pts + checkin_pts + lesson_pts + onboarding_pts
+    activity_score = max(1, min(5, total_pts))
+
+    if activity_score == 5:
+        rating = "Outstanding"
+        badge = "🌟 5/5"
+    elif activity_score == 4:
+        rating = "Great"
+        badge = "⚡ 4/5"
+    elif activity_score == 3:
+        rating = "Good"
+        badge = "📈 3/5"
+    elif activity_score == 2:
+        rating = "Fair"
+        badge = "👍 2/5"
+    else:
+        rating = "Getting Started"
+        badge = "🌱 1/5"
+
+    return {
+        "date": str(target_date),
+        "activity_score": activity_score,
+        "max_score": 5,
+        "rating": rating,
+        "badge": badge,
+        "completed_activities": {
+            "wear_time_logged": wear_logged,
+            "wear_hours": wear_hours,
+            "daily_wear_goal_hours": wear_goal,
+            "daily_checkin_logged": checkin_logged,
+            "daily_lesson_completed": bool(lesson_pts),
+            "onboarding_completed": bool(onboarding_pts)
+        }
+    }
+
+
+class TodayWearTimeView(APIView):
+    """
+    API endpoint showing how many hours the user wore their hearing aids today vs. their daily target goal
+    
+    GET /api/users/today-wear-time/
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+
+    def get(self, request):
+        today = timezone.now().date()
+        user = request.user
+        wear_goal = getattr(user, 'daily_wear_goal_hours', 8) or 8
+
+        wear_log = HearingAidWearTime.objects.filter(user=user, date=today).first()
+
+        hours = wear_log.hours if wear_log else 0
+        minutes = wear_log.minutes if wear_log else 0
+        total_hours = wear_log.total_hours if wear_log else 0.0
+
+        goal_completion_pct = round(min(100.0, (total_hours / float(wear_goal)) * 100.0), 1)
+        is_achieved = total_hours >= float(wear_goal)
+        remaining_hours = max(0.0, round(float(wear_goal) - total_hours, 2))
+
+        return standard_response(
+            success=True,
+            message="Today's wear time retrieved successfully",
+            data={
+                "date": str(today),
+                "hours_worn": hours,
+                "minutes_worn": minutes,
+                "total_hours": total_hours,
+                "daily_goal_hours": wear_goal,
+                "goal_completion_percentage": goal_completion_pct,
+                "is_goal_achieved": is_achieved,
+                "remaining_hours": remaining_hours,
+                "notes": wear_log.notes if wear_log else ""
+            },
+            status_code=status.HTTP_200_OK
+        )
+
+
+class DailyActivityScoreView(APIView):
+    """
+    API endpoint for getting user's daily activity score scaled between 1 and 5
+    
+    GET /api/users/daily-activity-score/
+    GET /api/users/daily-activity-score/?date=2026-08-19
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+
+    def get(self, request):
+        date_str = request.query_params.get('date')
+        target_date = timezone.now().date()
+        if date_str:
+            try:
+                target_date = timezone.datetime.strptime(date_str, "%Y-%m-%d").date()
+            except ValueError:
+                pass
+
+        activity_data = calculate_daily_activity_score(request.user, target_date=target_date)
+        return standard_response(
+            success=True,
+            message="Daily activity score retrieved successfully",
+            data=activity_data,
+            status_code=status.HTTP_200_OK
+        )
+
+
+class ProgressChartView(APIView):
+    """
+    API endpoint returning monthly & yearly progress score data formatted for frontend charts/graphs
+    
+    GET /api/users/progress-chart/?period=monthly&year=2026&month=8
+    GET /api/users/progress-chart/?period=yearly&year=2026
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+
+    def get(self, request):
+        user = request.user
+        period = request.query_params.get('period', 'monthly').lower()
+        today = timezone.now().date()
+
+        try:
+            year = int(request.query_params.get('year', today.year))
+        except (ValueError, TypeError):
+            year = today.year
+
+        try:
+            month = int(request.query_params.get('month', today.month))
+        except (ValueError, TypeError):
+            month = today.month
+
+        chart_data = []
+        if period == 'yearly':
+            for m in range(1, 13):
+                num_days = calendar.monthrange(year, m)[1]
+                start_d = timezone.datetime(year, m, 1).date()
+                end_d = timezone.datetime(year, m, num_days).date()
+
+                m_logs = HearingAidWearTime.objects.filter(user=user, date__range=[start_d, end_d])
+                m_wear_hrs = sum([l.total_hours for l in m_logs]) / max(m_logs.count(), 1) if m_logs.exists() else 0.0
+
+                month_name = calendar.month_abbr[m]
+                m_score = calculate_user_hearing_score(user) if m == month else min(100, max(1, int(round((m_wear_hrs / 8.0) * 50 + 35))))
+                
+                chart_data.append({
+                    "label": month_name,
+                    "month": m,
+                    "year": year,
+                    "score": m_score,
+                    "average_wear_hours": round(m_wear_hrs, 1)
+                })
+
+            summary = {
+                "period": "yearly",
+                "year": year,
+                "average_score": round(sum([d['score'] for d in chart_data]) / 12.0, 1),
+                "highest_score": max([d['score'] for d in chart_data]),
+                "lowest_score": min([d['score'] for d in chart_data]),
+            }
+        else:
+            num_days = calendar.monthrange(year, month)[1]
+            scores_list = []
+            for d in range(1, num_days + 1):
+                cur_date = timezone.datetime(year, month, d).date()
+                label = f"{calendar.month_abbr[month]} {d:02d}"
+
+                w_log = HearingAidWearTime.objects.filter(user=user, date=cur_date).first()
+                w_hrs = w_log.total_hours if w_log else 0.0
+                
+                act_data = calculate_daily_activity_score(user, target_date=cur_date)
+                daily_score = calculate_user_hearing_score(user) if cur_date == today else min(100, max(1, int(round((w_hrs / 8.0) * 50 + (act_data['activity_score'] * 10)))))
+
+                scores_list.append(daily_score)
+                chart_data.append({
+                    "label": label,
+                    "date": str(cur_date),
+                    "score": daily_score,
+                    "wear_hours": round(w_hrs, 1),
+                    "activity_score": act_data['activity_score']
+                })
+
+            summary = {
+                "period": "monthly",
+                "year": year,
+                "month": month,
+                "month_name": calendar.month_name[month],
+                "average_score": round(sum(scores_list) / max(len(scores_list), 1), 1),
+                "highest_score": max(scores_list) if scores_list else 0,
+                "lowest_score": min(scores_list) if scores_list else 0,
+            }
+
+        return standard_response(
+            success=True,
+            message=f"{period.capitalize()} progress chart data retrieved successfully",
+            data={
+                "period": period,
+                "current_score": calculate_user_hearing_score(user),
+                "summary": summary,
+                "chart_data": chart_data
+            },
+            status_code=status.HTTP_200_OK
+        )
+
+
+class UserWearGoalView(APIView):
+    """
+    API endpoint for viewing or updating the user's daily wear goal in hours
+    
+    GET /api/users/wear-goal/
+    PUT /api/users/wear-goal/
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+
+    def get(self, request):
+        user = request.user
+        goal = getattr(user, 'daily_wear_goal_hours', 8) or 8
+        return standard_response(
+            success=True,
+            message="Daily wear goal retrieved",
+            data={"daily_wear_goal_hours": goal},
+            status_code=status.HTTP_200_OK
+        )
+
+    def put(self, request):
+        user = request.user
+        goal_val = request.data.get('daily_wear_goal_hours')
+        try:
+            goal_int = int(goal_val)
+            if goal_int <= 0 or goal_int > 24:
+                raise ValueError()
+        except (ValueError, TypeError):
+            return standard_response(
+                success=False,
+                message="daily_wear_goal_hours must be an integer between 1 and 24",
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+
+        user.daily_wear_goal_hours = goal_int
+        user.save(update_fields=['daily_wear_goal_hours', 'updated_at'])
+
+        return standard_response(
+            success=True,
+            message="Daily wear goal updated successfully",
+            data={"daily_wear_goal_hours": user.daily_wear_goal_hours},
+            status_code=status.HTTP_200_OK
+        )
+
+
