@@ -615,6 +615,121 @@
             },
             "description": "Returns single Hearing Score number (1-100) along with status classification (Excellent, Good, Average, Poor, Bad) acknowledging user's progress."
           }
+        },
+        {
+          "name": "Get Today's Wear Time vs Goal (Hours & % Completed)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/today-wear-time/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "today-wear-time",
+                ""
+              ]
+            },
+            "description": "Returns how many hours and minutes the user wore their hearing aid today vs their daily target goal (default 8 hrs, customizable by admin)."
+          }
+        },
+        {
+          "name": "Get Daily Activity Score (1 to 5)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/daily-activity-score/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "daily-activity-score",
+                ""
+              ]
+            },
+            "description": "Returns user's daily activity score scaled between 1 and 5 (1=Getting Started, 5=Outstanding) based on today's completed activities."
+          }
+        },
+        {
+          "name": "Get Progress Score Chart Data (Monthly & Yearly)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/progress-chart/?period=monthly",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "progress-chart",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "monthly",
+                  "description": "monthly or yearly"
+                }
+              ]
+            },
+            "description": "Returns graph-friendly progress score breakdown grouped for monthly or yearly UI charts."
+          }
+        },
+        {
+          "name": "Update User Daily Wear Time Goal",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"daily_wear_goal_hours\": 8\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/wear-goal/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "wear-goal",
+                ""
+              ]
+            },
+            "description": "Get or update target daily wear goal hours for the user."
+          }
         }
       ]
     },
