@@ -1,0 +1,75 @@
+# ==============================================================================
+# GitLab CI/CD Pipeline for AWS ECR Build & EC2 Container Deployment
+# ==============================================================================
+
+stages:
+  - test
+  - build
+  - deploy
+
+variables:
+  AWS_REGION: "us-east-1"
+  AWS_ACCOUNT_ID: "960946312476"
+  AWS_ECR_REPOSITORY: "hearing-app-backend"
+  EC2_HOST: "44.196.172.165"
+  EC2_USERNAME: "ubuntu"
+
+# ------------------------------------------------------------------------------
+# Stage 1: Run Django Unit Tests
+# ------------------------------------------------------------------------------
+unit-tests:
+  stage: test
+  image: python:3.12-slim
+  script:
+    - python -m pip install --upgrade pip
+    - pip install -r requirements.txt
+    - python manage.py test
+  only:
+    - main
+
+# ------------------------------------------------------------------------------
+# Stage 2: Build Docker Image & Push to AWS ECR
+# ------------------------------------------------------------------------------
+build-and-push-ecr:
+  stage: build
+  image: docker:24.0.7
+  services:
+    - docker:24.0.7-dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - apk add --no-cache python3 py3-pip aws-cli
+  script:
+    - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+    - ECR_IMAGE=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$AWS_ECR_REPOSITORY
+    - docker build -t $ECR_IMAGE:$CI_COMMIT_SHA -t $ECR_IMAGE:latest .
+    - docker push $ECR_IMAGE:$CI_COMMIT_SHA
+    - docker push $ECR_IMAGE:latest
+  only:
+    - main
+
+# ------------------------------------------------------------------------------
+# Stage 3: SSH to EC2 & Deploy Container Zero-Downtime
+# ------------------------------------------------------------------------------
+deploy-to-ec2:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache openssh-client bash
+    - eval $(ssh-agent -s)
+    - echo "$EC2_SSH_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
+  script:
+    - |
+      ssh $EC2_USERNAME@$EC2_HOST "
+        cd /home/ubuntu/app && \
+        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com && \
+        docker compose -f docker-compose.prod.yml pull && \
+        docker compose -f docker-compose.prod.yml up -d --remove-orphans && \
+        docker image prune -af
+      "
+  only:
+    - main
