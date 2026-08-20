@@ -408,7 +408,9 @@ if USE_S3:
         'CacheControl': 'max-age=86400',
     }
     AWS_DEFAULT_ACL = None
-    AWS_QUERYSTRING_AUTH = False
+    AWS_QUERYSTRING_AUTH = True       
+    AWS_QUERYSTRING_EXPIRE = 3600     
+    AWS_LOCATION = 'media'
 
     # Media files S3 Storage
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
