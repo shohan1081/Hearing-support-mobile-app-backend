@@ -412,7 +412,15 @@ if USE_S3:
     AWS_LOCATION = 'media'
 
     # Media files S3 Storage
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+        # Media files S3 Storage (Django 5.1+ নতুন STORAGES API)
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
     
 
 
