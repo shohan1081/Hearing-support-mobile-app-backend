@@ -14,7 +14,6 @@ services:
       POSTGRES_DB: ${DB_NAME:-hearing_app_db}
       POSTGRES_USER: ${DB_USER:-hearing_user}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-hearing_secure_pass_123}
-      PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
     healthcheck:
