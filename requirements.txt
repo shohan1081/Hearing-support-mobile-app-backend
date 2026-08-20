@@ -8,6 +8,8 @@ charset-normalizer==3.4.4
 cryptography==46.0.3
 Django==5.2.8
 django-cors-headers==4.7.0
+django-storages==1.14.4
+boto3==1.35.80
 djangorestframework==3.16.1
 djangorestframework_simplejwt==5.5.1
 django-unfold==0.45.0
