@@ -771,7 +771,7 @@ class UserProfileView(APIView):
     def get(self, request):
         """Get user profile"""
         user = request.user
-        serializer = UserProfileSerializer(user)
+        serializer = UserProfileSerializer(user, context={'request': request})
         
         return standard_response(
             success=True,
@@ -789,7 +789,7 @@ class UserProfileView(APIView):
             serializer.save()
             
             # Return updated profile
-            profile_serializer = UserProfileSerializer(user)
+            profile_serializer = UserProfileSerializer(user, context={'request': request})
             
             return standard_response(
                 success=True,
@@ -814,7 +814,7 @@ class UserProfileView(APIView):
             serializer.save()
             
             # Return updated profile
-            profile_serializer = UserProfileSerializer(user)
+            profile_serializer = UserProfileSerializer(user, context={'request': request})
             
             return standard_response(
                 success=True,
