@@ -443,12 +443,12 @@ class UserOnboardingSerializer(serializers.ModelSerializer):
 
 class UserProfileUpdateSerializer(serializers.ModelSerializer):
     """
-    Serializer for updating user profile (only full name, phone number, and profile picture)
+    Serializer for updating user profile (only full name and profile picture)
     """
     
     class Meta:
         model = User
-        fields = ['name', 'phone_number', 'profile_picture']
+        fields = ['name', 'profile_picture']
     
     def validate_name(self, value):
         """Validate name"""
