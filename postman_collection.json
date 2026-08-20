@@ -445,7 +445,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"John Doe\",\n  \"phone_number\": \"+1234567890\"\n}"
+              "raw": "{\n  \"name\": \"John Doe\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/users/profile/",
@@ -459,7 +459,7 @@
                 ""
               ]
             },
-            "description": "Full update of user profile data (name, phone_number, profile_picture)."
+            "description": "Full update of user profile data (name, profile_picture)."
           }
         },
         {
@@ -478,7 +478,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone_number\": \"+9876543210\"\n}"
+              "raw": "{\n  \"name\": \"Jane Doe\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/users/profile/",
@@ -492,7 +492,7 @@
                 ""
               ]
             },
-            "description": "Partial update of user profile fields (name, phone_number, profile_picture)."
+            "description": "Partial update of user profile fields (name, profile_picture)."
           }
         },
         {
