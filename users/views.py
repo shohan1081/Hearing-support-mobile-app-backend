@@ -14,6 +14,7 @@ All views return standardized response format
 from rest_framework import status, generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from .authentication import FirebaseAuthentication
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -758,12 +759,13 @@ class PasswordChangeView(APIView):
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
     """
     API endpoint to get and update user profile
     
     GET /api/users/profile/ - Get user profile
-    PUT /api/users/profile/ - Update full profile
-    PATCH /api/users/profile/ - Partial update profile
+    PUT /api/users/profile/ - Update full profile (form-data or json)
+    PATCH /api/users/profile/ - Partial update profile (form-data or json)
     """
     
     permission_classes = [IsAuthenticated]
