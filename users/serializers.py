@@ -342,6 +342,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     Serializer for user profile (read and update)
     """
     is_onboarding_completed = serializers.BooleanField(read_only=True)
+    profile_picture = serializers.SerializerMethodField()
     
     class Meta:
         model = User
@@ -368,6 +369,21 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'date_joined',
             'last_login',
         ]
+
+    def get_profile_picture(self, obj):
+        """Return full absolute URL with base URL for profile picture"""
+        if not obj.profile_picture:
+            return None
+        
+        request = self.context.get('request')
+        url = obj.profile_picture.url
+        if url.startswith('http://') or url.startswith('https://'):
+            return url
+        
+        if request:
+            return request.build_absolute_uri(url)
+        
+        return url
 
 
 class UserOnboardingSerializer(serializers.ModelSerializer):
