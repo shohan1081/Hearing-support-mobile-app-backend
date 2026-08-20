@@ -22,6 +22,24 @@ python manage.py migrate --noinput
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
 
+# Auto-create superuser if DJANGO_SUPERUSER_EMAIL & DJANGO_SUPERUSER_PASSWORD are set
+if [ -n "$DJANGO_SUPERUSER_EMAIL" ] && [ -n "$DJANGO_SUPERUSER_PASSWORD" ]; then
+    echo "Checking/creating default superuser..."
+    python manage.py shell -c "
+from django.contrib.auth import get_user_model
+User = get_user_model()
+if not User.objects.filter(is_superuser=True).exists():
+    User.objects.create_superuser(
+        email='$DJANGO_SUPERUSER_EMAIL',
+        name='${DJANGO_SUPERUSER_NAME:-Admin User}',
+        password='$DJANGO_SUPERUSER_PASSWORD'
+    )
+    print('Superuser created successfully.')
+else:
+    print('Superuser already exists.')
+" || true
+fi
+
 # Start Gunicorn WSGI HTTP Server
 echo "Starting Gunicorn Production Server..."
 exec gunicorn Config.wsgi:application \
