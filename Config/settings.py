@@ -382,7 +382,7 @@ DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default=EMAIL_HOST_USER)
 # REST Framework Configuration
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'users.authentication.CustomJWTAuthentication',
         'users.authentication.FirebaseAuthentication',
     ),
     'EXCEPTION_HANDLER': 'users.exceptions.custom_exception_handler',

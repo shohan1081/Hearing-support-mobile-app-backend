@@ -1,12 +1,55 @@
 """
-Custom authentication backend for Firebase token verification
+Custom authentication backends for Firebase token and JWT token verification
 """
 
 from rest_framework import authentication, exceptions
+from rest_framework_simplejwt.authentication import (
+    JWTAuthentication as SimpleJWTAuthentication,
+    AUTH_HEADER_TYPES,
+    AUTH_HEADER_TYPE_BYTES,
+)
 from django.contrib.auth import get_user_model
+from django.utils.translation import gettext_lazy as _
 from .utils import verify_firebase_token
 
 User = get_user_model()
+
+
+class CustomJWTAuthentication(SimpleJWTAuthentication):
+    """
+    Custom JWT Authentication backend that provides clean, professional error messages
+    when tokens are missing, malformed, or invalid.
+    """
+
+    def get_raw_token(self, header: bytes):
+        """
+        Extracts an unvalidated JSON web token from the given "Authorization" header value.
+        """
+        parts = header.split()
+
+        if len(parts) == 0:
+            return None
+
+        if parts[0] not in AUTH_HEADER_TYPE_BYTES:
+            return None
+
+        if len(parts) == 1:
+            raise exceptions.AuthenticationFailed(
+                _("Authentication token was not provided. Please provide a valid Bearer token."),
+                code="token_not_provided",
+            )
+
+        if len(parts) > 2:
+            raise exceptions.AuthenticationFailed(
+                _("Invalid Authorization header format. Expected 'Bearer <token>'."),
+                code="bad_authorization_header",
+            )
+
+        return parts[1]
+
+
+# Backward compatibility alias
+JWTAuthentication = CustomJWTAuthentication
 
 
 class FirebaseAuthentication(authentication.BaseAuthentication):

@@ -9,6 +9,58 @@ from rest_framework.exceptions import APIException
 from django.core.exceptions import ValidationError as DjangoValidationError
 
 
+def sanitize_error_message(message, status_code=None, error_code=None):
+    """
+    Sanitizes technical / low-level exception messages into clean, professional user messages.
+    """
+    if not message:
+        return "An error occurred"
+
+    msg_str = str(message).strip()
+    msg_lower = msg_str.lower()
+
+    # Authentication errors (401 Unauthorized)
+    if status_code == status.HTTP_401_UNAUTHORIZED or error_code in (
+        "bad_authorization_header",
+        "not_authenticated",
+        "token_not_provided",
+        "token_not_valid",
+        "user_not_found",
+        "user_inactive",
+        "authentication_failed",
+    ):
+        # Missing or malformed Authorization header (e.g. 'Bearer' with no token or missing header)
+        if (
+            "two space-delimited values" in msg_lower
+            or "credentials were not provided" in msg_lower
+            or "no credentials provided" in msg_lower
+            or "token was not provided" in msg_lower
+            or "authorization header" in msg_lower
+            or error_code in ("bad_authorization_header", "not_authenticated", "token_not_provided")
+        ):
+            return "Authentication token was not provided. Please provide a valid Bearer token."
+
+        # Invalid, expired, or corrupted token
+        if (
+            "given token not valid" in msg_lower
+            or "token is invalid or expired" in msg_lower
+            or "token contained no recognizable" in msg_lower
+            or "invalid firebase token" in msg_lower
+            or error_code in ("token_not_valid", "invalid_token")
+        ):
+            return "Authentication token is invalid or expired. Please log in again."
+
+        # Disabled / inactive user
+        if "inactive" in msg_lower or "disabled" in msg_lower or error_code == "user_inactive":
+            return "User account is disabled. Please contact support."
+
+        # User not found
+        if "user not found" in msg_lower or error_code == "user_not_found":
+            return "User account not found. Please log in or register."
+
+    return msg_str
+
+
 def custom_exception_handler(exc, context):
     """
     Custom exception handler that returns consistent error format.
@@ -33,9 +85,11 @@ def custom_exception_handler(exc, context):
             {
                 "success": False,
                 "message": "Validation error",
-                "errors": exc.message_dict
-                if hasattr(exc, "message_dict")
-                else {"detail": exc.messages},
+                "errors": (
+                    exc.message_dict
+                    if hasattr(exc, "message_dict")
+                    else {"detail": exc.messages}
+                ),
             },
             status=status.HTTP_400_BAD_REQUEST,
         )
@@ -48,18 +102,37 @@ def custom_exception_handler(exc, context):
             "errors": {},
         }
 
+        error_code = getattr(exc, "default_code", None) or getattr(exc, "code", None)
+
         if isinstance(response.data, dict):
+            # Check for error code in response data if present (e.g. SimpleJWT's 'code')
+            if "code" in response.data and not error_code:
+                error_code = response.data["code"]
+
             if "detail" in response.data:
-                custom_response["message"] = str(response.data["detail"])
+                raw_message = str(response.data["detail"])
+                custom_response["message"] = sanitize_error_message(
+                    raw_message,
+                    status_code=response.status_code,
+                    error_code=error_code,
+                )
             else:
                 custom_response["message"] = "Validation error"
                 custom_response["errors"] = response.data
         elif isinstance(response.data, list):
-            custom_response["message"] = (
-                response.data[0] if response.data else "An error occurred"
+            raw_message = response.data[0] if response.data else "An error occurred"
+            custom_response["message"] = sanitize_error_message(
+                raw_message,
+                status_code=response.status_code,
+                error_code=error_code,
             )
         else:
-            custom_response["message"] = str(response.data)
+            raw_message = str(response.data)
+            custom_response["message"] = sanitize_error_message(
+                raw_message,
+                status_code=response.status_code,
+                error_code=error_code,
+            )
 
         response.data = custom_response
 
