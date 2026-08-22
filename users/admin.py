@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.utils import timezone
+from datetime import time, timedelta
 from django.utils.translation import gettext_lazy as _
 from unfold.admin import ModelAdmin
 from unfold.forms import UserChangeForm, UserCreationForm
@@ -278,19 +280,31 @@ class AppointmentAdmin(ModelAdmin):
 
     def get_changeform_initial_data(self, request):
         initial = super().get_changeform_initial_data(request)
-        user_id = request.GET.get('user')
-        checkin_id = request.GET.get('checkin')
-        title = request.GET.get('title')
+        user_param = request.GET.get('user')
+        checkin_param = request.GET.get('checkin')
+        title_param = request.GET.get('title')
 
-        if user_id:
-            initial['user'] = user_id
-        if checkin_id:
-            initial['checkin'] = checkin_id
-        if title:
-            initial['title'] = title
-        
+        if user_param:
+            user_obj = User.objects.filter(id=user_param).first()
+            if user_obj:
+                initial['user'] = user_obj.pk
+            else:
+                initial['user'] = user_param
+
+        if checkin_param:
+            if str(checkin_param).isdigit():
+                checkin_obj = DailyCheckIn.objects.filter(id=int(checkin_param)).first()
+                if checkin_obj:
+                    initial['checkin'] = checkin_obj.pk
+                else:
+                    initial['checkin'] = checkin_param
+            else:
+                initial['checkin'] = checkin_param
+
+        if title_param:
+            initial['title'] = title_param
+
         # Set default appointment date to tomorrow at 10:00 AM
-        from datetime import time, timedelta
         tomorrow = timezone.now().date() + timedelta(days=1)
         initial.setdefault('appointment_date', tomorrow)
         initial.setdefault('appointment_time', time(10, 0))

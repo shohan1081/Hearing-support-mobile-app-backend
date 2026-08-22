@@ -264,3 +264,17 @@ class AppointmentAndStrugglingCheckInTestCase(TestCase):
         self.assertEqual(detail_res.json()['data']['id'], appt.id)
         self.assertEqual(detail_res.json()['data']['title'], "Care Team Audiologist Consultation - Struggling")
         self.assertTrue(detail_res.json()['data']['is_upcoming'])
+
+    def test_admin_appointment_add_view_with_query_params(self):
+        admin_user = User.objects.create_superuser('admin_tester@example.com', 'Admin Tester', 'AdminPass123!')
+        self.client.force_login(admin_user)
+
+        checkin = DailyCheckIn.objects.create(
+            user=self.user,
+            hearing_status='frustrated',
+            why_struggling='Sounds are unbearable today'
+        )
+
+        admin_add_url = reverse('admin:users_appointment_add') + f'?user={self.user.id}&checkin={checkin.id}&title=Care+Team+Consultation+-+Frustrated'
+        response = self.client.get(admin_add_url)
+        self.assertEqual(response.status_code, 200)
