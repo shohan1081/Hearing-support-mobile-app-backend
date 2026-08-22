@@ -55,6 +55,7 @@ class DailyLesson(models.Model):
     duration_seconds = models.PositiveIntegerField(
         _('duration in seconds'),
         default=0,
+        blank=True,
         help_text=_("Duration of the media in seconds")
     )
     key_takeaways = models.JSONField(
@@ -144,6 +145,7 @@ class WelcomeTutorial(models.Model):
     duration_seconds = models.PositiveIntegerField(
         _('duration in seconds'),
         default=0,
+        blank=True,
         help_text=_("Duration of the video in seconds")
     )
     is_active = models.BooleanField(
@@ -215,6 +217,7 @@ class CheckInOverviewVideo(models.Model):
     duration_seconds = models.PositiveIntegerField(
         _('duration in seconds'),
         default=0,
+        blank=True,
         help_text=_("Duration of the video in seconds")
     )
     is_active = models.BooleanField(
@@ -286,6 +289,7 @@ class CareTeamSupportVideo(models.Model):
     duration_seconds = models.PositiveIntegerField(
         _('duration in seconds'),
         default=0,
+        blank=True,
         help_text=_("Duration of the video in seconds")
     )
     is_active = models.BooleanField(
@@ -357,6 +361,7 @@ class ProgressOverviewVideo(models.Model):
     duration_seconds = models.PositiveIntegerField(
         _('duration in seconds'),
         default=0,
+        blank=True,
         help_text=_("Duration of the video in seconds")
     )
     is_active = models.BooleanField(

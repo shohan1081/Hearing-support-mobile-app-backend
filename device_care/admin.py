@@ -106,7 +106,7 @@ class DeviceCareSectionAdmin(ModelAdmin):
 
 @admin.register(DeviceCareVideo)
 class DeviceCareVideoAdmin(ModelAdmin):
-    list_display = ('title_display', 'section', 'duration_seconds', 'order', 'is_active', 'updated_at')
+    list_display = ('title_display', 'section', 'order', 'is_active', 'updated_at')
     list_editable = ('order', 'is_active')
     list_filter = ('section__section_type', 'section__model', 'is_active')
     search_fields = ('title', 'description', 'section__title')
@@ -117,7 +117,7 @@ class DeviceCareVideoAdmin(ModelAdmin):
             'fields': ('section', 'title', 'order', 'is_active')
         }),
         ('Video Description & File', {
-            'fields': ('description', 'video_file', 'thumbnail', 'duration_seconds')
+            'fields': ('description', 'video_file', 'thumbnail')
         }),
     )
 

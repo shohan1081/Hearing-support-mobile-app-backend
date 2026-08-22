@@ -29,7 +29,6 @@ class DailyLessonAdmin(ModelAdmin):
                 'video_file',
                 'audio_file',
                 'thumbnail',
-                'duration_seconds',
             )
         }),
     )
@@ -49,7 +48,7 @@ class WelcomeTutorialAdmin(ModelAdmin):
             'fields': ('description',)
         }),
         ('Upload Welcome Video & Thumbnail', {
-            'fields': ('video_file', 'thumbnail', 'duration_seconds')
+            'fields': ('video_file', 'thumbnail')
         }),
     )
 
@@ -68,7 +67,7 @@ class CheckInOverviewVideoAdmin(ModelAdmin):
             'fields': ('description',)
         }),
         ('Upload Check-in Overview Video & Thumbnail', {
-            'fields': ('video_file', 'thumbnail', 'duration_seconds')
+            'fields': ('video_file', 'thumbnail')
         }),
     )
 
@@ -87,7 +86,7 @@ class CareTeamSupportVideoAdmin(ModelAdmin):
             'fields': ('description',)
         }),
         ('Upload Care Team Video & Thumbnail', {
-            'fields': ('video_file', 'thumbnail', 'duration_seconds')
+            'fields': ('video_file', 'thumbnail')
         }),
     )
 
@@ -106,7 +105,7 @@ class ProgressOverviewVideoAdmin(ModelAdmin):
             'fields': ('description',)
         }),
         ('Upload Progress Overview Video & Thumbnail', {
-            'fields': ('video_file', 'thumbnail', 'duration_seconds')
+            'fields': ('video_file', 'thumbnail')
         }),
     )
 

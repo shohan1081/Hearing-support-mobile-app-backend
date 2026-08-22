@@ -39,6 +39,7 @@ class WhatNormalVideo(models.Model):
     duration_seconds = models.PositiveIntegerField(
         _('duration in seconds'),
         default=0,
+        blank=True,
         help_text=_("Duration of the video in seconds")
     )
     order = models.PositiveIntegerField(
@@ -112,6 +113,7 @@ class WhatNormalAudio(models.Model):
     duration_seconds = models.PositiveIntegerField(
         _('duration in seconds'),
         default=0,
+        blank=True,
         help_text=_("Duration of the audio in seconds")
     )
     order = models.PositiveIntegerField(

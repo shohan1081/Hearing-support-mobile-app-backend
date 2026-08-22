@@ -53,6 +53,7 @@ class WeeklyTutorial(models.Model):
     duration_seconds = models.PositiveIntegerField(
         _('duration in seconds'),
         default=0,
+        blank=True,
         help_text=_("Duration of the video in seconds")
     )
     what_you_will_learn = models.JSONField(

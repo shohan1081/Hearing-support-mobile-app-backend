@@ -5,7 +5,7 @@ from .models import WhatNormalVideo, WhatNormalAudio
 
 @admin.register(WhatNormalVideo)
 class WhatNormalVideoAdmin(ModelAdmin):
-    list_display = ('title', 'order', 'subtitle', 'duration_seconds', 'is_active', 'updated_at')
+    list_display = ('title', 'order', 'subtitle', 'is_active', 'updated_at')
     list_editable = ('order', 'is_active')
     list_filter = ('is_active',)
     search_fields = ('title', 'subtitle', 'description')
@@ -18,14 +18,14 @@ class WhatNormalVideoAdmin(ModelAdmin):
             'fields': ('description',)
         }),
         ('Upload Video & Thumbnail', {
-            'fields': ('video_file', 'thumbnail', 'duration_seconds')
+            'fields': ('video_file', 'thumbnail')
         }),
     )
 
 
 @admin.register(WhatNormalAudio)
 class WhatNormalAudioAdmin(ModelAdmin):
-    list_display = ('title', 'order', 'subtitle', 'duration_seconds', 'is_active', 'updated_at')
+    list_display = ('title', 'order', 'subtitle', 'is_active', 'updated_at')
     list_editable = ('order', 'is_active')
     list_filter = ('is_active',)
     search_fields = ('title', 'subtitle', 'description')
@@ -38,6 +38,6 @@ class WhatNormalAudioAdmin(ModelAdmin):
             'fields': ('description',)
         }),
         ('Upload Audio & Thumbnail', {
-            'fields': ('audio_file', 'thumbnail', 'duration_seconds')
+            'fields': ('audio_file', 'thumbnail')
         }),
     )

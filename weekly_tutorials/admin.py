@@ -18,7 +18,7 @@ class WeeklyTutorialAdmin(ModelAdmin):
             'fields': ('description', 'what_you_will_learn')
         }),
         ('Media & Video', {
-            'fields': ('video_file', 'video_url', 'thumbnail', 'duration_seconds')
+            'fields': ('video_file', 'video_url', 'thumbnail')
         }),
     )
 

@@ -5,7 +5,7 @@ from .models import EverydayListeningTip
 
 @admin.register(EverydayListeningTip)
 class EverydayListeningTipAdmin(ModelAdmin):
-    list_display = ('title', 'slug', 'order', 'duration_seconds', 'is_active', 'updated_at')
+    list_display = ('title', 'slug', 'order', 'is_active', 'updated_at')
     list_editable = ('order', 'is_active')
     list_filter = ('is_active',)
     search_fields = ('title', 'slug', 'subtitle', 'description')
@@ -19,6 +19,6 @@ class EverydayListeningTipAdmin(ModelAdmin):
             'fields': ('description',)
         }),
         ('Upload Audio & Thumbnail', {
-            'fields': ('audio_file', 'thumbnail', 'duration_seconds')
+            'fields': ('audio_file', 'thumbnail')
         }),
     )
