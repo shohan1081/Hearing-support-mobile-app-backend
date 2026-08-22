@@ -174,7 +174,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     
     # OTP fields
-    otp = models.CharField(max_length=4, null=True, blank=True)
+    otp = models.CharField(max_length=6, null=True, blank=True)
     otp_created_at = models.DateTimeField(null=True, blank=True)
 
     # journal_pin = models.CharField(max_length=128, null=True, blank=True)

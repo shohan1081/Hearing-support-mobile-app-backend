@@ -524,14 +524,14 @@ class VerifyOTPSerializer(serializers.Serializer):
     Serializer for OTP verification
     """
     email = serializers.EmailField()
-    otp = serializers.CharField(max_length=4)
+    otp = serializers.CharField(max_length=6, min_length=6, help_text="6-digit OTP code")
 
 class PasswordResetOTPVerifySerializer(serializers.Serializer):
     """
     Serializer for verifying OTP for password reset
     """
     email = serializers.EmailField()
-    otp = serializers.CharField(max_length=4)
+    otp = serializers.CharField(max_length=6, min_length=6, help_text="6-digit OTP code")
 
 class ResendOTPSerializer(serializers.Serializer):
     """

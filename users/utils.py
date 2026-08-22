@@ -47,9 +47,9 @@ def initialize_firebase():
             print(f"Error initializing Firebase Admin SDK: {str(e)}")
 
 
-def generate_otp(length=4):
+def generate_otp(length=6):
     """
-    Generate a random OTP of a given length
+    Generate a random OTP of a given length (default 6 digits)
     """
     return ''.join([str(secrets.randbelow(10)) for _ in range(length)])
 
