@@ -23,9 +23,14 @@ from .exceptions import (
     EmailAlreadyExistsException,
 )
 from .utils import validate_age
-from .models import HearingAidWearTime, CheckInTutorialFeedback, CheckInTutorial, DailyCheckIn, UserOnboarding
-
-from .models import UserOnboarding, DailyCheckIn, CheckInTutorial, CheckInTutorialFeedback
+from .models import (
+    UserOnboarding,
+    DailyCheckIn,
+    CheckInTutorial,
+    CheckInTutorialFeedback,
+    HearingAidWearTime,
+    Appointment,
+)
 
 User = get_user_model()
 
@@ -717,3 +722,49 @@ class HearingAidWearTimeInputSerializer(serializers.Serializer):
         if hrs == 24 and mins > 0:
             raise serializers.ValidationError("Wear time cannot exceed 24 hours per day.")
         return data
+
+
+class AppointmentCheckInSnippetSerializer(serializers.ModelSerializer):
+    """Snippet of related check-in report for appointment detail view"""
+    class Meta:
+        model = DailyCheckIn
+        fields = [
+            'id',
+            'hearing_status',
+            'why_struggling',
+            'what_went_okay',
+            'what_went_well',
+            'checkin_date',
+        ]
+
+
+class AppointmentSerializer(serializers.ModelSerializer):
+    """
+    Serializer for user care appointments (consultations with audiologist / care team)
+    """
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    is_upcoming = serializers.BooleanField(read_only=True)
+    formatted_date_time = serializers.CharField(read_only=True)
+    related_checkin = AppointmentCheckInSnippetSerializer(source='checkin', read_only=True)
+
+    class Meta:
+        model = Appointment
+        fields = [
+            'id',
+            'title',
+            'specialist_name',
+            'appointment_date',
+            'appointment_time',
+            'duration_minutes',
+            'status',
+            'status_display',
+            'meeting_link',
+            'location',
+            'notes',
+            'is_upcoming',
+            'formatted_date_time',
+            'related_checkin',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']

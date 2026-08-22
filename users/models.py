@@ -605,3 +605,140 @@ class HearingAidWearTime(models.Model):
     @property
     def total_hours(self):
         return round(self.hours + (self.minutes / 60.0), 2)
+
+
+class Appointment(models.Model):
+    """
+    Care team / audiologist appointment scheduled for a user.
+    Can be created manually or triggered when a user reports 'struggling' or 'frustrated' in daily check-in.
+    """
+    STATUS_SCHEDULED = 'scheduled'
+    STATUS_CONFIRMED = 'confirmed'
+    STATUS_COMPLETED = 'completed'
+    STATUS_CANCELLED = 'cancelled'
+    STATUS_RESCHEDULED = 'rescheduled'
+
+    STATUS_CHOICES = [
+        (STATUS_SCHEDULED, _('Scheduled')),
+        (STATUS_CONFIRMED, _('Confirmed')),
+        (STATUS_COMPLETED, _('Completed')),
+        (STATUS_CANCELLED, _('Cancelled')),
+        (STATUS_RESCHEDULED, _('Rescheduled')),
+    ]
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='appointments',
+        verbose_name=_('patient / client'),
+        help_text=_("Patient or client for this appointment")
+    )
+    checkin = models.ForeignKey(
+        DailyCheckIn,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='appointments',
+        verbose_name=_('related check-in'),
+        help_text=_("The daily check-in report that prompted this appointment (e.g. struggling/frustrated)")
+    )
+    title = models.CharField(
+        _('title'),
+        max_length=255,
+        default="Care Team Audiologist Consultation",
+        help_text=_("Appointment title or purpose (e.g. 'Hearing Aid Adjustment Consultation')")
+    )
+    specialist_name = models.CharField(
+        _('specialist name'),
+        max_length=255,
+        default="Care Team Hearing Specialist",
+        help_text=_("Name of the audiologist, clinician, or care specialist")
+    )
+    appointment_date = models.DateField(
+        _('appointment date'),
+        help_text=_("Date of the appointment (YYYY-MM-DD)")
+    )
+    appointment_time = models.TimeField(
+        _('appointment time'),
+        help_text=_("Time of the appointment (HH:MM)")
+    )
+    duration_minutes = models.PositiveIntegerField(
+        _('duration (minutes)'),
+        default=30,
+        help_text=_("Estimated duration in minutes (e.g. 30, 45, 60)")
+    )
+    status = models.CharField(
+        _('status'),
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_SCHEDULED,
+        help_text=_("Current status of the appointment")
+    )
+    meeting_link = models.URLField(
+        _('meeting link'),
+        max_length=500,
+        null=True,
+        blank=True,
+        help_text=_("Video call or telehealth meeting link (e.g. Google Meet, Zoom)")
+    )
+    location = models.CharField(
+        _('location'),
+        max_length=255,
+        default="Online Video Consultation",
+        blank=True,
+        help_text=_("Location or consultation channel")
+    )
+    notes = models.TextField(
+        _('notes for client'),
+        null=True,
+        blank=True,
+        help_text=_("Instructions or guidance visible to the client (e.g. 'Please wear your hearing aids for this call')")
+    )
+    admin_notes = models.TextField(
+        _('internal notes'),
+        null=True,
+        blank=True,
+        help_text=_("Internal clinician or care team notes (not shown to client)")
+    )
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='created_appointments',
+        verbose_name=_('created by admin/specialist'),
+        help_text=_("Admin user who scheduled the appointment")
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('care appointment')
+        verbose_name_plural = _('care appointments')
+        ordering = ['-appointment_date', '-appointment_time', '-created_at']
+
+    def __str__(self):
+        time_str = self.appointment_time.strftime('%I:%M %p') if self.appointment_time else ''
+        return f"{self.user.email} - {self.title} on {self.appointment_date} at {time_str}"
+
+    @property
+    def is_upcoming(self):
+        """Check if appointment is in the future and not cancelled/completed"""
+        if self.status in [self.STATUS_CANCELLED, self.STATUS_COMPLETED]:
+            return False
+        import datetime
+        app_dt = datetime.datetime.combine(self.appointment_date, self.appointment_time)
+        if timezone.is_aware(timezone.now()):
+            current_tz = timezone.get_current_timezone()
+            app_dt = timezone.make_aware(app_dt, current_tz)
+        return app_dt >= timezone.now()
+
+    @property
+    def formatted_date_time(self):
+        """Human-readable date time string (e.g. 'Monday, Aug 25, 2026 at 10:30 AM')"""
+        try:
+            date_str = self.appointment_date.strftime("%A, %b %d, %Y")
+            time_str = self.appointment_time.strftime("%I:%M %p").lstrip('0')
+            return f"{date_str} at {time_str}"
+        except Exception:
+            return f"{self.appointment_date} {self.appointment_time}"

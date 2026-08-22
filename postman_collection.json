@@ -1113,7 +1113,120 @@
                 ""
               ]
             },
-            "description": "Retrieve whether user checked in today, today's check-in response, and recent check-in history."
+            "description": "Retrieve whether user checked in today, today's check-in response, recent check-in history, and any upcoming care team appointment."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Care Appointments (Audiologist Consultations)",
+      "item": [
+        {
+          "name": "Get User Appointments List (All)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/appointments/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "appointments",
+                ""
+              ]
+            },
+            "description": "Retrieve all care appointments scheduled for the authenticated user by the admin / audiologist care team."
+          }
+        },
+        {
+          "name": "Get Upcoming Appointments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/appointments/?status=upcoming",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "appointments",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "upcoming"
+                }
+              ]
+            },
+            "description": "Retrieve all future scheduled / confirmed appointments for the authenticated user."
+          }
+        },
+        {
+          "name": "Get Next Upcoming Appointment (Single / Banner)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/appointments/upcoming/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "appointments",
+                "upcoming",
+                ""
+              ]
+            },
+            "description": "Retrieve the single next upcoming appointment to display on the dashboard or check-in screen."
+          }
+        },
+        {
+          "name": "Get Appointment Details by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/appointments/1/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "appointments",
+                "1",
+                ""
+              ]
+            },
+            "description": "Retrieve detailed information for a specific appointment including specialist name, date, time, meeting link, and notes."
           }
         }
       ]

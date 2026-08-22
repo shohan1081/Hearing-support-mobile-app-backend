@@ -42,6 +42,7 @@ from .serializers import (
     DailyCheckInSerializer,
     CheckInTutorialSerializer,
     CheckInTutorialFeedbackSerializer,
+    AppointmentSerializer,
 )
 from django.db import IntegrityError
 from .utils import (
@@ -51,7 +52,16 @@ from .utils import (
     get_client_ip,
     get_user_agent,
 )
-from .models import UserLoginHistory, AccountDeletionRequest, ProfileDataDeletionRequest, UserOnboarding, DailyCheckIn, CheckInTutorial, CheckInTutorialFeedback
+from .models import (
+    UserLoginHistory,
+    AccountDeletionRequest,
+    ProfileDataDeletionRequest,
+    UserOnboarding,
+    DailyCheckIn,
+    CheckInTutorial,
+    CheckInTutorialFeedback,
+    Appointment,
+)
 from django.shortcuts import render
 
 @csrf_exempt
@@ -1083,15 +1093,23 @@ class DailyCheckInView(APIView):
     """
 
     def get(self, request):
-        """Get user check-in status for today and recent history"""
+        """Get user check-in status for today, recent history, and upcoming care team appointment"""
         user = request.user
         today = timezone.now().date()
 
         today_checkin = DailyCheckIn.objects.filter(user=user, checkin_date=today).first()
         recent_checkins = DailyCheckIn.objects.filter(user=user)[:30]
 
+        # Check for upcoming active care team appointment
+        upcoming_appt = Appointment.objects.filter(
+            user=user,
+            appointment_date__gte=today,
+            status__in=[Appointment.STATUS_SCHEDULED, Appointment.STATUS_CONFIRMED]
+        ).order_by('appointment_date', 'appointment_time').first()
+
         serializer = self.serializer_class(today_checkin) if today_checkin else None
         history_serializer = self.serializer_class(recent_checkins, many=True)
+        upcoming_appt_data = AppointmentSerializer(upcoming_appt).data if upcoming_appt else None
 
         return standard_response(
             success=True,
@@ -1099,7 +1117,9 @@ class DailyCheckInView(APIView):
             data={
                 "has_checked_in_today": today_checkin is not None,
                 "today_checkin": serializer.data if serializer else None,
-                "recent_history": history_serializer.data
+                "recent_history": history_serializer.data,
+                "has_upcoming_appointment": upcoming_appt is not None,
+                "upcoming_appointment": upcoming_appt_data,
             },
             status_code=status.HTTP_200_OK
         )
@@ -1943,5 +1963,127 @@ class ConsistencyReportView(APIView):
                 },
                 status_code=status.HTTP_200_OK
             )
+
+
+class UserAppointmentListView(APIView):
+    """
+    API endpoint for mobile user to fetch list of care appointments
+    
+    GET /api/users/appointments/
+    GET /api/users/appointments/?status=upcoming
+    GET /api/users/appointments/?status=past
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+
+    def get(self, request):
+        user = request.user
+        today = timezone.now().date()
+        status_filter = request.query_params.get('status')
+
+        queryset = Appointment.objects.filter(user=user)
+
+        if status_filter == 'upcoming':
+            queryset = queryset.filter(
+                appointment_date__gte=today,
+                status__in=[Appointment.STATUS_SCHEDULED, Appointment.STATUS_CONFIRMED]
+            ).order_by('appointment_date', 'appointment_time')
+        elif status_filter == 'past':
+            queryset = queryset.filter(
+                models.Q(appointment_date__lt=today) | models.Q(status__in=[Appointment.STATUS_COMPLETED, Appointment.STATUS_CANCELLED])
+            ).order_by('-appointment_date', '-appointment_time')
+        elif status_filter:
+            queryset = queryset.filter(status=status_filter).order_by('-appointment_date', '-appointment_time')
+        else:
+            queryset = queryset.order_by('-appointment_date', '-appointment_time')
+
+        upcoming_count = Appointment.objects.filter(
+            user=user,
+            appointment_date__gte=today,
+            status__in=[Appointment.STATUS_SCHEDULED, Appointment.STATUS_CONFIRMED]
+        ).count()
+
+        serializer = AppointmentSerializer(queryset, many=True, context={'request': request})
+        return standard_response(
+            success=True,
+            message="User care appointments retrieved successfully",
+            data={
+                "upcoming_count": upcoming_count,
+                "total_count": queryset.count(),
+                "appointments": serializer.data
+            },
+            status_code=status.HTTP_200_OK
+        )
+
+
+class UpcomingAppointmentView(APIView):
+    """
+    API endpoint to fetch the single next upcoming care appointment for the active user
+    
+    GET /api/users/appointments/upcoming/
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+
+    def get(self, request):
+        user = request.user
+        today = timezone.now().date()
+
+        upcoming_appt = Appointment.objects.filter(
+            user=user,
+            appointment_date__gte=today,
+            status__in=[Appointment.STATUS_SCHEDULED, Appointment.STATUS_CONFIRMED]
+        ).order_by('appointment_date', 'appointment_time').first()
+
+        if not upcoming_appt:
+            return standard_response(
+                success=True,
+                message="No upcoming appointment scheduled at this time",
+                data={
+                    "has_upcoming_appointment": False,
+                    "appointment": None
+                },
+                status_code=status.HTTP_200_OK
+            )
+
+        serializer = AppointmentSerializer(upcoming_appt, context={'request': request})
+        return standard_response(
+            success=True,
+            message="Upcoming care appointment retrieved successfully",
+            data={
+                "has_upcoming_appointment": True,
+                "appointment": serializer.data
+            },
+            status_code=status.HTTP_200_OK
+        )
+
+
+class UserAppointmentDetailView(APIView):
+    """
+    API endpoint to retrieve details of a specific care appointment
+    
+    GET /api/users/appointments/<id>/
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+
+    def get(self, request, pk):
+        user = request.user
+        try:
+            appointment = Appointment.objects.get(pk=pk, user=user)
+        except Appointment.DoesNotExist:
+            return standard_response(
+                success=False,
+                message="Care appointment not found",
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = AppointmentSerializer(appointment, context={'request': request})
+        return standard_response(
+            success=True,
+            message="Care appointment details retrieved successfully",
+            data=serializer.data,
+            status_code=status.HTTP_200_OK
+        )
 
 

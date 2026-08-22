@@ -3,7 +3,18 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
 from unfold.admin import ModelAdmin
 from unfold.forms import UserChangeForm, UserCreationForm
-from .models import User, UserLoginHistory, AccountDeletionRequest, ProfileDataDeletionRequest, UserOnboarding, DailyCheckIn, CheckInTutorial, CheckInTutorialFeedback, HearingAidWearTime
+from .models import (
+    User,
+    UserLoginHistory,
+    AccountDeletionRequest,
+    ProfileDataDeletionRequest,
+    UserOnboarding,
+    DailyCheckIn,
+    CheckInTutorial,
+    CheckInTutorialFeedback,
+    HearingAidWearTime,
+    Appointment,
+)
 from django.core.mail import send_mail
 from django.urls import reverse
 from django.utils.html import format_html
@@ -36,10 +47,305 @@ class CheckInTutorialAdmin(ModelAdmin):
 
 @admin.register(DailyCheckIn)
 class DailyCheckInAdmin(ModelAdmin):
-    list_display = ('user', 'hearing_status', 'what_went_well', 'what_went_okay', 'why_struggling', 'checkin_date', 'created_at')
+    """
+    Daily Check-in Admin with highlighting for struggling/frustrated users
+    and one-click Care Team Appointment scheduling.
+    """
+    list_display = (
+        'user',
+        'status_badge',
+        'why_struggling_display',
+        'checkin_date',
+        'appointment_action_or_status',
+        'created_at',
+    )
     list_filter = ('hearing_status', 'checkin_date')
     search_fields = ('user__email', 'user__name', 'what_went_well', 'what_went_okay', 'why_struggling')
-    readonly_fields = ('created_at',)
+    readonly_fields = ('created_at', 'appointment_box')
+    ordering = ('-checkin_date', '-created_at')
+
+    fieldsets = (
+        (None, {
+            'fields': ('user', 'hearing_status', 'checkin_date')
+        }),
+        ('Care Consultation / Appointment', {
+            'fields': ('appointment_box',),
+            'description': _("Manage or schedule care appointments for clients experiencing challenges.")
+        }),
+        ('User Response Details', {
+            'fields': ('why_struggling', 'what_went_okay', 'what_went_well', 'notes')
+        }),
+        ('Metadata', {
+            'fields': ('created_at',),
+            'classes': ('collapse',)
+        }),
+    )
+
+    def status_badge(self, obj):
+        status_map = {
+            'struggling': (
+                'background-color: #fee2e2; color: #dc2626; border: 1px solid #f87171;',
+                '⚠️ Struggling'
+            ),
+            'frustrated': (
+                'background-color: #ffedd5; color: #ea580c; border: 1px solid #fb923c;',
+                '🔥 Frustrated'
+            ),
+            'okay': (
+                'background-color: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd;',
+                '🔵 Okay'
+            ),
+            'good': (
+                'background-color: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0;',
+                '🟢 Good'
+            ),
+        }
+        style, label = status_map.get(
+            obj.hearing_status,
+            ('background-color: #f3f4f6; color: #374151;', obj.hearing_status)
+        )
+        return format_html(
+            '<span style="padding: 4px 10px; border-radius: 6px; font-weight: bold; display: inline-block; font-size: 12px; {}">{}</span>',
+            style,
+            label
+        )
+    status_badge.short_description = _("Hearing Status")
+
+    def why_struggling_display(self, obj):
+        if obj.why_struggling:
+            text = obj.why_struggling.strip()
+            if len(text) > 40:
+                return format_html(
+                    '<span title="{}">{}...</span>',
+                    text,
+                    text[:40]
+                )
+            return text
+        elif obj.what_went_okay:
+            return format_html('<span style="color: #6b7280;">Okay: {}</span>', obj.what_went_okay[:30])
+        elif obj.what_went_well:
+            return format_html('<span style="color: #16a34a;">Well: {}</span>', obj.what_went_well[:30])
+        return format_html('<span style="color: #9ca3af;">—</span>')
+    why_struggling_display.short_description = _("Reason / User Response")
+
+    def appointment_action_or_status(self, obj):
+        # Look for existing appointment linked to checkin or upcoming for user
+        appointment = obj.appointments.first()
+        if not appointment:
+            appointment = Appointment.objects.filter(
+                user=obj.user,
+                appointment_date__gte=obj.checkin_date,
+                status__in=[Appointment.STATUS_SCHEDULED, Appointment.STATUS_CONFIRMED]
+            ).first()
+
+        if appointment:
+            change_url = reverse('admin:users_appointment_change', args=[appointment.id])
+            time_formatted = appointment.appointment_time.strftime('%I:%M %p') if appointment.appointment_time else ''
+            return format_html(
+                '<a href="{}" style="background-color: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; padding: 4px 10px; border-radius: 6px; font-weight: 600; text-decoration: none; font-size: 12px; display: inline-block;">'
+                '📅 {} at {} ({})'
+                '</a>',
+                change_url,
+                appointment.appointment_date,
+                time_formatted,
+                appointment.get_status_display()
+            )
+
+        if obj.hearing_status in ['struggling', 'frustrated']:
+            add_url = reverse('admin:users_appointment_add') + f'?user={obj.user.id}&checkin={obj.id}&title=Care+Team+Consultation+-+{obj.hearing_status.capitalize()}'
+            return format_html(
+                '<a href="{}" style="background-color: #16a34a; color: white; padding: 4px 12px; border-radius: 6px; font-weight: bold; text-decoration: none; font-size: 12px; display: inline-block; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">'
+                '➕ Schedule Appointment'
+                '</a>',
+                add_url
+            )
+
+        return format_html('<span style="color: #9ca3af;">—</span>')
+    appointment_action_or_status.short_description = _("Care Team Appointment")
+
+    def appointment_box(self, obj):
+        if not obj or not obj.id:
+            return _("Save check-in first to view appointment actions.")
+
+        appointment = obj.appointments.first()
+        if not appointment:
+            appointment = Appointment.objects.filter(
+                user=obj.user,
+                appointment_date__gte=obj.checkin_date,
+                status__in=[Appointment.STATUS_SCHEDULED, Appointment.STATUS_CONFIRMED]
+            ).first()
+
+        if appointment:
+            change_url = reverse('admin:users_appointment_change', args=[appointment.id])
+            time_formatted = appointment.appointment_time.strftime('%I:%M %p') if appointment.appointment_time else ''
+            return format_html(
+                '<div style="background-color: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; padding: 14px; margin: 4px 0;">'
+                '<h4 style="margin: 0 0 8px 0; color: #166534; font-size: 14px; font-weight: bold;">✅ Appointment Already Scheduled</h4>'
+                '<p style="margin: 0 0 8px 0; color: #374151; font-size: 13px;">'
+                '<strong>Title:</strong> {}<br>'
+                '<strong>Specialist:</strong> {}<br>'
+                '<strong>Date & Time:</strong> {} at {}<br>'
+                '<strong>Status:</strong> {}'
+                '</p>'
+                '<a href="{}" class="button" style="background-color: #1d4ed8; color: white; padding: 6px 14px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block; font-size: 12px;">'
+                '✏️ View / Edit Appointment in Admin'
+                '</a>'
+                '</div>',
+                appointment.title,
+                appointment.specialist_name,
+                appointment.appointment_date,
+                time_formatted,
+                appointment.get_status_display(),
+                change_url
+            )
+
+        if obj.hearing_status in ['struggling', 'frustrated']:
+            add_url = reverse('admin:users_appointment_add') + f'?user={obj.user.id}&checkin={obj.id}&title=Care+Team+Consultation+-+{obj.hearing_status.capitalize()}'
+            return format_html(
+                '<div style="background-color: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 14px; margin: 4px 0;">'
+                '<h4 style="margin: 0 0 8px 0; color: #92400e; font-size: 14px; font-weight: bold;">⚠️ User Reported Struggling / Frustrated</h4>'
+                '<p style="margin: 0 0 10px 0; color: #4b5563; font-size: 13px;">'
+                'This patient reported difficulty with their hearing aids today. Schedule a one-on-one consultation with an audiologist to help them adjust.'
+                '</p>'
+                '<a href="{}" class="button" style="background-color: #16a34a; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block; font-size: 13px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">'
+                '📅 Schedule Appointment with Date & Time for {}'
+                '</a>'
+                '</div>',
+                add_url,
+                obj.user.name or obj.user.email
+            )
+
+        return format_html(
+            '<div style="color: #6b7280; font-size: 13px;">'
+            'No appointment required for standard check-in. You can still '
+            '<a href="{}" style="color: #2563eb; font-weight: 500;">create an appointment manually</a> if needed.'
+            '</div>',
+            reverse('admin:users_appointment_add') + f'?user={obj.user.id}&checkin={obj.id}'
+        )
+    appointment_box.short_description = _("Care Appointment Action")
+
+
+@admin.register(Appointment)
+class AppointmentAdmin(ModelAdmin):
+    """
+    Care team & audiologist appointments management in Unfold Django Admin
+    """
+    list_display = (
+        'user',
+        'title',
+        'appointment_date',
+        'appointment_time',
+        'duration_display',
+        'status_badge',
+        'specialist_name',
+        'meeting_link_display',
+        'related_checkin_display',
+        'created_at',
+    )
+    list_filter = ('status', 'appointment_date', 'specialist_name', 'duration_minutes')
+    search_fields = ('user__email', 'user__name', 'title', 'specialist_name', 'notes', 'admin_notes', 'meeting_link')
+    ordering = ('-appointment_date', '-appointment_time', '-created_at')
+    readonly_fields = ('created_by', 'created_at', 'updated_at')
+
+    fieldsets = (
+        (_('Patient & Context'), {
+            'fields': ('user', 'checkin', 'title')
+        }),
+        (_('Date, Time & Duration'), {
+            'fields': (
+                ('appointment_date', 'appointment_time'),
+                ('duration_minutes', 'status'),
+            )
+        }),
+        (_('Care Specialist & Meeting Details'), {
+            'fields': (
+                'specialist_name',
+                'meeting_link',
+                'location',
+            )
+        }),
+        (_('Instructions & Notes'), {
+            'fields': (
+                'notes',
+                'admin_notes',
+            )
+        }),
+        (_('Audit Metadata'), {
+            'fields': ('created_by', 'created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+    def get_changeform_initial_data(self, request):
+        initial = super().get_changeform_initial_data(request)
+        user_id = request.GET.get('user')
+        checkin_id = request.GET.get('checkin')
+        title = request.GET.get('title')
+
+        if user_id:
+            initial['user'] = user_id
+        if checkin_id:
+            initial['checkin'] = checkin_id
+        if title:
+            initial['title'] = title
+        
+        # Set default appointment date to tomorrow at 10:00 AM
+        from datetime import time, timedelta
+        tomorrow = timezone.now().date() + timedelta(days=1)
+        initial.setdefault('appointment_date', tomorrow)
+        initial.setdefault('appointment_time', time(10, 0))
+        initial.setdefault('specialist_name', 'Dr. Sarah Jenkins, Au.D.')
+        initial.setdefault('meeting_link', 'https://meet.google.com/hearing-support-care')
+        initial.setdefault('notes', 'Please wear your hearing aids for this consultation call so we can adjust the volume and programs together.')
+
+        return initial
+
+    def save_model(self, request, obj, form, change):
+        if not change and not obj.created_by and request.user.is_authenticated:
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
+
+    def duration_display(self, obj):
+        return f"{obj.duration_minutes} mins"
+    duration_display.short_description = _("Duration")
+
+    def status_badge(self, obj):
+        status_styles = {
+            Appointment.STATUS_SCHEDULED: ('background-color: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd;', '🗓️ Scheduled'),
+            Appointment.STATUS_CONFIRMED: ('background-color: #dcfce7; color: #16a34a; border: 1px solid #86efac;', '✅ Confirmed'),
+            Appointment.STATUS_COMPLETED: ('background-color: #f3f4f6; color: #374151; border: 1px solid #d1d5db;', '🏁 Completed'),
+            Appointment.STATUS_CANCELLED: ('background-color: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;', '❌ Cancelled'),
+            Appointment.STATUS_RESCHEDULED: ('background-color: #ffedd5; color: #ea580c; border: 1px solid #fdba74;', '🔄 Rescheduled'),
+        }
+        style, label = status_styles.get(obj.status, ('background-color: #f3f4f6; color: #374151;', obj.status))
+        return format_html(
+            '<span style="padding: 3px 8px; border-radius: 6px; font-weight: bold; display: inline-block; font-size: 12px; {}">{}</span>',
+            style,
+            label
+        )
+    status_badge.short_description = _("Status")
+
+    def meeting_link_display(self, obj):
+        if obj.meeting_link:
+            return format_html(
+                '<a href="{}" target="_blank" style="color: #2563eb; font-weight: 500; text-decoration: underline;">🔗 Join Meeting</a>',
+                obj.meeting_link
+            )
+        return format_html('<span style="color: #9ca3af;">—</span>')
+    meeting_link_display.short_description = _("Meeting Link")
+
+    def related_checkin_display(self, obj):
+        if obj.checkin:
+            change_url = reverse('admin:users_dailycheckin_change', args=[obj.checkin.id])
+            status_text = obj.checkin.hearing_status.capitalize()
+            return format_html(
+                '<a href="{}" style="color: #4b5563; text-decoration: underline;">Check-in on {} ({})</a>',
+                change_url,
+                obj.checkin.checkin_date,
+                status_text
+            )
+        return format_html('<span style="color: #9ca3af;">—</span>')
+    related_checkin_display.short_description = _("Prompted By Check-in")
 
 
 @admin.register(UserOnboarding)

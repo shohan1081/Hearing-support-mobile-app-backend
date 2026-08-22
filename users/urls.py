@@ -34,6 +34,9 @@ from .views import (
     ProgressChartView,
     UserWearGoalView,
     ConsistencyReportView,
+    UserAppointmentListView,
+    UpcomingAppointmentView,
+    UserAppointmentDetailView,
 )
 
 app_name = 'users'
@@ -75,6 +78,11 @@ urlpatterns = [
     path('onboarding/options/', OnboardingOptionsView.as_view(), name='onboarding-options'),
     path('checkin/', DailyCheckInView.as_view(), name='daily-checkin'),
     path('checkin/options/', DailyCheckInOptionsView.as_view(), name='daily-checkin-options'),
+
+    # Care Appointments (Audiologist / Care Team Consultations)
+    path('appointments/', UserAppointmentListView.as_view(), name='user-appointments-list'),
+    path('appointments/upcoming/', UpcomingAppointmentView.as_view(), name='user-upcoming-appointment'),
+    path('appointments/<int:pk>/', UserAppointmentDetailView.as_view(), name='user-appointment-detail'),
 
     # Check-in Tutorials
     path('checkin-tutorials/', CheckInTutorialListView.as_view(), name='checkin-tutorial-list'),

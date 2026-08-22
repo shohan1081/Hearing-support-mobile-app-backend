@@ -182,3 +182,85 @@ class WearTimeAndHearingScoreTestCase(TestCase):
         self.assertGreaterEqual(len(data['data']['bar_chart_data']), 4)
         self.assertIn('average_daily_wear_hours', data['data']['bar_chart_data'][0])
         self.assertIn('daily_goal_hours', data['data']['bar_chart_data'][0])
+
+
+class AppointmentAndStrugglingCheckInTestCase(TestCase):
+    def setUp(self):
+        from .models import Appointment
+        self.Appointment = Appointment
+        self.client = APIClient()
+        self.user = User.objects.create_user(
+            email="patient@example.com",
+            name="Jane Patient",
+            password="TestPassword123!"
+        )
+        refresh = RefreshToken.for_user(self.user)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
+
+    def test_struggling_checkin_and_appointment_flow(self):
+        # 1. User submits struggling daily check-in
+        checkin_url = reverse('users:daily-checkin')
+        checkin_payload = {
+            "hearing_status": "struggling",
+            "why_struggling": "Background noise in restaurant was way too sharp."
+        }
+        res = self.client.post(checkin_url, checkin_payload)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        checkin_id = res.json()['data']['id']
+        checkin_obj = DailyCheckIn.objects.get(id=checkin_id)
+
+        # 2. Check checkin GET initially has no appointment
+        get_res = self.client.get(checkin_url)
+        self.assertEqual(get_res.status_code, status.HTTP_200_OK)
+        self.assertFalse(get_res.json()['data']['has_upcoming_appointment'])
+        self.assertIsNone(get_res.json()['data']['upcoming_appointment'])
+
+        # 3. Admin creates an appointment for this struggling patient
+        import datetime
+        tomorrow = timezone.now().date() + datetime.timedelta(days=1)
+        appt = self.Appointment.objects.create(
+            user=self.user,
+            checkin=checkin_obj,
+            title="Care Team Audiologist Consultation - Struggling",
+            specialist_name="Dr. Sarah Jenkins, Au.D.",
+            appointment_date=tomorrow,
+            appointment_time=datetime.time(10, 30),
+            duration_minutes=45,
+            status=self.Appointment.STATUS_SCHEDULED,
+            meeting_link="https://meet.google.com/test-care-link",
+            location="Online Video Consultation",
+            notes="Please have your hearing aids in your ears during this consultation."
+        )
+
+        # 4. User calls checkin API again and now sees the upcoming appointment
+        get_res_after = self.client.get(checkin_url)
+        self.assertEqual(get_res_after.status_code, status.HTTP_200_OK)
+        self.assertTrue(get_res_after.json()['data']['has_upcoming_appointment'])
+        self.assertIsNotNone(get_res_after.json()['data']['upcoming_appointment'])
+        self.assertEqual(get_res_after.json()['data']['upcoming_appointment']['specialist_name'], "Dr. Sarah Jenkins, Au.D.")
+        self.assertEqual(get_res_after.json()['data']['upcoming_appointment']['meeting_link'], "https://meet.google.com/test-care-link")
+
+        # 5. User fetches appointments list
+        appts_url = reverse('users:user-appointments-list')
+        list_res = self.client.get(appts_url)
+        self.assertEqual(list_res.status_code, status.HTTP_200_OK)
+        list_data = list_res.json()['data']
+        self.assertEqual(list_data['total_count'], 1)
+        self.assertEqual(list_data['upcoming_count'], 1)
+        self.assertEqual(len(list_data['appointments']), 1)
+        self.assertEqual(list_data['appointments'][0]['related_checkin']['id'], checkin_id)
+
+        # 6. User fetches single upcoming appointment
+        upcoming_url = reverse('users:user-upcoming-appointment')
+        upcoming_res = self.client.get(upcoming_url)
+        self.assertEqual(upcoming_res.status_code, status.HTTP_200_OK)
+        self.assertTrue(upcoming_res.json()['data']['has_upcoming_appointment'])
+        self.assertEqual(upcoming_res.json()['data']['appointment']['id'], appt.id)
+
+        # 7. User fetches appointment details
+        detail_url = reverse('users:user-appointment-detail', kwargs={'pk': appt.id})
+        detail_res = self.client.get(detail_url)
+        self.assertEqual(detail_res.status_code, status.HTTP_200_OK)
+        self.assertEqual(detail_res.json()['data']['id'], appt.id)
+        self.assertEqual(detail_res.json()['data']['title'], "Care Team Audiologist Consultation - Struggling")
+        self.assertTrue(detail_res.json()['data']['is_upcoming'])
