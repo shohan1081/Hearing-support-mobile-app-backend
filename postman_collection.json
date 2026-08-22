@@ -815,6 +815,12 @@
           "name": "Get Onboarding Options",
           "request": {
             "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/api/users/onboarding/options/",
               "host": [
@@ -898,6 +904,12 @@
           "name": "Get Daily Check-in Options",
           "request": {
             "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/api/users/checkin/options/",
               "host": [
@@ -1113,6 +1125,12 @@
           "name": "Get All Tutorials",
           "request": {
             "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/api/users/checkin-tutorials/",
               "host": [
@@ -1132,6 +1150,12 @@
           "name": "Get Tutorial Details (Sounds Are Too Loud)",
           "request": {
             "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/api/users/checkin-tutorials/sounds-are-too-loud/",
               "host": [
@@ -1152,6 +1176,12 @@
           "name": "Get Tutorial Details (I Hear But Don't Understand)",
           "request": {
             "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/api/users/checkin-tutorials/i-hear-but-dont-understand/",
               "host": [
@@ -1172,6 +1202,12 @@
           "name": "Get Tutorial Details (Background Noise Is Distracting)",
           "request": {
             "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/api/users/checkin-tutorials/background-noise-is-distracting/",
               "host": [
@@ -1192,6 +1228,12 @@
           "name": "Get Tutorial Details (Restaurants Are Hard)",
           "request": {
             "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/api/users/checkin-tutorials/restaurants-are-hard/",
               "host": [
@@ -1212,6 +1254,12 @@
           "name": "Get Tutorial Details (TV Is Unclear)",
           "request": {
             "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/api/users/checkin-tutorials/tv-is-unclear/",
               "host": [
@@ -1232,6 +1280,12 @@
           "name": "Get Tutorial Details (I Feel Overwhelmed)",
           "request": {
             "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/api/users/checkin-tutorials/i-feel-overwhelmed/",
               "host": [
@@ -1252,6 +1306,12 @@
           "name": "Get Tutorial Details (Other)",
           "request": {
             "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/api/users/checkin-tutorials/other/",
               "host": [

@@ -1032,8 +1032,8 @@ class OnboardingView(APIView):
 
 
 class OnboardingOptionsView(APIView):
-    permission_classes = [AllowAny]
-    authentication_classes = []
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
     """
     API endpoint to fetch available question options for the onboarding questionnaire
     
@@ -1168,8 +1168,8 @@ class DailyCheckInView(APIView):
 
 
 class DailyCheckInOptionsView(APIView):
-    permission_classes = [AllowAny]
-    authentication_classes = []
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
     """
     API endpoint to fetch daily check-in question, available choices, and follow-up flows
     
@@ -1232,8 +1232,8 @@ class DailyCheckInOptionsView(APIView):
 
 
 class CheckInTutorialListView(APIView):
-    permission_classes = [AllowAny]
-    authentication_classes = []
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
     serializer_class = CheckInTutorialSerializer
     """
     API endpoint to list active check-in tutorial videos and instructions
@@ -1258,8 +1258,8 @@ class CheckInTutorialListView(APIView):
 
 
 class CheckInTutorialDetailView(APIView):
-    permission_classes = [AllowAny]
-    authentication_classes = []
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
     serializer_class = CheckInTutorialSerializer
     """
     API endpoint to retrieve single check-in tutorial by slug or ID
