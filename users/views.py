@@ -43,6 +43,8 @@ from .serializers import (
     CheckInTutorialSerializer,
     CheckInTutorialFeedbackSerializer,
     AppointmentSerializer,
+    AppointmentRequestCreateSerializer,
+    AppointmentRequestSerializer,
 )
 from django.db import IntegrityError
 from .utils import (
@@ -61,6 +63,7 @@ from .models import (
     CheckInTutorial,
     CheckInTutorialFeedback,
     Appointment,
+    AppointmentRequest,
 )
 from django.shortcuts import render
 
@@ -2082,6 +2085,97 @@ class UserAppointmentDetailView(APIView):
         return standard_response(
             success=True,
             message="Care appointment details retrieved successfully",
+            data=serializer.data,
+            status_code=status.HTTP_200_OK
+        )
+
+
+class AppointmentRequestCreateView(APIView):
+    """
+    API endpoint for mobile user to submit an appointment / consultation request to the Care Team
+    
+    POST /api/users/appointments/request/
+    Request Body:
+    {
+        "name": "John Doe",
+        "email": "john@example.com",
+        "phone_number": "+1234567890",
+        "description": "Need help with volume adjustments on my left hearing aid",
+        "preferred_date": "2026-08-25", // Optional (YYYY-MM-DD)
+        "preferred_time": "Morning"     // Optional
+    }
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+
+    def post(self, request):
+        serializer = AppointmentRequestCreateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return standard_response(
+                success=False,
+                message="Validation failed",
+                errors=serializer.errors,
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+
+        appointment_request = serializer.save(user=request.user)
+        response_serializer = AppointmentRequestSerializer(appointment_request, context={'request': request})
+
+        return standard_response(
+            success=True,
+            message="Appointment request submitted successfully. Our Care Team will review and schedule your consultation.",
+            data=response_serializer.data,
+            status_code=status.HTTP_201_CREATED
+        )
+
+
+class UserAppointmentRequestListView(APIView):
+    """
+    API endpoint for mobile user to list all their submitted appointment requests
+    
+    GET /api/users/appointments/requests/
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+
+    def get(self, request):
+        requests = AppointmentRequest.objects.filter(user=request.user).order_by('-created_at')
+        serializer = AppointmentRequestSerializer(requests, many=True, context={'request': request})
+
+        return standard_response(
+            success=True,
+            message="User appointment requests retrieved successfully",
+            data={
+                "total_count": requests.count(),
+                "requests": serializer.data
+            },
+            status_code=status.HTTP_200_OK
+        )
+
+
+class UserAppointmentRequestDetailView(APIView):
+    """
+    API endpoint for mobile user to view details of a specific appointment request
+    
+    GET /api/users/appointments/requests/<id>/
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+
+    def get(self, request, pk):
+        try:
+            appointment_request = AppointmentRequest.objects.get(pk=pk, user=request.user)
+        except AppointmentRequest.DoesNotExist:
+            return standard_response(
+                success=False,
+                message="Appointment request not found",
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = AppointmentRequestSerializer(appointment_request, context={'request': request})
+        return standard_response(
+            success=True,
+            message="Appointment request details retrieved successfully",
             data=serializer.data,
             status_code=status.HTTP_200_OK
         )

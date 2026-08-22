@@ -30,6 +30,7 @@ from .models import (
     CheckInTutorialFeedback,
     HearingAidWearTime,
     Appointment,
+    AppointmentRequest,
 )
 
 User = get_user_model()
@@ -768,3 +769,66 @@ class AppointmentSerializer(serializers.ModelSerializer):
             'updated_at',
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class AppointmentRequestCreateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for user requesting a care / audiologist consultation
+    """
+    class Meta:
+        model = AppointmentRequest
+        fields = [
+            'name',
+            'email',
+            'phone_number',
+            'description',
+            'preferred_date',
+            'preferred_time',
+        ]
+
+    def validate_name(self, value):
+        if not value or not value.strip():
+            raise serializers.ValidationError("Name is required.")
+        return value.strip()
+
+    def validate_email(self, value):
+        if not value or not value.strip():
+            raise serializers.ValidationError("Email is required.")
+        return value.strip().lower()
+
+    def validate_phone_number(self, value):
+        if not value or not value.strip():
+            raise serializers.ValidationError("Contact phone number is required.")
+        return value.strip()
+
+    def validate_description(self, value):
+        if not value or not value.strip():
+            raise serializers.ValidationError("Please provide a brief description of your hearing challenge or reason for the appointment.")
+        return value.strip()
+
+
+class AppointmentRequestSerializer(serializers.ModelSerializer):
+    """
+    Serializer for viewing appointment requests submitted by the user
+    """
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    scheduled_appointment = AppointmentSerializer(source='appointment', read_only=True)
+
+    class Meta:
+        model = AppointmentRequest
+        fields = [
+            'id',
+            'name',
+            'email',
+            'phone_number',
+            'description',
+            'preferred_date',
+            'preferred_time',
+            'status',
+            'status_display',
+            'scheduled_appointment',
+            'admin_notes',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = ['id', 'status', 'scheduled_appointment', 'admin_notes', 'created_at', 'updated_at']

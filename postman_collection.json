@@ -1119,8 +1119,95 @@
       ]
     },
     {
-      "name": "Care Appointments (Audiologist Consultations)",
+      "name": "Care Appointments & Consultation Requests",
       "item": [
+        {
+          "name": "Submit Appointment Request (User In-App)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Patient\",\n  \"email\": \"patient@example.com\",\n  \"phone_number\": \"+1 555-0199\",\n  \"description\": \"I am experiencing persistent whistling feedback and high pitch discomfort with my left hearing aid.\",\n  \"preferred_date\": \"2026-08-25\",\n  \"preferred_time\": \"Morning (10:00 AM - 12:00 PM)\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/appointments/request/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "appointments",
+                "request",
+                ""
+              ]
+            },
+            "description": "Submit a request from the app to book an appointment with the Care Team / Audiologist. Admin can review in Django Admin, accept, assign date & time, or cancel."
+          }
+        },
+        {
+          "name": "Get User Appointment Requests List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/appointments/requests/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "appointments",
+                "requests",
+                ""
+              ]
+            },
+            "description": "Retrieve all appointment requests submitted by the authenticated user with current status (pending, accepted, cancelled) and any linked scheduled appointment."
+          }
+        },
+        {
+          "name": "Get Appointment Request Details by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/appointments/requests/1/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "appointments",
+                "requests",
+                "1",
+                ""
+              ]
+            },
+            "description": "Retrieve details of a specific appointment request by its ID."
+          }
+        },
         {
           "name": "Get User Appointments List (All)",
           "request": {

@@ -16,6 +16,7 @@ from .models import (
     CheckInTutorialFeedback,
     HearingAidWearTime,
     Appointment,
+    AppointmentRequest,
 )
 from django.core.mail import send_mail
 from django.urls import reverse
@@ -282,9 +283,27 @@ class AppointmentAdmin(ModelAdmin):
         initial = super().get_changeform_initial_data(request)
         user_param = request.GET.get('user')
         checkin_param = request.GET.get('checkin')
+        request_id_param = request.GET.get('request_id')
         title_param = request.GET.get('title')
 
-        if user_param:
+        # If created from an in-app AppointmentRequest
+        if request_id_param and str(request_id_param).isdigit():
+            req_obj = AppointmentRequest.objects.filter(id=int(request_id_param)).first()
+            if req_obj:
+                initial['user'] = req_obj.user_id
+                initial['title'] = f"Care Consultation - {req_obj.name}"
+                if req_obj.preferred_date:
+                    initial['appointment_date'] = req_obj.preferred_date
+                initial['notes'] = (
+                    f"Patient Request Details:\n"
+                    f"• Name: {req_obj.name}\n"
+                    f"• Email: {req_obj.email}\n"
+                    f"• Phone: {req_obj.phone_number}\n"
+                    f"• Preferred Date/Time: {req_obj.preferred_date or 'Any'} ({req_obj.preferred_time or 'Any'})\n"
+                    f"• Issue: {req_obj.description}"
+                )
+
+        if user_param and not initial.get('user'):
             user_obj = User.objects.filter(id=user_param).first()
             if user_obj:
                 initial['user'] = user_obj.pk
@@ -318,6 +337,15 @@ class AppointmentAdmin(ModelAdmin):
         if not change and not obj.created_by and request.user.is_authenticated:
             obj.created_by = request.user
         super().save_model(request, obj, form, change)
+
+        # If this appointment was created from an AppointmentRequest, link & accept it
+        request_id_param = request.GET.get('request_id')
+        if request_id_param and str(request_id_param).isdigit():
+            req_obj = AppointmentRequest.objects.filter(id=int(request_id_param)).first()
+            if req_obj:
+                req_obj.appointment = obj
+                req_obj.status = AppointmentRequest.STATUS_ACCEPTED
+                req_obj.save()
 
     def duration_display(self, obj):
         return f"{obj.duration_minutes} mins"
@@ -360,6 +388,158 @@ class AppointmentAdmin(ModelAdmin):
             )
         return format_html('<span style="color: #9ca3af;">—</span>')
     related_checkin_display.short_description = _("Prompted By Check-in")
+
+
+@admin.register(AppointmentRequest)
+class AppointmentRequestAdmin(ModelAdmin):
+    """
+    User consultation requests submitted from the mobile app.
+    Admin can review, accept (schedule appointment with date & time), or cancel.
+    """
+    list_display = (
+        'name',
+        'email',
+        'phone_number',
+        'status_badge',
+        'description_preview',
+        'preferred_date',
+        'preferred_time',
+        'action_or_appointment_link',
+        'created_at',
+    )
+    list_filter = ('status', 'preferred_date', 'created_at')
+    search_fields = ('name', 'email', 'phone_number', 'description', 'admin_notes', 'user__email', 'user__name')
+    ordering = ('-created_at',)
+    readonly_fields = ('user', 'action_box', 'created_at', 'updated_at')
+    actions = ['mark_as_cancelled_action', 'mark_as_pending_action']
+
+    fieldsets = (
+        (_('Client Contact & User'), {
+            'fields': ('user', 'name', 'email', 'phone_number')
+        }),
+        (_('Request Details & Preference'), {
+            'fields': ('description', ('preferred_date', 'preferred_time'))
+        }),
+        (_('Status & Care Consultation'), {
+            'fields': ('status', 'appointment', 'action_box')
+        }),
+        (_('Internal Notes'), {
+            'fields': ('admin_notes',)
+        }),
+        (_('Audit Metadata'), {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+    def status_badge(self, obj):
+        status_styles = {
+            AppointmentRequest.STATUS_PENDING: ('background-color: #fef3c7; color: #b45309; border: 1px solid #fde68a;', '🟡 Pending Review'),
+            AppointmentRequest.STATUS_ACCEPTED: ('background-color: #dcfce7; color: #16a34a; border: 1px solid #86efac;', '🟢 Accepted & Scheduled'),
+            AppointmentRequest.STATUS_CANCELLED: ('background-color: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;', '🔴 Cancelled'),
+        }
+        style, label = status_styles.get(obj.status, ('background-color: #f3f4f6; color: #374151;', obj.status))
+        return format_html(
+            '<span style="padding: 4px 10px; border-radius: 6px; font-weight: bold; display: inline-block; font-size: 12px; {}">{}</span>',
+            style,
+            label
+        )
+    status_badge.short_description = _("Request Status")
+
+    def description_preview(self, obj):
+        if obj.description:
+            text = obj.description.strip()
+            if len(text) > 40:
+                return format_html('<span title="{}">{}...</span>', text, text[:40])
+            return text
+        return format_html('<span style="color: #9ca3af;">—</span>')
+    description_preview.short_description = _("Description / Reason")
+
+    def action_or_appointment_link(self, obj):
+        if obj.appointment:
+            change_url = reverse('admin:users_appointment_change', args=[obj.appointment.id])
+            time_formatted = obj.appointment.appointment_time.strftime('%I:%M %p') if obj.appointment.appointment_time else ''
+            return format_html(
+                '<a href="{}" style="background-color: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; padding: 4px 10px; border-radius: 6px; font-weight: 600; text-decoration: none; font-size: 12px; display: inline-block;">'
+                '📅 {} at {} ({})'
+                '</a>',
+                change_url,
+                obj.appointment.appointment_date,
+                time_formatted,
+                obj.appointment.get_status_display()
+            )
+
+        if obj.status == AppointmentRequest.STATUS_PENDING:
+            add_url = reverse('admin:users_appointment_add') + f'?user={obj.user_id}&request_id={obj.id}'
+            return format_html(
+                '<a href="{}" style="background-color: #16a34a; color: white; padding: 4px 12px; border-radius: 6px; font-weight: bold; text-decoration: none; font-size: 12px; display: inline-block; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">'
+                '📅 Accept & Schedule'
+                '</a>',
+                add_url
+            )
+
+        return format_html('<span style="color: #9ca3af;">Cancelled</span>')
+    action_or_appointment_link.short_description = _("Action / Consultation")
+
+    def action_box(self, obj):
+        if not obj or not obj.id:
+            return _("Save request first to view actions.")
+
+        if obj.appointment:
+            change_url = reverse('admin:users_appointment_change', args=[obj.appointment.id])
+            time_formatted = obj.appointment.appointment_time.strftime('%I:%M %p') if obj.appointment.appointment_time else ''
+            return format_html(
+                '<div style="background-color: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; padding: 14px; margin: 4px 0;">'
+                '<h4 style="margin: 0 0 8px 0; color: #166534; font-size: 14px; font-weight: bold;">✅ Scheduled Appointment Linked</h4>'
+                '<p style="margin: 0 0 8px 0; color: #374151; font-size: 13px;">'
+                '<strong>Title:</strong> {}<br>'
+                '<strong>Specialist:</strong> {}<br>'
+                '<strong>Date & Time:</strong> {} at {}<br>'
+                '<strong>Status:</strong> {}'
+                '</p>'
+                '<a href="{}" class="button" style="background-color: #1d4ed8; color: white; padding: 6px 14px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block; font-size: 12px;">'
+                '✏️ View / Edit Consultation in Admin'
+                '</a>'
+                '</div>',
+                obj.appointment.title,
+                obj.appointment.specialist_name,
+                obj.appointment.appointment_date,
+                time_formatted,
+                obj.appointment.get_status_display(),
+                change_url
+            )
+
+        if obj.status == AppointmentRequest.STATUS_PENDING:
+            add_url = reverse('admin:users_appointment_add') + f'?user={obj.user_id}&request_id={obj.id}'
+            return format_html(
+                '<div style="background-color: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 14px; margin: 4px 0;">'
+                '<h4 style="margin: 0 0 8px 0; color: #92400e; font-size: 14px; font-weight: bold;">🟡 Pending Consultation Request</h4>'
+                '<p style="margin: 0 0 10px 0; color: #4b5563; font-size: 13px;">'
+                'Client has requested an appointment. Click below to accept the request and schedule the consultation date & time:'
+                '</p>'
+                '<a href="{}" class="button" style="background-color: #16a34a; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block; font-size: 13px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">'
+                '📅 Accept & Schedule Appointment with Date/Time'
+                '</a>'
+                '</div>',
+                add_url
+            )
+
+        return format_html(
+            '<div style="color: #dc2626; font-size: 13px; background-color: #fef2f2; border: 1px solid #fecaca; padding: 10px; border-radius: 6px;">'
+            'This appointment request has been marked as <strong>Cancelled</strong>.'
+            '</div>'
+        )
+    action_box.short_description = _("Admin Care Action")
+
+    @admin.action(description=_("Mark selected requests as Cancelled"))
+    def mark_as_cancelled_action(self, request, queryset):
+        count = queryset.update(status=AppointmentRequest.STATUS_CANCELLED)
+        self.message_user(request, f"{count} appointment request(s) marked as Cancelled.")
+
+    @admin.action(description=_("Mark selected requests as Pending Review"))
+    def mark_as_pending_action(self, request, queryset):
+        count = queryset.update(status=AppointmentRequest.STATUS_PENDING)
+        self.message_user(request, f"{count} appointment request(s) marked as Pending Review.")
 
 
 @admin.register(UserOnboarding)

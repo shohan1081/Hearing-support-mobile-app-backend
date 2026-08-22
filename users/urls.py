@@ -37,6 +37,9 @@ from .views import (
     UserAppointmentListView,
     UpcomingAppointmentView,
     UserAppointmentDetailView,
+    AppointmentRequestCreateView,
+    UserAppointmentRequestListView,
+    UserAppointmentRequestDetailView,
 )
 
 app_name = 'users'
@@ -79,10 +82,13 @@ urlpatterns = [
     path('checkin/', DailyCheckInView.as_view(), name='daily-checkin'),
     path('checkin/options/', DailyCheckInOptionsView.as_view(), name='daily-checkin-options'),
 
-    # Care Appointments (Audiologist / Care Team Consultations)
+    # Care Appointments & Consultation Requests
     path('appointments/', UserAppointmentListView.as_view(), name='user-appointments-list'),
     path('appointments/upcoming/', UpcomingAppointmentView.as_view(), name='user-upcoming-appointment'),
     path('appointments/<int:pk>/', UserAppointmentDetailView.as_view(), name='user-appointment-detail'),
+    path('appointments/request/', AppointmentRequestCreateView.as_view(), name='appointment-request-create'),
+    path('appointments/requests/', UserAppointmentRequestListView.as_view(), name='user-appointment-requests-list'),
+    path('appointments/requests/<int:pk>/', UserAppointmentRequestDetailView.as_view(), name='user-appointment-request-detail'),
 
     # Check-in Tutorials
     path('checkin-tutorials/', CheckInTutorialListView.as_view(), name='checkin-tutorial-list'),

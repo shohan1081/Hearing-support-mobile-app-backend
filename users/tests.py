@@ -278,3 +278,60 @@ class AppointmentAndStrugglingCheckInTestCase(TestCase):
         admin_add_url = reverse('admin:users_appointment_add') + f'?user={self.user.id}&checkin={checkin.id}&title=Care+Team+Consultation+-+Frustrated'
         response = self.client.get(admin_add_url)
         self.assertEqual(response.status_code, 200)
+
+    def test_user_appointment_request_flow(self):
+        from .models import AppointmentRequest
+        req_url = reverse('users:appointment-request-create')
+        payload = {
+            "name": "Jane Patient",
+            "email": "patient@example.com",
+            "phone_number": "+1 555-0199",
+            "description": "I need help with high frequency adjustments and feedback noise in crowded rooms.",
+            "preferred_date": str(timezone.now().date() + timezone.timedelta(days=2)),
+            "preferred_time": "Morning (10:00 AM - 12:00 PM)"
+        }
+
+        # 1. User submits request
+        response = self.client.post(req_url, payload)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        data = response.json()
+        self.assertTrue(data['success'])
+        self.assertEqual(data['data']['name'], "Jane Patient")
+        self.assertEqual(data['data']['status'], "pending")
+        req_id = data['data']['id']
+
+        # 2. User lists requests
+        list_url = reverse('users:user-appointment-requests-list')
+        list_res = self.client.get(list_url)
+        self.assertEqual(list_res.status_code, status.HTTP_200_OK)
+        self.assertEqual(list_res.json()['data']['total_count'], 1)
+
+        # 3. User views single request
+        detail_url = reverse('users:user-appointment-request-detail', kwargs={'pk': req_id})
+        detail_res = self.client.get(detail_url)
+        self.assertEqual(detail_res.status_code, status.HTTP_200_OK)
+        self.assertEqual(detail_res.json()['data']['id'], req_id)
+
+        # 4. Admin accepts & schedules appointment for this request
+        import datetime
+        appt = self.Appointment.objects.create(
+            user=self.user,
+            title="Care Consultation - Jane Patient",
+            specialist_name="Dr. Sarah Jenkins, Au.D.",
+            appointment_date=timezone.now().date() + datetime.timedelta(days=2),
+            appointment_time=datetime.time(10, 0),
+            duration_minutes=30,
+            status=self.Appointment.STATUS_SCHEDULED,
+            meeting_link="https://meet.google.com/hearing-care-test"
+        )
+        req_obj = AppointmentRequest.objects.get(id=req_id)
+        req_obj.appointment = appt
+        req_obj.status = AppointmentRequest.STATUS_ACCEPTED
+        req_obj.save()
+
+        # 5. User re-checks request details to see scheduled appointment attached
+        detail_res_after = self.client.get(detail_url)
+        self.assertEqual(detail_res_after.status_code, status.HTTP_200_OK)
+        self.assertEqual(detail_res_after.json()['data']['status'], "accepted")
+        self.assertIsNotNone(detail_res_after.json()['data']['scheduled_appointment'])
+        self.assertEqual(detail_res_after.json()['data']['scheduled_appointment']['id'], appt.id)

@@ -742,3 +742,90 @@ class Appointment(models.Model):
             return f"{date_str} at {time_str}"
         except Exception:
             return f"{self.appointment_date} {self.appointment_time}"
+
+
+class AppointmentRequest(models.Model):
+    """
+    User-submitted request for a care / audiologist consultation from the mobile app.
+    Admin reviews the request in the admin panel and can accept (schedule with date & time) or cancel it.
+    """
+    STATUS_PENDING = 'pending'
+    STATUS_ACCEPTED = 'accepted'
+    STATUS_CANCELLED = 'cancelled'
+
+    STATUS_CHOICES = [
+        (STATUS_PENDING, _('Pending Review')),
+        (STATUS_ACCEPTED, _('Accepted & Scheduled')),
+        (STATUS_CANCELLED, _('Cancelled')),
+    ]
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='appointment_requests',
+        verbose_name=_('user / client'),
+        help_text=_("User requesting the appointment")
+    )
+    name = models.CharField(
+        _('client name'),
+        max_length=255,
+        help_text=_("Full name of the client")
+    )
+    email = models.EmailField(
+        _('email address'),
+        help_text=_("Contact email address")
+    )
+    phone_number = models.CharField(
+        _('phone number'),
+        max_length=50,
+        help_text=_("Contact phone number")
+    )
+    description = models.TextField(
+        _('description / reason'),
+        help_text=_("Description of hearing challenge or reason for requesting an appointment")
+    )
+    preferred_date = models.DateField(
+        _('preferred date'),
+        null=True,
+        blank=True,
+        help_text=_("Optional preferred date for the appointment (YYYY-MM-DD)")
+    )
+    preferred_time = models.CharField(
+        _('preferred time'),
+        max_length=100,
+        null=True,
+        blank=True,
+        help_text=_("Optional preferred time of day (e.g. 'Morning', '2:00 PM - 4:00 PM')")
+    )
+    status = models.CharField(
+        _('status'),
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_PENDING,
+        help_text=_("Current review status of the appointment request")
+    )
+    appointment = models.OneToOneField(
+        Appointment,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='origin_request',
+        verbose_name=_('scheduled appointment'),
+        help_text=_("The scheduled appointment created by admin when accepted")
+    )
+    admin_notes = models.TextField(
+        _('admin / care team notes'),
+        null=True,
+        blank=True,
+        help_text=_("Internal clinician or admin notes regarding this request")
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('appointment request')
+        verbose_name_plural = _('appointment requests')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Request by {self.name} ({self.email}) - {self.get_status_display()}"
