@@ -653,11 +653,16 @@ class CheckInTutorialSerializer(serializers.ModelSerializer):
 
 class CheckInTutorialFeedbackSerializer(serializers.ModelSerializer):
     """
-    Serializer for submitting 'This still feels wrong' or 'Other' option feedback on tutorials
+    Serializer for submitting 'This still feels wrong' or 'Other' option feedback
     """
+    tutorial = serializers.PrimaryKeyRelatedField(
+        queryset=CheckInTutorial.objects.all(),
+        required=False,
+        allow_null=True
+    )
+    tutorial_title = serializers.SerializerMethodField()
     issue_duration = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     issue_duration_display = serializers.CharField(source='get_issue_duration_display', read_only=True)
-    tutorial_title = serializers.CharField(source='tutorial.title', read_only=True)
 
     class Meta:
         model = CheckInTutorialFeedback
@@ -672,6 +677,9 @@ class CheckInTutorialFeedbackSerializer(serializers.ModelSerializer):
             'created_at',
         ]
         read_only_fields = ['id', 'created_at']
+
+    def get_tutorial_title(self, obj):
+        return obj.tutorial.title if obj and obj.tutorial else None
 
     def validate_issue_duration(self, value):
         if not value:

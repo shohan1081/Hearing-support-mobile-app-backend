@@ -523,9 +523,11 @@ class CheckInTutorialFeedback(models.Model):
     )
     tutorial = models.ForeignKey(
         CheckInTutorial,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name='feedbacks',
-        help_text=_("Tutorial this feedback belongs to")
+        help_text=_("Optional tutorial this feedback belongs to")
     )
     issue_duration = models.CharField(
         max_length=50,

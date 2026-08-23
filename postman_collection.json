@@ -1660,7 +1660,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"tutorial\": 8,\n  \"other_challenge_text\": \"I struggle hearing whispers and soft voices in quiet rooms.\"\n}"
+              "raw": "{\n  \"other_challenge_text\": \"I struggle hearing whispers and soft voices in quiet rooms.\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/users/checkin-tutorials/feedback/",
@@ -1694,7 +1694,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"tutorial\": 1,\n  \"issue_duration\": \"more_than_1_week\",\n  \"notes\": \"Volume is still painfully loud during high pitched sounds.\"\n}"
+              "raw": "{\n  \"issue_duration\": \"more_than_1_week\",\n  \"notes\": \"Volume is still painfully loud during high pitched sounds.\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/users/checkin-tutorials/feedback/",
