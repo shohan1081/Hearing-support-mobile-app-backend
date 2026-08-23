@@ -47,6 +47,23 @@ class CheckInTutorialAdmin(ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
     list_editable = ('order', 'is_active')
     readonly_fields = ('created_at', 'updated_at', 'video_preview')
+    actions = ['seed_default_tutorials_action']
+
+    def changelist_view(self, request, extra_context=None):
+        """Auto-populate default check-in tutorials if database is empty"""
+        if CheckInTutorial.objects.count() == 0:
+            from django.core.management import call_command
+            try:
+                call_command('seed_checkin_tutorials')
+            except Exception:
+                pass
+        return super().changelist_view(request, extra_context=extra_context)
+
+    @admin.action(description=_("Populate / restore default 7 check-in tutorials"))
+    def seed_default_tutorials_action(self, request, queryset):
+        from django.core.management import call_command
+        call_command('seed_checkin_tutorials')
+        self.message_user(request, "Default check-in tutorials populated and synchronized successfully.")
 
     fieldsets = (
         (_('Tutorial Details'), {
