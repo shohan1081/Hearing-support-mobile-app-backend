@@ -41,11 +41,67 @@ class CheckInTutorialFeedbackAdmin(ModelAdmin):
 
 @admin.register(CheckInTutorial)
 class CheckInTutorialAdmin(ModelAdmin):
-    list_display = ('title', 'category', 'order', 'is_active', 'created_at')
+    list_display = ('title', 'category', 'video_status', 'order', 'is_active', 'created_at')
     list_filter = ('category', 'is_active')
     search_fields = ('title', 'category', 'description')
     prepopulated_fields = {'slug': ('title',)}
     list_editable = ('order', 'is_active')
+    readonly_fields = ('created_at', 'updated_at', 'video_preview')
+
+    fieldsets = (
+        (_('Tutorial Details'), {
+            'fields': (
+                'title',
+                'slug',
+                'category',
+                'description',
+                ('order', 'is_active'),
+            )
+        }),
+        (_('Video & Media Upload'), {
+            'fields': (
+                'video_file',
+                'video_url',
+                'thumbnail',
+                'video_preview',
+            ),
+            'description': _("Upload a video file (MP4/MOV) directly or provide an external video URL. You can also upload a thumbnail image.")
+        }),
+        (_('Metadata'), {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+    def video_status(self, obj):
+        if obj.video_file:
+            return format_html('<span style="color: #16a34a; font-weight: 600;">📁 Uploaded File</span>')
+        elif obj.video_url:
+            return format_html('<span style="color: #2563eb; font-weight: 600;">🔗 External URL</span>')
+        return format_html('<span style="color: #dc2626; font-weight: 500;">❌ No Video</span>')
+    video_status.short_description = _("Video Source")
+
+    def video_preview(self, obj):
+        if not obj or not obj.id:
+            return _("Save tutorial first to view video preview.")
+        stream_url = obj.get_video_stream_url()
+        if stream_url:
+            return format_html(
+                '<div style="margin-top: 5px;">'
+                '<video width="320" height="180" controls style="border-radius: 8px; background: #000;">'
+                '<source src="{}" type="video/mp4">'
+                'Your browser does not support the video tag.'
+                '</video>'
+                '<p style="font-size: 12px; color: #6b7280; margin-top: 4px;">'
+                'Source: <a href="{}" target="_blank" style="color: #2563eb;">{}</a>'
+                '</p>'
+                '</div>',
+                stream_url,
+                stream_url,
+                stream_url[:50] + '...' if len(stream_url) > 50 else stream_url
+            )
+        return format_html('<span style="color: #9ca3af;">No video uploaded yet.</span>')
+    video_preview.short_description = _("Video Preview")
 
 
 @admin.register(DailyCheckIn)
