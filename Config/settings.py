@@ -209,19 +209,29 @@ UNFOLD = {
                         "link": reverse_lazy("admin:users_dailycheckin_changelist"),
                     },
                     {
-                        "title": "Onboarding Survey Data",
-                        "icon": "assignment",
-                        "link": reverse_lazy("admin:users_useronboarding_changelist"),
-                    },
-                    {
-                        "title": "Troubleshooting Tutorials",
-                        "icon": "live_help",
+                        "title": "Check-in Tutorial Videos",
+                        "icon": "smart_display",
                         "link": reverse_lazy("admin:users_checkintutorial_changelist"),
                     },
                     {
-                        "title": "Tutorial Feedback",
+                        "title": "Check-in Tutorial Feedback",
                         "icon": "feedback",
                         "link": reverse_lazy("admin:users_checkintutorialfeedback_changelist"),
+                    },
+                    {
+                        "title": "Care Appointments",
+                        "icon": "event_available",
+                        "link": reverse_lazy("admin:users_appointment_changelist"),
+                    },
+                    {
+                        "title": "Appointment Requests",
+                        "icon": "add_alert",
+                        "link": reverse_lazy("admin:users_appointmentrequest_changelist"),
+                    },
+                    {
+                        "title": "Onboarding Survey Data",
+                        "icon": "assignment",
+                        "link": reverse_lazy("admin:users_useronboarding_changelist"),
                     },
                     {
                         "title": "Login History",

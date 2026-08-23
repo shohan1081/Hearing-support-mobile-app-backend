@@ -488,8 +488,8 @@ class CheckInTutorial(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = _('check-in tutorial')
-        verbose_name_plural = _('check-in tutorials')
+        verbose_name = _('check-in tutorial video')
+        verbose_name_plural = _('check-in tutorial videos')
         ordering = ['order', '-created_at']
 
     def __str__(self):
