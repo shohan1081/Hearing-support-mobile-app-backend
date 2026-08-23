@@ -45,6 +45,8 @@ from .serializers import (
     AppointmentSerializer,
     AppointmentRequestCreateSerializer,
     AppointmentRequestSerializer,
+    IssueReportCreateSerializer,
+    IssueReportSerializer,
 )
 from django.db import IntegrityError
 from .utils import (
@@ -64,6 +66,7 @@ from .models import (
     CheckInTutorialFeedback,
     Appointment,
     AppointmentRequest,
+    IssueReport,
 )
 from django.shortcuts import render
 
@@ -2179,5 +2182,115 @@ class UserAppointmentRequestDetailView(APIView):
             data=serializer.data,
             status_code=status.HTTP_200_OK
         )
+
+
+class IssueCategoryListView(APIView):
+    """
+    API endpoint to list available issue categories for user issue reporting
+    
+    GET /api/users/issues/categories/
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+
+    def get(self, request):
+        categories = [
+            {
+                "value": key,
+                "label": str(label),
+            }
+            for key, label in IssueReport.CATEGORY_CHOICES
+        ]
+        return standard_response(
+            success=True,
+            message="Issue categories retrieved successfully",
+            data={
+                "categories": categories,
+                "total_count": len(categories)
+            },
+            status_code=status.HTTP_200_OK
+        )
+
+
+class IssueReportCreateView(APIView):
+    """
+    API endpoint for mobile users to report issues
+    
+    POST /api/users/issues/report/
+    POST /api/users/report-issue/
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+    serializer_class = IssueReportCreateSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            issue = serializer.save()
+            detail_serializer = IssueReportSerializer(issue, context={'request': request})
+            return standard_response(
+                success=True,
+                message="Issue report submitted successfully. Our care team will review and reply via email.",
+                data=detail_serializer.data,
+                status_code=status.HTTP_201_CREATED
+            )
+        return standard_response(
+            success=False,
+            message="Failed to submit issue report",
+            errors=serializer.errors,
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+
+
+class UserIssueReportListView(APIView):
+    """
+    API endpoint for mobile users to list all their submitted issue reports
+    
+    GET /api/users/issues/
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+
+    def get(self, request):
+        issues = IssueReport.objects.filter(user=request.user).order_by('-created_at')
+        serializer = IssueReportSerializer(issues, many=True, context={'request': request})
+        return standard_response(
+            success=True,
+            message="User issue reports retrieved successfully",
+            data={
+                "total_count": issues.count(),
+                "issues": serializer.data
+            },
+            status_code=status.HTTP_200_OK
+        )
+
+
+class UserIssueReportDetailView(APIView):
+    """
+    API endpoint for mobile users to view a specific issue report and its reply status
+    
+    GET /api/users/issues/<id>/
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+
+    def get(self, request, pk):
+        try:
+            issue = IssueReport.objects.get(pk=pk, user=request.user)
+        except IssueReport.DoesNotExist:
+            return standard_response(
+                success=False,
+                message="Issue report not found",
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = IssueReportSerializer(issue, context={'request': request})
+        return standard_response(
+            success=True,
+            message="Issue report details retrieved successfully",
+            data=serializer.data,
+            status_code=status.HTTP_200_OK
+        )
+
 
 

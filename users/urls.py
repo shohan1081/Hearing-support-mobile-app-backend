@@ -40,6 +40,10 @@ from .views import (
     AppointmentRequestCreateView,
     UserAppointmentRequestListView,
     UserAppointmentRequestDetailView,
+    IssueCategoryListView,
+    IssueReportCreateView,
+    UserIssueReportListView,
+    UserIssueReportDetailView,
 )
 
 app_name = 'users'
@@ -96,6 +100,13 @@ urlpatterns = [
     path('checkin-tutorials/<slug:slug>/', CheckInTutorialDetailView.as_view(), name='checkin-tutorial-detail'),
     path('checkin-tutorial/', CheckInTutorialListView.as_view(), name='checkin-tutorial-alias'),
     path('checkin-tutorial/<slug:slug>/', CheckInTutorialDetailView.as_view(), name='checkin-tutorial-detail-alias'),
+
+    # Issue Reporting & Support
+    path('issues/categories/', IssueCategoryListView.as_view(), name='issue-category-list'),
+    path('issues/report/', IssueReportCreateView.as_view(), name='issue-report-create'),
+    path('report-issue/', IssueReportCreateView.as_view(), name='issue-report-create-alias'),
+    path('issues/', UserIssueReportListView.as_view(), name='user-issue-reports-list'),
+    path('issues/<int:pk>/', UserIssueReportDetailView.as_view(), name='user-issue-report-detail'),
 
     # Account Deletion
     path('delete-account/', account_deletion_request_view, name='delete-account-form'),

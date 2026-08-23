@@ -17,6 +17,7 @@ from .models import (
     HearingAidWearTime,
     Appointment,
     AppointmentRequest,
+    IssueReport,
 )
 from django.core.mail import send_mail
 from django.urls import reverse
@@ -833,3 +834,160 @@ class UserLoginHistoryAdmin(ModelAdmin):
             return obj.user_agent[:50] + '...' if len(obj.user_agent) > 50 else obj.user_agent
         return '-'
     get_user_agent_preview.short_description = 'User Agent'
+
+
+@admin.register(IssueReport)
+class IssueReportAdmin(ModelAdmin):
+    list_display = (
+        'id',
+        'user_display',
+        'user_email',
+        'category_badge',
+        'status_badge',
+        'reply_badge',
+        'created_at',
+    )
+    list_filter = ('category', 'status', 'is_reply_sent', 'created_at')
+    search_fields = (
+        'user__email',
+        'user__name',
+        'user_email',
+        'description',
+        'admin_reply',
+        'device_model_info',
+    )
+    readonly_fields = ('created_at', 'updated_at', 'replied_at', 'replied_by', 'is_reply_sent')
+    actions = [
+        'send_reply_email_action',
+        'mark_in_progress_action',
+        'mark_resolved_action',
+        'mark_closed_action',
+    ]
+
+    fieldsets = (
+        (_('Reported Issue Details'), {
+            'fields': (
+                'user',
+                'user_email',
+                'category',
+                'description',
+                'device_model_info',
+                'created_at',
+            )
+        }),
+        (_('Care Team Email Reply & Status'), {
+            'fields': (
+                'status',
+                'admin_reply',
+                'is_reply_sent',
+                'replied_at',
+                'replied_by',
+            ),
+            'description': _(
+                "Write your reply to the user above. When you save this issue report with a reply, "
+                "an email will automatically be dispatched to the user's email address."
+            )
+        }),
+        (_('System Metadata'), {
+            'fields': ('updated_at',),
+            'classes': ('collapse',)
+        }),
+    )
+
+    def user_display(self, obj):
+        if obj.user:
+            url = reverse('admin:users_user_change', args=[obj.user.id])
+            name = obj.user.get_full_name() or obj.user.email
+            return format_html('<a href="{}" style="font-weight: 600; color: #2563eb;">{}</a>', url, name)
+        return "-"
+    user_display.short_description = _("User")
+
+    def category_badge(self, obj):
+        category_styles = {
+            IssueReport.CATEGORY_SOUND_QUALITY: ('#fef3c7', '#b45309', '🔊 Sound Quality'),
+            IssueReport.CATEGORY_BLUETOOTH_SYNCING: ('#dbeafe', '#1d4ed8', '📶 Bluetooth & Syncing'),
+            IssueReport.CATEGORY_BATTERY_CHARGING: ('#fef9c3', '#a16207', '🔋 Battery & Charging'),
+            IssueReport.CATEGORY_HARDWARE_FIT_COMFORT: ('#ede9fe', '#6d28d9', '👂 Hardware Fit & Comfort'),
+            IssueReport.CATEGORY_OTHER: ('#f3f4f6', '#374151', '⚙️ Other'),
+        }
+        bg, color, text = category_styles.get(obj.category, ('#f3f4f6', '#374151', obj.get_category_display()))
+        return format_html(
+            '<span style="background-color: {}; color: {}; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 11px;">{}</span>',
+            bg, color, text
+        )
+    category_badge.short_description = _("Category")
+
+    def status_badge(self, obj):
+        status_styles = {
+            IssueReport.STATUS_PENDING: ('#fee2e2', '#b91c1c', '⏳ Pending Review'),
+            IssueReport.STATUS_IN_PROGRESS: ('#fef3c7', '#b45309', '🔄 In Progress'),
+            IssueReport.STATUS_RESOLVED: ('#dcfce7', '#15803d', '✅ Resolved / Replied'),
+            IssueReport.STATUS_CLOSED: ('#f3f4f6', '#4b5563', '📁 Closed'),
+        }
+        bg, color, text = status_styles.get(obj.status, ('#f3f4f6', '#374151', obj.get_status_display()))
+        return format_html(
+            '<span style="background-color: {}; color: {}; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 11px;">{}</span>',
+            bg, color, text
+        )
+    status_badge.short_description = _("Status")
+
+    def reply_badge(self, obj):
+        if obj.is_reply_sent:
+            return format_html('<span style="color: #16a34a; font-weight: 600;">✉️ Email Sent</span>')
+        elif obj.admin_reply:
+            return format_html('<span style="color: #d97706; font-weight: 600;">📝 Draft Saved</span>')
+        return format_html('<span style="color: #9ca3af;">⏳ Awaiting Reply</span>')
+    reply_badge.short_description = _("Email Reply")
+
+    def save_model(self, request, obj, form, change):
+        # Auto send email if admin_reply is filled and reply has not been sent, or if admin_reply changed
+        is_reply_new_or_updated = 'admin_reply' in form.changed_data if change else bool(obj.admin_reply)
+        
+        super().save_model(request, obj, form, change)
+
+        if obj.admin_reply and (is_reply_new_or_updated or not obj.is_reply_sent):
+            success, msg = obj.send_reply_email(admin_user=request.user)
+            if success:
+                from django.contrib import messages
+                messages.success(request, f"Care reply email sent successfully to {obj.user_email}!")
+            else:
+                from django.contrib import messages
+                messages.warning(request, f"Issue report saved, but email could not be sent: {msg}")
+
+    @admin.action(description=_("Send / Resend Care Reply Email to selected issues"))
+    def send_reply_email_action(self, request, queryset):
+        success_count = 0
+        fail_count = 0
+        from django.contrib import messages
+        for issue in queryset:
+            if not issue.admin_reply:
+                fail_count += 1
+                continue
+            success, _ = issue.send_reply_email(admin_user=request.user)
+            if success:
+                success_count += 1
+            else:
+                fail_count += 1
+
+        if success_count > 0:
+            messages.success(request, f"Successfully sent reply email to {success_count} user(s).")
+        if fail_count > 0:
+            messages.warning(request, f"{fail_count} issue(s) could not be emailed (empty reply or mail error).")
+
+    @admin.action(description=_("Mark selected issues as In Progress"))
+    def mark_in_progress_action(self, request, queryset):
+        count = queryset.update(status=IssueReport.STATUS_IN_PROGRESS)
+        from django.contrib import messages
+        messages.success(request, f"{count} issue(s) marked as In Progress.")
+
+    @admin.action(description=_("Mark selected issues as Resolved"))
+    def mark_resolved_action(self, request, queryset):
+        count = queryset.update(status=IssueReport.STATUS_RESOLVED)
+        from django.contrib import messages
+        messages.success(request, f"{count} issue(s) marked as Resolved.")
+
+    @admin.action(description=_("Mark selected issues as Closed"))
+    def mark_closed_action(self, request, queryset):
+        count = queryset.update(status=IssueReport.STATUS_CLOSED)
+        from django.contrib import messages
+        messages.success(request, f"{count} issue(s) marked as Closed.")

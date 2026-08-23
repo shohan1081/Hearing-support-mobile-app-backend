@@ -829,3 +829,160 @@ class AppointmentRequest(models.Model):
 
     def __str__(self):
         return f"Request by {self.name} ({self.email}) - {self.get_status_display()}"
+
+
+class IssueReport(models.Model):
+    """
+    User-submitted problem / issue report from the mobile app.
+    Categories: Sound Quality, Bluetooth & Syncing, Battery & Charging, Hardware Fit & Comfort, Other.
+    Admin can review issues in the admin panel and reply directly to the user via email.
+    """
+    CATEGORY_SOUND_QUALITY = 'sound_quality'
+    CATEGORY_BLUETOOTH_SYNCING = 'bluetooth_syncing'
+    CATEGORY_BATTERY_CHARGING = 'battery_charging'
+    CATEGORY_HARDWARE_FIT_COMFORT = 'hardware_fit_comfort'
+    CATEGORY_OTHER = 'other'
+
+    CATEGORY_CHOICES = [
+        (CATEGORY_SOUND_QUALITY, _('Sound Quality')),
+        (CATEGORY_BLUETOOTH_SYNCING, _('Bluetooth & Syncing')),
+        (CATEGORY_BATTERY_CHARGING, _('Battery & Charging')),
+        (CATEGORY_HARDWARE_FIT_COMFORT, _('Hardware Fit & Comfort')),
+        (CATEGORY_OTHER, _('Other')),
+    ]
+
+    STATUS_PENDING = 'pending'
+    STATUS_IN_PROGRESS = 'in_progress'
+    STATUS_RESOLVED = 'resolved'
+    STATUS_CLOSED = 'closed'
+
+    STATUS_CHOICES = [
+        (STATUS_PENDING, _('Pending Review')),
+        (STATUS_IN_PROGRESS, _('In Progress')),
+        (STATUS_RESOLVED, _('Resolved / Replied')),
+        (STATUS_CLOSED, _('Closed')),
+    ]
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='issue_reports',
+        verbose_name=_('user / client'),
+        help_text=_("User reporting the issue")
+    )
+    user_email = models.EmailField(
+        _('contact email'),
+        help_text=_("Email address where admin reply will be delivered")
+    )
+    category = models.CharField(
+        _('issue category'),
+        max_length=50,
+        choices=CATEGORY_CHOICES,
+        help_text=_("Category: Sound Quality, Bluetooth & Syncing, Battery & Charging, Hardware Fit & Comfort, Other")
+    )
+    description = models.TextField(
+        _('issue description'),
+        help_text=_("Detailed description of the issue faced by the user")
+    )
+    device_model_info = models.CharField(
+        _('device / OS info'),
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text=_("Optional device model or OS details (e.g. iPhone 15 / Hearing Aid Model X)")
+    )
+    status = models.CharField(
+        _('status'),
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_PENDING,
+        help_text=_("Current resolution status of this issue")
+    )
+    admin_reply = models.TextField(
+        _('admin reply / email response'),
+        blank=True,
+        null=True,
+        help_text=_("Care team / admin response message that will be emailed to the user")
+    )
+    is_reply_sent = models.BooleanField(
+        _('reply email sent'),
+        default=False,
+        help_text=_("Whether the admin reply has been dispatched via email to the user")
+    )
+    replied_at = models.DateTimeField(
+        _('replied at'),
+        null=True,
+        blank=True,
+        help_text=_("Timestamp when the email reply was sent")
+    )
+    replied_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='replied_issues',
+        verbose_name=_('replied by admin'),
+        help_text=_("Admin user who replied to the issue")
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('issue report')
+        verbose_name_plural = _('issue reports')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Issue #{self.id} - {self.get_category_display()} ({self.user_email}) - {self.get_status_display()}"
+
+    def send_reply_email(self, admin_user=None):
+        """Send admin reply to user via email and update reply metadata"""
+        if not self.admin_reply:
+            return False, "Admin reply content is empty."
+
+        recipient_email = self.user_email or (self.user.email if self.user else None)
+        if not recipient_email:
+            return False, "No valid recipient email address found."
+
+        subject = f"Care Team Support: Response to Issue #{self.id} ({self.get_category_display()})"
+        user_name = self.user.get_full_name() if self.user and self.user.get_full_name() else "Valued Member"
+
+        message = (
+            f"Hello {user_name},\n\n"
+            f"Thank you for reaching out to our Care Team. We have reviewed your reported issue regarding '{self.get_category_display()}'.\n\n"
+            f"--------------------------------------------------\n"
+            f"YOUR REPORTED ISSUE:\n"
+            f"{self.description}\n"
+            f"--------------------------------------------------\n\n"
+            f"CARE TEAM RESPONSE:\n"
+            f"{self.admin_reply}\n\n"
+            f"--------------------------------------------------\n"
+            f"If you need additional assistance or wish to speak directly with an audiologist, you can also request a Care Consultation directly in the Hearing App.\n\n"
+            f"Warm regards,\n"
+            f"Hearing Support Care Team"
+        )
+
+        from django.core.mail import send_mail
+        from django.conf import settings
+        from django.utils import timezone
+
+        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'support@hearingapp.com')
+
+        try:
+            send_mail(
+                subject=subject,
+                message=message,
+                from_email=from_email,
+                recipient_list=[recipient_email],
+                fail_silently=False,
+            )
+            self.is_reply_sent = True
+            self.replied_at = timezone.now()
+            if admin_user and admin_user.is_authenticated:
+                self.replied_by = admin_user
+            if self.status == self.STATUS_PENDING:
+                self.status = self.STATUS_RESOLVED
+            self.save(update_fields=['is_reply_sent', 'replied_at', 'replied_by', 'status', 'updated_at'])
+            return True, f"Email successfully sent to {recipient_email}"
+        except Exception as e:
+            return False, f"Failed to send email: {str(e)}"

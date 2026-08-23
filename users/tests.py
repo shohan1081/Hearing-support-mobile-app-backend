@@ -335,3 +335,103 @@ class AppointmentAndStrugglingCheckInTestCase(TestCase):
         self.assertEqual(detail_res_after.json()['data']['status'], "accepted")
         self.assertIsNotNone(detail_res_after.json()['data']['scheduled_appointment'])
         self.assertEqual(detail_res_after.json()['data']['scheduled_appointment']['id'], appt.id)
+
+
+class IssueReportingAndAdminEmailReplyTestCase(TestCase):
+    def setUp(self):
+        from django.core import mail
+        from users.models import IssueReport
+        self.mail = mail
+        self.IssueReport = IssueReport
+        self.client = APIClient()
+        self.user = User.objects.create_user(
+            email='issueuser@example.com',
+            password='Password123!',
+            name='Test Reporter'
+        )
+        self.admin_user = User.objects.create_superuser(
+            email='admincare@example.com',
+            password='AdminPassword123!',
+            name='Admin Clinician'
+        )
+        self.token = str(RefreshToken.for_user(self.user).access_token)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.token}')
+
+    def test_issue_categories_endpoint(self):
+        url = reverse('users:issue-category-list')
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        data = res.json()
+        self.assertTrue(data['success'])
+        self.assertEqual(data['data']['total_count'], 5)
+        category_values = [c['value'] for c in data['data']['categories']]
+        self.assertIn('sound_quality', category_values)
+        self.assertIn('bluetooth_syncing', category_values)
+        self.assertIn('battery_charging', category_values)
+        self.assertIn('hardware_fit_comfort', category_values)
+        self.assertIn('other', category_values)
+
+    def test_submit_issue_report_success(self):
+        url = reverse('users:issue-report-create')
+        payload = {
+            "category": "sound_quality",
+            "description": "Right hearing aid produces whistling static in loud rooms.",
+            "device_model_info": "Hearing Aid Pro 2026 - iOS 18"
+        }
+        res = self.client.post(url, payload)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        data = res.json()
+        self.assertTrue(data['success'])
+        self.assertEqual(data['data']['category'], "sound_quality")
+        self.assertEqual(data['data']['user_email'], "issueuser@example.com")
+        self.assertEqual(data['data']['status'], "pending")
+        self.assertFalse(data['data']['is_reply_sent'])
+        issue_id = data['data']['id']
+
+        # User list
+        list_url = reverse('users:user-issue-reports-list')
+        list_res = self.client.get(list_url)
+        self.assertEqual(list_res.status_code, status.HTTP_200_OK)
+        self.assertEqual(list_res.json()['data']['total_count'], 1)
+
+        # User detail
+        detail_url = reverse('users:user-issue-report-detail', kwargs={'pk': issue_id})
+        detail_res = self.client.get(detail_url)
+        self.assertEqual(detail_res.status_code, status.HTTP_200_OK)
+        self.assertEqual(detail_res.json()['data']['id'], issue_id)
+
+    def test_submit_issue_report_invalid_category(self):
+        url = reverse('users:issue-report-create')
+        payload = {
+            "category": "invalid_category_xyz",
+            "description": "Testing invalid category"
+        }
+        res = self.client.post(url, payload)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(res.json()['success'])
+
+    def test_admin_email_reply_dispatch(self):
+        issue = self.IssueReport.objects.create(
+            user=self.user,
+            user_email="issueuser@example.com",
+            category=self.IssueReport.CATEGORY_BLUETOOTH_SYNCING,
+            description="Bluetooth disconnects randomly when walking outside."
+        )
+
+        self.mail.outbox.clear()
+        issue.admin_reply = "Please try clearing the Bluetooth cache in the Hearing app settings and re-pairing the hearing aids."
+        success, msg = issue.send_reply_email(admin_user=self.admin_user)
+
+        self.assertTrue(success)
+        self.assertTrue(issue.is_reply_sent)
+        self.assertEqual(issue.status, self.IssueReport.STATUS_RESOLVED)
+        self.assertIsNotNone(issue.replied_at)
+        self.assertEqual(issue.replied_by, self.admin_user)
+
+        # Check that email was sent to user outbox
+        self.assertEqual(len(self.mail.outbox), 1)
+        sent_mail = self.mail.outbox[0]
+        self.assertIn("issueuser@example.com", sent_mail.to)
+        self.assertIn("Bluetooth & Syncing", sent_mail.subject)
+        self.assertIn("Please try clearing the Bluetooth cache", sent_mail.body)
+

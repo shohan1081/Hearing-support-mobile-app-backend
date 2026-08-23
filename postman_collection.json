@@ -1319,6 +1319,122 @@
       ]
     },
     {
+      "name": "Issue Reporting & Care Support",
+      "item": [
+        {
+          "name": "Get Issue Categories",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/issues/categories/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "issues",
+                "categories",
+                ""
+              ]
+            },
+            "description": "Fetch the list of selectable issue categories: Sound Quality, Bluetooth & Syncing, Battery & Charging, Hardware Fit & Comfort, Other."
+          }
+        },
+        {
+          "name": "Submit Issue Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category\": \"sound_quality\",\n  \"description\": \"The right hearing aid has a high-pitched whistling sound when I am in noisy environments.\",\n  \"user_email\": \"user@example.com\",\n  \"device_model_info\": \"Hearing Aid Pro 2026 / iPhone 15 iOS 18\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/issues/report/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "issues",
+                "report",
+                ""
+              ]
+            },
+            "description": "Submit a new problem report. Categories: sound_quality, bluetooth_syncing, battery_charging, hardware_fit_comfort, other. Admin will review and reply via email."
+          }
+        },
+        {
+          "name": "Get User Issue Reports List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/issues/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "issues",
+                ""
+              ]
+            },
+            "description": "List all issues submitted by the authenticated user with resolution status and admin replies."
+          }
+        },
+        {
+          "name": "Get Issue Report Details by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/issues/1/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "issues",
+                "1",
+                ""
+              ]
+            },
+            "description": "Retrieve details of a specific issue report, including care team admin reply and email dispatch status."
+          }
+        }
+      ]
+    },
+    {
       "name": "Check-in Tutorials",
       "item": [
         {

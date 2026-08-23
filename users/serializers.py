@@ -31,6 +31,7 @@ from .models import (
     HearingAidWearTime,
     Appointment,
     AppointmentRequest,
+    IssueReport,
 )
 
 User = get_user_model()
@@ -832,3 +833,88 @@ class AppointmentRequestSerializer(serializers.ModelSerializer):
             'updated_at',
         ]
         read_only_fields = ['id', 'status', 'scheduled_appointment', 'admin_notes', 'created_at', 'updated_at']
+
+
+class IssueReportCreateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for creating user issue reports from the mobile app
+    """
+    category = serializers.ChoiceField(
+        choices=IssueReport.CATEGORY_CHOICES,
+        error_messages={
+            'invalid_choice': "Invalid category. Must be one of: sound_quality, bluetooth_syncing, battery_charging, hardware_fit_comfort, other."
+        }
+    )
+    user_email = serializers.EmailField(
+        required=False,
+        allow_blank=True,
+        help_text="Optional contact email. Defaults to logged-in user's email if not provided."
+    )
+
+    class Meta:
+        model = IssueReport
+        fields = [
+            'id',
+            'category',
+            'description',
+            'user_email',
+            'device_model_info',
+            'created_at',
+        ]
+        read_only_fields = ['id', 'created_at']
+
+    def validate_description(self, value):
+        if not value or not value.strip():
+            raise serializers.ValidationError("Issue description is required.")
+        return value.strip()
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        user = request.user if request and request.user.is_authenticated else None
+        
+        user_email = validated_data.get('user_email')
+        if not user_email or not user_email.strip():
+            user_email = user.email if user else ""
+        else:
+            user_email = user_email.strip().lower()
+
+        validated_data['user'] = user
+        validated_data['user_email'] = user_email
+        return super().create(validated_data)
+
+
+class IssueReportSerializer(serializers.ModelSerializer):
+    """
+    Serializer for viewing issue reports and admin replies
+    """
+    category_display = serializers.CharField(source='get_category_display', read_only=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+
+    class Meta:
+        model = IssueReport
+        fields = [
+            'id',
+            'category',
+            'category_display',
+            'description',
+            'user_email',
+            'device_model_info',
+            'status',
+            'status_display',
+            'admin_reply',
+            'is_reply_sent',
+            'replied_at',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = [
+            'id',
+            'category_display',
+            'status',
+            'status_display',
+            'admin_reply',
+            'is_reply_sent',
+            'replied_at',
+            'created_at',
+            'updated_at',
+        ]

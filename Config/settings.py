@@ -229,6 +229,11 @@ UNFOLD = {
                         "link": reverse_lazy("admin:users_appointmentrequest_changelist"),
                     },
                     {
+                        "title": "User Issue Reports",
+                        "icon": "report_problem",
+                        "link": reverse_lazy("admin:users_issuereport_changelist"),
+                    },
+                    {
                         "title": "Onboarding Survey Data",
                         "icon": "assignment",
                         "link": reverse_lazy("admin:users_useronboarding_changelist"),
