@@ -837,18 +837,15 @@ class AppointmentRequestSerializer(serializers.ModelSerializer):
 
 class IssueReportCreateSerializer(serializers.ModelSerializer):
     """
-    Serializer for creating user issue reports from the mobile app
+    Serializer for creating user issue reports from the mobile app.
+    Only requires category and description in the request body.
+    User and user_email are automatically populated from the authenticated user.
     """
     category = serializers.ChoiceField(
         choices=IssueReport.CATEGORY_CHOICES,
         error_messages={
             'invalid_choice': "Invalid category. Must be one of: sound_quality, bluetooth_syncing, battery_charging, hardware_fit_comfort, other."
         }
-    )
-    user_email = serializers.EmailField(
-        required=False,
-        allow_blank=True,
-        help_text="Optional contact email. Defaults to logged-in user's email if not provided."
     )
 
     class Meta:
@@ -857,8 +854,6 @@ class IssueReportCreateSerializer(serializers.ModelSerializer):
             'id',
             'category',
             'description',
-            'user_email',
-            'device_model_info',
             'created_at',
         ]
         read_only_fields = ['id', 'created_at']
@@ -871,12 +866,7 @@ class IssueReportCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         request = self.context.get('request')
         user = request.user if request and request.user.is_authenticated else None
-        
-        user_email = validated_data.get('user_email')
-        if not user_email or not user_email.strip():
-            user_email = user.email if user else ""
-        else:
-            user_email = user_email.strip().lower()
+        user_email = user.email if user and user.email else ""
 
         validated_data['user'] = user
         validated_data['user_email'] = user_email

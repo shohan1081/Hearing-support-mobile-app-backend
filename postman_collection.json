@@ -1363,7 +1363,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"category\": \"sound_quality\",\n  \"description\": \"The right hearing aid has a high-pitched whistling sound when I am in noisy environments.\",\n  \"user_email\": \"user@example.com\",\n  \"device_model_info\": \"Hearing Aid Pro 2026 / iPhone 15 iOS 18\"\n}"
+              "raw": "{\n  \"category\": \"sound_quality\",\n  \"description\": \"The right hearing aid has a high-pitched whistling sound when I am in noisy environments.\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/users/issues/report/",

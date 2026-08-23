@@ -375,8 +375,7 @@ class IssueReportingAndAdminEmailReplyTestCase(TestCase):
         url = reverse('users:issue-report-create')
         payload = {
             "category": "sound_quality",
-            "description": "Right hearing aid produces whistling static in loud rooms.",
-            "device_model_info": "Hearing Aid Pro 2026 - iOS 18"
+            "description": "Right hearing aid produces whistling static in loud rooms."
         }
         res = self.client.post(url, payload)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
