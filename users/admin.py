@@ -840,13 +840,15 @@ class UserLoginHistoryAdmin(ModelAdmin):
 class IssueReportAdmin(ModelAdmin):
     list_display = (
         'id',
-        'user_display',
-        'user_email',
         'category_badge',
+        'issue_preview',
         'status_badge',
         'reply_badge',
+        'user_name_display',
+        'user_email',
         'created_at',
     )
+    list_display_links = ('id', 'category_badge', 'issue_preview')
     list_filter = ('category', 'status', 'is_reply_sent', 'created_at')
     search_fields = (
         'user__email',
@@ -854,9 +856,17 @@ class IssueReportAdmin(ModelAdmin):
         'user_email',
         'description',
         'admin_reply',
-        'device_model_info',
     )
-    readonly_fields = ('created_at', 'updated_at', 'replied_at', 'replied_by', 'is_reply_sent')
+    readonly_fields = (
+        'client_info_display',
+        'category_badge',
+        'description',
+        'created_at',
+        'updated_at',
+        'replied_at',
+        'replied_by',
+        'is_reply_sent',
+    )
     actions = [
         'send_reply_email_action',
         'mark_in_progress_action',
@@ -867,13 +877,12 @@ class IssueReportAdmin(ModelAdmin):
     fieldsets = (
         (_('Reported Issue Details'), {
             'fields': (
-                'user',
-                'user_email',
-                'category',
+                'client_info_display',
+                'category_badge',
                 'description',
-                'device_model_info',
                 'created_at',
-            )
+            ),
+            'description': _("Details of the issue reported by the client.")
         }),
         (_('Care Team Email Reply & Status'), {
             'fields': (
@@ -884,8 +893,8 @@ class IssueReportAdmin(ModelAdmin):
                 'replied_by',
             ),
             'description': _(
-                "Write your reply to the user above. When you save this issue report with a reply, "
-                "an email will automatically be dispatched to the user's email address."
+                "Write your reply to the user above. When you save this issue report, "
+                "an email will automatically be dispatched directly to the user's email address."
             )
         }),
         (_('System Metadata'), {
@@ -894,13 +903,33 @@ class IssueReportAdmin(ModelAdmin):
         }),
     )
 
-    def user_display(self, obj):
+    def client_info_display(self, obj):
+        if not obj or not obj.user:
+            return "-"
+        name = obj.user.get_full_name() or "N/A"
+        email = obj.user_email or obj.user.email
+        phone = obj.user.phone_number if hasattr(obj.user, 'phone_number') and obj.user.phone_number else "N/A"
+        return format_html(
+            '<div style="background: #f8fafc; padding: 12px 16px; border-radius: 8px; border: 1px solid #e2e8f0; max-width: 500px;">'
+            '<p style="margin: 0; font-weight: 600; font-size: 14px; color: #1e293b;">👤 Client Name: <span style="color: #2563eb;">{}</span></p>'
+            '<p style="margin: 4px 0 0 0; font-size: 13px; color: #475569;">✉️ Contact Email: <span style="font-weight: 500; color: #0f172a;">{}</span></p>'
+            '<p style="margin: 4px 0 0 0; font-size: 13px; color: #475569;">📞 Phone: <span style="font-weight: 500; color: #0f172a;">{}</span></p>'
+            '</div>',
+            name, email, phone
+        )
+    client_info_display.short_description = _("Client Contact Info")
+
+    def user_name_display(self, obj):
         if obj.user:
-            url = reverse('admin:users_user_change', args=[obj.user.id])
-            name = obj.user.get_full_name() or obj.user.email
-            return format_html('<a href="{}" style="font-weight: 600; color: #2563eb;">{}</a>', url, name)
+            return obj.user.get_full_name() or obj.user.email
         return "-"
-    user_display.short_description = _("User")
+    user_name_display.short_description = _("User")
+
+    def issue_preview(self, obj):
+        if obj.description:
+            return obj.description[:80] + '...' if len(obj.description) > 80 else obj.description
+        return "-"
+    issue_preview.short_description = _("Issue Description")
 
     def category_badge(self, obj):
         category_styles = {
@@ -912,7 +941,7 @@ class IssueReportAdmin(ModelAdmin):
         }
         bg, color, text = category_styles.get(obj.category, ('#f3f4f6', '#374151', obj.get_category_display()))
         return format_html(
-            '<span style="background-color: {}; color: {}; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 11px;">{}</span>',
+            '<span style="background-color: {}; color: {}; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 12px; display: inline-block;">{}</span>',
             bg, color, text
         )
     category_badge.short_description = _("Category")
@@ -926,7 +955,7 @@ class IssueReportAdmin(ModelAdmin):
         }
         bg, color, text = status_styles.get(obj.status, ('#f3f4f6', '#374151', obj.get_status_display()))
         return format_html(
-            '<span style="background-color: {}; color: {}; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-size: 11px;">{}</span>',
+            '<span style="background-color: {}; color: {}; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 12px; display: inline-block;">{}</span>',
             bg, color, text
         )
     status_badge.short_description = _("Status")
