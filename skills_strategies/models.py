@@ -4,23 +4,40 @@ from django.utils.translation import gettext_lazy as _
 
 class EverydayListeningTip(models.Model):
     """
-    Admin-managed audio strategy & tip for Skills & Strategies:
-    - Start the conversation
-    - Manage group conversations
-    - Improve understanding
-    - Handle misunderstandings
-    - Build stronger connections
+    Audio strategy and tip model for Skills & Strategies.
+    Categories:
+    1. Everyday Listening Tips (5 audios)
+    2. Communication Strategies (5 audios)
+    3. Building Confidence (5 audios)
     """
+    CATEGORY_EVERYDAY_LISTENING = 'everyday_listening_tips'
+    CATEGORY_COMMUNICATION_STRATEGIES = 'communication_strategies'
+    CATEGORY_BUILDING_CONFIDENCE = 'building_confidence'
+
+    CATEGORY_CHOICES = (
+        (CATEGORY_EVERYDAY_LISTENING, _('Everyday Listening Tips')),
+        (CATEGORY_COMMUNICATION_STRATEGIES, _('Communication Strategies')),
+        (CATEGORY_BUILDING_CONFIDENCE, _('Building Confidence')),
+    )
+
+    category = models.CharField(
+        _('category'),
+        max_length=50,
+        choices=CATEGORY_CHOICES,
+        default=CATEGORY_EVERYDAY_LISTENING,
+        db_index=True,
+        help_text=_("Main section category")
+    )
     slug = models.SlugField(
         _('slug'),
         max_length=100,
         unique=True,
-        help_text=_("Unique identifier slug e.g. 'start-the-conversation', 'manage-group-conversations'")
+        help_text=_("Unique identifier slug e.g. 'reduce-background-noise', 'start-the-conversation'")
     )
     title = models.CharField(
         _('title'),
         max_length=255,
-        help_text=_("Section title e.g. 'Start the conversation', 'Improve understanding'")
+        help_text=_("Section title e.g. 'Reduce Background Noise', 'Start the conversation'")
     )
     subtitle = models.CharField(
         _('subtitle'),
@@ -31,7 +48,7 @@ class EverydayListeningTip(models.Model):
     description = models.TextField(
         _('description'),
         blank=True,
-        help_text=_("Full explanation, practical conversational tips, and listening guidance")
+        help_text=_("Full explanation, practical tips, and guidance")
     )
     audio_file = models.FileField(
         _('upload audio file'),
@@ -76,10 +93,10 @@ class EverydayListeningTip(models.Model):
     class Meta:
         verbose_name = _('skills & strategy audio')
         verbose_name_plural = _('skills & strategy audios')
-        ordering = ['order', 'created_at']
+        ordering = ['category', 'order', 'created_at']
 
     def __str__(self):
-        return f"{self.order}. {self.title}"
+        return f"[{self.get_category_display()}] {self.order}. {self.title}"
 
     @property
     def duration_formatted(self):
@@ -113,3 +130,24 @@ class EverydayListeningTip(models.Model):
             except Exception:
                 return str(self.thumbnail)
         return ""
+
+
+class EverydayListeningTipProxy(EverydayListeningTip):
+    class Meta:
+        proxy = True
+        verbose_name = _('everyday listening tip audio')
+        verbose_name_plural = _('1. Everyday Listening Tips (5 Audios)')
+
+
+class CommunicationStrategyProxy(EverydayListeningTip):
+    class Meta:
+        proxy = True
+        verbose_name = _('communication strategy audio')
+        verbose_name_plural = _('2. Communication Strategies (5 Audios)')
+
+
+class BuildingConfidenceTipProxy(EverydayListeningTip):
+    class Meta:
+        proxy = True
+        verbose_name = _('building confidence audio')
+        verbose_name_plural = _('3. Building Confidence (5 Audios)')

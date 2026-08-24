@@ -1,14 +1,18 @@
-from django.contrib import admin
+﻿from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from unfold.admin import ModelAdmin
 
-from .models import EverydayListeningTip
+from .models import (
+    EverydayListeningTip,
+    EverydayListeningTipProxy,
+    CommunicationStrategyProxy,
+    BuildingConfidenceTipProxy,
+)
 from .utils import seed_default_everyday_listening_tips
 
 
-@admin.register(EverydayListeningTip)
-class EverydayListeningTipAdmin(ModelAdmin):
+class BaseSkillStrategyAdmin(ModelAdmin):
     list_display = (
         'order',
         'title',
@@ -27,17 +31,17 @@ class EverydayListeningTipAdmin(ModelAdmin):
     readonly_fields = ('audio_player_preview_large', 'created_at', 'updated_at')
 
     fieldsets = (
-        (_('Section Title & Identification'), {
-            'fields': ('title', 'slug', 'subtitle', 'order', 'is_active')
+        (_('Section Title & Category'), {
+            'fields': ('category', 'title', 'slug', 'subtitle', 'order', 'is_active')
         }),
-        (_('Conversational Strategy Guidance & Text'), {
+        (_('Strategy Guidance & Educational Content'), {
             'fields': ('description',)
         }),
-        (_('Audio Upload & Stream Settings'), {
+        (_('Audio Upload & Player Settings'), {
             'fields': ('audio_file', 'audio_url', 'audio_player_preview_large', 'duration_seconds', 'thumbnail'),
             'description': _(
-                "Upload an audio file (MP3, WAV, AAC, M4A) or paste an external audio URL. "
-                "The audio will be immediately available in the mobile app API."
+                "Upload an audio file (MP3, WAV, AAC, M4A) or provide an audio URL. "
+                "The audio will be immediately playable in the mobile app."
             )
         }),
         (_('Timestamps'), {
@@ -54,7 +58,7 @@ class EverydayListeningTipAdmin(ModelAdmin):
         url = obj.get_audio_stream_url()
         if url:
             return format_html(
-                '<audio controls preload="none" style="height: 30px; width: 200px;">'
+                '<audio controls preload="none" style="height: 30px; width: 190px;">'
                 '<source src="{}" type="audio/mpeg">'
                 'Your browser does not support audio.'
                 '</audio>',
@@ -82,3 +86,36 @@ class EverydayListeningTipAdmin(ModelAdmin):
     def duration_display(self, obj):
         return obj.duration_formatted
     duration_display.short_description = _("Duration")
+
+
+@admin.register(EverydayListeningTipProxy)
+class EverydayListeningTipAdmin(BaseSkillStrategyAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(category=EverydayListeningTip.CATEGORY_EVERYDAY_LISTENING)
+
+    def save_model(self, request, obj, form, change):
+        if not obj.category:
+            obj.category = EverydayListeningTip.CATEGORY_EVERYDAY_LISTENING
+        super().save_model(request, obj, form, change)
+
+
+@admin.register(CommunicationStrategyProxy)
+class CommunicationStrategyAdmin(BaseSkillStrategyAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(category=EverydayListeningTip.CATEGORY_COMMUNICATION_STRATEGIES)
+
+    def save_model(self, request, obj, form, change):
+        if not obj.category:
+            obj.category = EverydayListeningTip.CATEGORY_COMMUNICATION_STRATEGIES
+        super().save_model(request, obj, form, change)
+
+
+@admin.register(BuildingConfidenceTipProxy)
+class BuildingConfidenceTipAdmin(BaseSkillStrategyAdmin):
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(category=EverydayListeningTip.CATEGORY_BUILDING_CONFIDENCE)
+
+    def save_model(self, request, obj, form, change):
+        if not obj.category:
+            obj.category = EverydayListeningTip.CATEGORY_BUILDING_CONFIDENCE
+        super().save_model(request, obj, form, change)

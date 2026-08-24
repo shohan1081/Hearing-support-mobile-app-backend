@@ -23,81 +23,111 @@ class SkillsStrategiesTestCase(TestCase):
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
         seed_default_everyday_listening_tips()
 
-    def test_start_the_conversation_audio_api(self):
-        url = reverse('skills_strategies:start-the-conversation')
+    def test_main_overview_api(self):
+        url = reverse('skills_strategies:overview')
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         data = res.json()
         self.assertTrue(data['success'])
-        self.assertEqual(data['data']['slug'], 'start-the-conversation')
-        self.assertEqual(data['data']['title'], 'Start the conversation')
-        self.assertIn('audio_stream_url', data['data'])
-        self.assertTrue(data['data']['has_audio'])
+        self.assertEqual(len(data['data']['sections']), 4)
+        section_titles = [s['title'] for s in data['data']['sections']]
+        self.assertIn("Everyday Listening Tips", section_titles)
+        self.assertIn("Communication Strategies", section_titles)
+        self.assertIn("Building Confidence", section_titles)
+        self.assertIn("Practice and Progress", section_titles)
 
-    def test_manage_group_conversations_audio_api(self):
-        url = reverse('skills_strategies:manage-group-conversations')
-        res = self.client.get(url)
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        data = res.json()
-        self.assertTrue(data['success'])
-        self.assertEqual(data['data']['slug'], 'manage-group-conversations')
-        self.assertEqual(data['data']['title'], 'Manage group conversations')
-        self.assertIn('audio_stream_url', data['data'])
-
-    def test_improve_understanding_audio_api(self):
-        url = reverse('skills_strategies:improve-understanding')
-        res = self.client.get(url)
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        data = res.json()
-        self.assertTrue(data['success'])
-        self.assertEqual(data['data']['slug'], 'improve-understanding')
-        self.assertEqual(data['data']['title'], 'Improve understanding')
-        self.assertIn('audio_stream_url', data['data'])
-
-    def test_handle_misunderstandings_audio_api(self):
-        url = reverse('skills_strategies:handle-misunderstandings')
-        res = self.client.get(url)
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        data = res.json()
-        self.assertTrue(data['success'])
-        self.assertEqual(data['data']['slug'], 'handle-misunderstandings')
-        self.assertEqual(data['data']['title'], 'Handle misunderstandings')
-        self.assertIn('audio_stream_url', data['data'])
-
-    def test_build_stronger_connections_audio_api(self):
-        url = reverse('skills_strategies:build-stronger-connections')
-        res = self.client.get(url)
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        data = res.json()
-        self.assertTrue(data['success'])
-        self.assertEqual(data['data']['slug'], 'build-stronger-connections')
-        self.assertEqual(data['data']['title'], 'Build stronger connections')
-        self.assertIn('audio_stream_url', data['data'])
-
-    def test_all_skills_strategies_list_api(self):
-        url = reverse('skills_strategies:tip-list')
+    # ========================================================
+    # 1. Everyday Listening Tips Tests (5 Audios)
+    # ========================================================
+    def test_everyday_listening_tips_list_api(self):
+        url = reverse('skills_strategies:everyday-listening-tips-list')
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         data = res.json()
         self.assertTrue(data['success'])
         self.assertEqual(data['data']['total_count'], 5)
 
-        slugs = [item['slug'] for item in data['data']['sections']]
-        expected_slugs = [
-            "start-the-conversation",
-            "manage-group-conversations",
-            "improve-understanding",
-            "handle-misunderstandings",
-            "build-stronger-connections",
+    def test_everyday_listening_5_audio_endpoints(self):
+        slugs = [
+            'reduce-background-noise',
+            'face-the-speaker',
+            'take-breaks',
+            'use-visual-cues',
+            'ask-for-repetition',
         ]
-        for expected in expected_slugs:
-            self.assertIn(expected, slugs)
+        for slug in slugs:
+            url = reverse(f'skills_strategies:{slug}')
+            res = self.client.get(url)
+            self.assertEqual(res.status_code, status.HTTP_200_OK, f"Failed for slug: {slug}")
+            data = res.json()
+            self.assertTrue(data['success'])
+            self.assertEqual(data['data']['slug'], slug)
+            self.assertIn('audio_stream_url', data['data'])
 
-    def test_detail_by_slug_api(self):
-        url = reverse('skills_strategies:tip-detail', kwargs={'lookup': 'start-the-conversation'})
+    # ========================================================
+    # 2. Communication Strategies Tests (5 Audios)
+    # ========================================================
+    def test_communication_strategies_list_api(self):
+        url = reverse('skills_strategies:communication-strategies-list')
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         data = res.json()
         self.assertTrue(data['success'])
-        self.assertEqual(data['data']['slug'], 'start-the-conversation')
-        self.assertIn("audio_stream_url", data['data'])
+        self.assertEqual(data['data']['total_count'], 5)
+
+    def test_communication_strategies_5_audio_endpoints(self):
+        comm_slugs = [
+            ('comm-start-the-conversation', 'start-the-conversation'),
+            ('comm-manage-group-conversations', 'manage-group-conversations'),
+            ('comm-improve-understanding', 'improve-understanding'),
+            ('comm-handle-misunderstandings', 'handle-misunderstandings'),
+            ('comm-build-stronger-connections', 'build-stronger-connections'),
+        ]
+        for route_name, slug in comm_slugs:
+            url = reverse(f'skills_strategies:{route_name}')
+            res = self.client.get(url)
+            self.assertEqual(res.status_code, status.HTTP_200_OK, f"Failed for route: {route_name}")
+            data = res.json()
+            self.assertTrue(data['success'])
+            self.assertEqual(data['data']['slug'], slug)
+            self.assertIn('audio_stream_url', data['data'])
+
+    # ========================================================
+    # 3. Building Confidence Tests (5 Audios)
+    # ========================================================
+    def test_building_confidence_list_api(self):
+        url = reverse('skills_strategies:building-confidence-list')
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        data = res.json()
+        self.assertTrue(data['success'])
+        self.assertEqual(data['data']['total_count'], 5)
+
+    def test_building_confidence_5_audio_endpoints(self):
+        conf_slugs = [
+            ('conf-start-small', 'start-small'),
+            ('conf-prepare-before-conversations', 'prepare-before-conversations'),
+            ('conf-be-patient-with-yourself', 'be-patient-with-yourself'),
+            ('conf-practice-every-day', 'practice-every-day'),
+            ('conf-celebrate-progress', 'celebrate-progress'),
+        ]
+        for route_name, slug in conf_slugs:
+            url = reverse(f'skills_strategies:{route_name}')
+            res = self.client.get(url)
+            self.assertEqual(res.status_code, status.HTTP_200_OK, f"Failed for route: {route_name}")
+            data = res.json()
+            self.assertTrue(data['success'])
+            self.assertEqual(data['data']['slug'], slug)
+            self.assertIn('audio_stream_url', data['data'])
+
+    # ========================================================
+    # 4. Practice and Progress Test (No audio needed)
+    # ========================================================
+    def test_practice_and_progress_endpoint(self):
+        url = reverse('skills_strategies:practice-and-progress')
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        data = res.json()
+        self.assertTrue(data['success'])
+        self.assertFalse(data['data']['has_audio'])
+        self.assertIn('recommended_actions', data['data'])

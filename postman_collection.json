@@ -2313,10 +2313,10 @@
       ]
     },
     {
-      "name": "Skills & Strategies (Conversational Audio Lessons)",
+      "name": "Skills & Strategies",
       "item": [
         {
-          "name": "1. Start the Conversation Audio",
+          "name": "Main Overview (All 4 Sections)",
           "request": {
             "method": "GET",
             "header": [
@@ -2326,97 +2326,501 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/skills-strategies/start-the-conversation/",
+              "raw": "{{base_url}}/api/skills-strategies/",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "skills-strategies",
-                "start-the-conversation",
                 ""
               ]
             },
-            "description": "Fetch audio stream URL and guidance for Section 1: 'Start the conversation'."
+            "description": "Returns full overview of all 4 sections in Skills & Strategies with their audio items."
           }
         },
         {
-          "name": "2. Manage Group Conversations Audio",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
+          "name": "1. Everyday Listening Tips",
+          "item": [
+            {
+              "name": "Get All Everyday Listening Tips Audio List",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/skills-strategies/everyday-listening-tips/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "skills-strategies",
+                    "everyday-listening-tips",
+                    ""
+                  ]
+                },
+                "description": "Returns list of all 5 Everyday Listening Tips audio lessons."
               }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/skills-strategies/manage-group-conversations/",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "skills-strategies",
-                "manage-group-conversations",
-                ""
-              ]
             },
-            "description": "Fetch audio stream URL and guidance for Section 2: 'Manage group conversations'."
-          }
+            {
+              "name": "1. Reduce Background Noise Audio",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/skills-strategies/everyday-listening-tips/reduce-background-noise/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "skills-strategies",
+                    "everyday-listening-tips",
+                    "reduce-background-noise",
+                    ""
+                  ]
+                },
+                "description": "Fetch audio stream and guidance for 'Reduce background noise'."
+              }
+            },
+            {
+              "name": "2. Face The Speaker Audio",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/skills-strategies/everyday-listening-tips/face-the-speaker/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "skills-strategies",
+                    "everyday-listening-tips",
+                    "face-the-speaker",
+                    ""
+                  ]
+                },
+                "description": "Fetch audio stream and guidance for 'Face the speaker'."
+              }
+            },
+            {
+              "name": "3. Take Breaks Audio",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/skills-strategies/everyday-listening-tips/take-breaks/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "skills-strategies",
+                    "everyday-listening-tips",
+                    "take-breaks",
+                    ""
+                  ]
+                },
+                "description": "Fetch audio stream and guidance for 'Take breaks'."
+              }
+            },
+            {
+              "name": "4. Use Visual Cues Audio",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/skills-strategies/everyday-listening-tips/use-visual-cues/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "skills-strategies",
+                    "everyday-listening-tips",
+                    "use-visual-cues",
+                    ""
+                  ]
+                },
+                "description": "Fetch audio stream and guidance for 'Use visual cues'."
+              }
+            },
+            {
+              "name": "5. Ask For Repetition Audio",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/skills-strategies/everyday-listening-tips/ask-for-repetition/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "skills-strategies",
+                    "everyday-listening-tips",
+                    "ask-for-repetition",
+                    ""
+                  ]
+                },
+                "description": "Fetch audio stream and guidance for 'Ask for repetition'."
+              }
+            }
+          ]
         },
         {
-          "name": "3. Improve Understanding Audio",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
+          "name": "2. Communication Strategies",
+          "item": [
+            {
+              "name": "Get All Communication Strategies Audio List",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/skills-strategies/communication-strategies/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "skills-strategies",
+                    "communication-strategies",
+                    ""
+                  ]
+                },
+                "description": "Returns list of all 5 Communication Strategies audio lessons."
               }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/skills-strategies/improve-understanding/",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "skills-strategies",
-                "improve-understanding",
-                ""
-              ]
             },
-            "description": "Fetch audio stream URL and guidance for Section 3: 'Improve understanding'."
-          }
+            {
+              "name": "1. Start The Conversation Audio",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/skills-strategies/communication-strategies/start-the-conversation/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "skills-strategies",
+                    "communication-strategies",
+                    "start-the-conversation",
+                    ""
+                  ]
+                },
+                "description": "Fetch audio stream and guidance for 'Start the conversation'."
+              }
+            },
+            {
+              "name": "2. Manage Group Conversations Audio",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/skills-strategies/communication-strategies/manage-group-conversations/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "skills-strategies",
+                    "communication-strategies",
+                    "manage-group-conversations",
+                    ""
+                  ]
+                },
+                "description": "Fetch audio stream and guidance for 'Manage group conversations'."
+              }
+            },
+            {
+              "name": "3. Improve Understanding Audio",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/skills-strategies/communication-strategies/improve-understanding/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "skills-strategies",
+                    "communication-strategies",
+                    "improve-understanding",
+                    ""
+                  ]
+                },
+                "description": "Fetch audio stream and guidance for 'Improve understanding'."
+              }
+            },
+            {
+              "name": "4. Handle Misunderstandings Audio",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/skills-strategies/communication-strategies/handle-misunderstandings/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "skills-strategies",
+                    "communication-strategies",
+                    "handle-misunderstandings",
+                    ""
+                  ]
+                },
+                "description": "Fetch audio stream and guidance for 'Handle misunderstandings'."
+              }
+            },
+            {
+              "name": "5. Build Stronger Connections Audio",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/skills-strategies/communication-strategies/build-stronger-connections/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "skills-strategies",
+                    "communication-strategies",
+                    "build-stronger-connections",
+                    ""
+                  ]
+                },
+                "description": "Fetch audio stream and guidance for 'Build stronger connections'."
+              }
+            }
+          ]
         },
         {
-          "name": "4. Handle Misunderstandings Audio",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
+          "name": "3. Building Confidence",
+          "item": [
+            {
+              "name": "Get All Building Confidence Audio List",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/skills-strategies/building-confidence/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "skills-strategies",
+                    "building-confidence",
+                    ""
+                  ]
+                },
+                "description": "Returns list of all 5 Building Confidence audio lessons."
               }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/skills-strategies/handle-misunderstandings/",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "skills-strategies",
-                "handle-misunderstandings",
-                ""
-              ]
             },
-            "description": "Fetch audio stream URL and guidance for Section 4: 'Handle misunderstandings'."
-          }
+            {
+              "name": "1. Start Small Audio",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/skills-strategies/building-confidence/start-small/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "skills-strategies",
+                    "building-confidence",
+                    "start-small",
+                    ""
+                  ]
+                },
+                "description": "Fetch audio stream and guidance for 'Start small'."
+              }
+            },
+            {
+              "name": "2. Prepare Before Conversations Audio",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/skills-strategies/building-confidence/prepare-before-conversations/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "skills-strategies",
+                    "building-confidence",
+                    "prepare-before-conversations",
+                    ""
+                  ]
+                },
+                "description": "Fetch audio stream and guidance for 'Prepare before conversations'."
+              }
+            },
+            {
+              "name": "3. Be Patient With Yourself Audio",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/skills-strategies/building-confidence/be-patient-with-yourself/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "skills-strategies",
+                    "building-confidence",
+                    "be-patient-with-yourself",
+                    ""
+                  ]
+                },
+                "description": "Fetch audio stream and guidance for 'Be patient with yourself'."
+              }
+            },
+            {
+              "name": "4. Practice Every Day Audio",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/skills-strategies/building-confidence/practice-every-day/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "skills-strategies",
+                    "building-confidence",
+                    "practice-every-day",
+                    ""
+                  ]
+                },
+                "description": "Fetch audio stream and guidance for 'Practice every day'."
+              }
+            },
+            {
+              "name": "5. Celebrate Progress Audio",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/skills-strategies/building-confidence/celebrate-progress/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "skills-strategies",
+                    "building-confidence",
+                    "celebrate-progress",
+                    ""
+                  ]
+                },
+                "description": "Fetch audio stream and guidance for 'Celebrate progress'."
+              }
+            }
+          ]
         },
         {
-          "name": "5. Build Stronger Connections Audio",
+          "name": "4. Practice and Progress",
           "request": {
             "method": "GET",
             "header": [
@@ -2426,43 +2830,18 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/skills-strategies/build-stronger-connections/",
+              "raw": "{{base_url}}/api/skills-strategies/practice-and-progress/",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "skills-strategies",
-                "build-stronger-connections",
+                "practice-and-progress",
                 ""
               ]
             },
-            "description": "Fetch audio stream URL and guidance for Section 5: 'Build stronger connections'."
-          }
-        },
-        {
-          "name": "Get All Conversational Strategies Audio List",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/skills-strategies/everyday-listening-tips/",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "skills-strategies",
-                "everyday-listening-tips",
-                ""
-              ]
-            },
-            "description": "Returns full list of all 5 Conversational Strategy audio sections with audio stream URLs, titles, and thumbnails."
+            "description": "Overview of Section 4: Practice and Progress (wear time, check-in, and hearing health score tracking)."
           }
         }
       ]

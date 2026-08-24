@@ -171,14 +171,24 @@ UNFOLD = {
                 ],
             },
             {
-                "title": "Skills & Strategies",
+                "title": "Skills & Strategies (Audio Lessons)",
                 "separator": True,
                 "collapsible": False,
                 "items": [
                     {
-                        "title": "Conversational Strategies (Audio Upload)",
-                        "icon": "record_voice_over",
-                        "link": reverse_lazy("admin:skills_strategies_everydaylisteningtip_changelist"),
+                        "title": "1. Everyday Listening Tips (5 Audios)",
+                        "icon": "hearing",
+                        "link": reverse_lazy("admin:skills_strategies_everydaylisteningtipproxy_changelist"),
+                    },
+                    {
+                        "title": "2. Communication Strategies (5 Audios)",
+                        "icon": "forum",
+                        "link": reverse_lazy("admin:skills_strategies_communicationstrategyproxy_changelist"),
+                    },
+                    {
+                        "title": "3. Building Confidence (5 Audios)",
+                        "icon": "psychology",
+                        "link": reverse_lazy("admin:skills_strategies_buildingconfidencetipproxy_changelist"),
                     },
                 ],
             },
