@@ -1435,6 +1435,179 @@
       ]
     },
     {
+      "name": "AI Hearing Assistant Chatbot",
+      "item": [
+        {
+          "name": "Chat with AI Hearing Assistant",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"How can I improve my hearing score?\",\n  \"session_id\": null\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/chatbot/chat/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "chatbot",
+                "chat",
+                ""
+              ]
+            },
+            "description": "Send a question to the AI Hearing Assistant (powered by OpenAI). Returns clinical answers, auditory exercises, and live user hearing progress stats."
+          }
+        },
+        {
+          "name": "Get Quick Prompt Suggestions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/chatbot/suggestions/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "chatbot",
+                "suggestions",
+                ""
+              ]
+            },
+            "description": "Fetch suggested quick prompt question chips for the mobile app chatbot screen."
+          }
+        },
+        {
+          "name": "Get User Chat Sessions List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/chatbot/sessions/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "chatbot",
+                "sessions",
+                ""
+              ]
+            },
+            "description": "List all previous AI chat sessions and topics for the authenticated user."
+          }
+        },
+        {
+          "name": "Get Chat Session History by Session ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/chatbot/sessions/{{session_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "chatbot",
+                "sessions",
+                "{{session_id}}",
+                ""
+              ]
+            },
+            "description": "Retrieve the full message turn history of a specific conversation session."
+          }
+        },
+        {
+          "name": "Delete Chat Session by ID",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/chatbot/sessions/{{session_id}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "chatbot",
+                "sessions",
+                "{{session_id}}",
+                ""
+              ]
+            },
+            "description": "Delete an individual conversation session and its messages."
+          }
+        },
+        {
+          "name": "Clear All AI Chat History",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"session_id\": null\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/chatbot/clear/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "chatbot",
+                "clear",
+                ""
+              ]
+            },
+            "description": "Clear all chat history or clear messages of a specific session."
+          }
+        }
+      ]
+    },
+    {
       "name": "Check-in Tutorials",
       "item": [
         {

@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'skills_strategies.apps.SkillsStrategiesConfig',
     'device_care.apps.DeviceCareConfig',
     'support_chat.apps.SupportChatConfig',
+    'ai_chatbot.apps.AIChatbotConfig',
 ]
 
 from django.urls import reverse_lazy
@@ -61,6 +62,28 @@ UNFOLD = {
         "show_search": True,
         "show_all_applications": False,
         "navigation": [
+            {
+                "title": "AI Hearing Assistant Chatbot",
+                "separator": True,
+                "collapsible": False,
+                "items": [
+                    {
+                        "title": "AI Chat Sessions",
+                        "icon": "smart_toy",
+                        "link": reverse_lazy("admin:ai_chatbot_aichatsession_changelist"),
+                    },
+                    {
+                        "title": "AI Chat Messages",
+                        "icon": "chat",
+                        "link": reverse_lazy("admin:ai_chatbot_aichatmessage_changelist"),
+                    },
+                    {
+                        "title": "Quick Prompt Suggestions",
+                        "icon": "lightbulb",
+                        "link": reverse_lazy("admin:ai_chatbot_quickpromptsuggestion_changelist"),
+                    },
+                ],
+            },
             {
                 "title": "Care Team Support Chat",
                 "separator": True,
@@ -436,6 +459,11 @@ if USE_S3:
             "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
         },
     }
+
+# OpenAI AI Chatbot Configuration
+OPENAI_API_KEY = config('OPENAI_API_KEY', default='')
+OPENAI_CHAT_MODEL = config('OPENAI_CHAT_MODEL', default='gpt-4o-mini')
+
     
 
 

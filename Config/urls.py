@@ -12,4 +12,6 @@ urlpatterns = [
     path('api/skills-strategies/', include(('skills_strategies.urls', 'skills_strategies'), namespace='skills_strategies')),
     path('api/device-care/', include(('device_care.urls', 'device_care'), namespace='device_care')),
     path('api/support-chat/', include(('support_chat.urls', 'support_chat'), namespace='support_chat')),
+    path('api/chatbot/', include(('ai_chatbot.urls', 'ai_chatbot'), namespace='ai_chatbot')),
+    path('api/ai-chat/', include(('ai_chatbot.urls', 'ai_chat'), namespace='ai_chat')),
 ]
