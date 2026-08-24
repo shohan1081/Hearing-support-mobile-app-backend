@@ -176,8 +176,8 @@ UNFOLD = {
                 "collapsible": False,
                 "items": [
                     {
-                        "title": "Everyday Listening Tips (Audio Upload)",
-                        "icon": "hearing",
+                        "title": "Conversational Strategies (Audio Upload)",
+                        "icon": "record_voice_over",
                         "link": reverse_lazy("admin:skills_strategies_everydaylisteningtip_changelist"),
                     },
                 ],
