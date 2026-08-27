@@ -1,6 +1,7 @@
-from django.test import TestCase
+﻿from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
+from django.core import mail
 from rest_framework.test import APIClient
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -33,6 +34,15 @@ class SupportChatTestCase(TestCase):
         refresh_admin = RefreshToken.for_user(self.admin_user)
         self.admin_client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh_admin.access_token}')
 
+    def test_unauthenticated_request_to_send_message_returns_401(self):
+        """Verify that sending a message without a Bearer token is strictly rejected with 401"""
+        anonymous_client = APIClient()
+        url = reverse('support_chat:send-message')
+        response = anonymous_client.post(url, {"message_text": "Hello without token"})
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        data = response.json()
+        self.assertFalse(data.get('success', False))
+
     def test_user_conversation_api(self):
         url = reverse('support_chat:my-conversation')
         response = self.client.get(url)
@@ -43,50 +53,56 @@ class SupportChatTestCase(TestCase):
         self.assertGreaterEqual(len(data['data']['messages']), 1)
         self.assertTrue(data['data']['messages'][0]['is_from_admin'])
 
-    def test_user_send_message_api(self):
+    def test_user_send_message_api_and_admin_notification(self):
         url = reverse('support_chat:send-message')
         payload = {
             "message_text": "Hello Care Team, how do I clean my new Phonak hearing aid receiver?",
             "attachment_type": "text"
         }
+        # Clear outbox before sending
+        mail.outbox = []
+
         response = self.client.post(url, payload)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         data = response.json()
         self.assertTrue(data['success'])
         self.assertFalse(data['data']['is_from_admin'])
         self.assertEqual(data['data']['message_text'], payload['message_text'])
+        self.assertEqual(data['data']['sender_name'], self.user.name)
 
-        # Verify conversation updated
+        # Verify conversation in database is tied to authenticated user
         conv = SupportConversation.objects.filter(user=self.user).first()
+        self.assertIsNotNone(conv)
         self.assertEqual(conv.unread_admin_count, 1)
 
+        # Verify Admin Email Notification was triggered
+        self.assertGreaterEqual(len(mail.outbox), 1)
+        sent_mail = mail.outbox[0]
+        self.assertIn("[Care Support Alert]", sent_mail.subject)
+        self.assertIn(self.user.email, sent_mail.body)
+        self.assertIn("Phonak hearing aid", sent_mail.body)
+
     def test_mark_read_and_unread_count_api(self):
-        # Care team admin replies to user
         conv = seed_default_support_chat_sample(self.user)
         conv.unread_user_count = 2
         conv.save()
 
-        # Check unread count API
         count_url = reverse('support_chat:unread-count')
         response = self.client.get(count_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()['data']['unread_count'], 2)
 
-        # Mark read API
         mark_url = reverse('support_chat:mark-read')
         response = self.client.post(mark_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        # Check unread count after marking read
         response_after = self.client.get(count_url)
         self.assertEqual(response_after.json()['data']['unread_count'], 0)
 
     def test_admin_conversation_list_and_reply_api(self):
-        # Send user message
         send_url = reverse('support_chat:send-message')
         self.client.post(send_url, {"message_text": "I need help with volume adjustment."})
 
-        # Admin lists all conversations
         list_url = reverse('support_chat:admin-conversations')
         response = self.admin_client.get(list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -96,7 +112,9 @@ class SupportChatTestCase(TestCase):
 
         conv_id = data['data'][0]['id']
 
-        # Admin replies to user
+        # Clear outbox before admin reply
+        mail.outbox = []
+
         reply_url = reverse('support_chat:admin-reply')
         reply_payload = {
             "conversation_id": conv_id,
@@ -108,7 +126,12 @@ class SupportChatTestCase(TestCase):
         self.assertTrue(reply_data['success'])
         self.assertTrue(reply_data['data']['is_from_admin'])
 
-        # Verify user now has 1 unread message from admin
         conv_updated = SupportConversation.objects.get(pk=conv_id)
         self.assertEqual(conv_updated.unread_user_count, 1)
         self.assertEqual(conv_updated.unread_admin_count, 0)
+
+        # Verify User Email Notification was triggered
+        self.assertGreaterEqual(len(mail.outbox), 1)
+        sent_mail = mail.outbox[0]
+        self.assertIn("Hearing Care Support: New Reply", sent_mail.subject)
+        self.assertIn(self.user.email, sent_mail.to)

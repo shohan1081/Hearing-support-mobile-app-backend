@@ -1,10 +1,9 @@
-from django.utils import timezone
+﻿from django.utils import timezone
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from users.authentication import FirebaseAuthentication
+from users.authentication import CustomJWTAuthentication, FirebaseAuthentication
 
 from .models import SupportConversation, SupportMessage
 from .serializers import (
@@ -14,7 +13,12 @@ from .serializers import (
     SendMessageInputSerializer,
     AdminReplyInputSerializer,
 )
-from .utils import get_or_create_user_support_conversation, seed_default_support_chat_sample
+from .utils import (
+    get_or_create_user_support_conversation,
+    seed_default_support_chat_sample,
+    send_admin_new_message_notification,
+    send_user_admin_reply_notification,
+)
 
 
 def standard_response(success=True, message="", data=None, errors=None, status_code=status.HTTP_200_OK):
@@ -39,7 +43,7 @@ class UserConversationView(APIView):
     GET /api/support-chat/my-conversation/
     """
     permission_classes = [IsAuthenticated]
-    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+    authentication_classes = [CustomJWTAuthentication, FirebaseAuthentication]
 
     def get(self, request):
         conversation = seed_default_support_chat_sample(request.user)
@@ -70,9 +74,17 @@ class SendMessageView(APIView):
     POST /api/support-chat/send/
     """
     permission_classes = [IsAuthenticated]
-    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+    authentication_classes = [CustomJWTAuthentication, FirebaseAuthentication]
 
     def post(self, request):
+        if not request.user or not request.user.is_authenticated:
+            return standard_response(
+                success=False,
+                message="Authentication required. Please provide a valid Bearer token in the Authorization header.",
+                errors={"detail": "Authentication credentials were not provided."},
+                status_code=status.HTTP_401_UNAUTHORIZED
+            )
+
         serializer = SendMessageInputSerializer(data=request.data)
         if not serializer.is_valid():
             return standard_response(
@@ -115,6 +127,9 @@ class SendMessageView(APIView):
         conversation.unread_admin_count += 1
         conversation.save(update_fields=['status', 'last_message_at', 'unread_admin_count', 'updated_at'])
 
+        # Notify Care Team Admins via Email
+        send_admin_new_message_notification(message, request=request)
+
         message_serializer = SupportMessageSerializer(message, context={'request': request})
         return standard_response(
             success=True,
@@ -131,7 +146,7 @@ class MessageListView(APIView):
     GET /api/support-chat/messages/
     """
     permission_classes = [IsAuthenticated]
-    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+    authentication_classes = [CustomJWTAuthentication, FirebaseAuthentication]
 
     def get(self, request):
         conversation = get_or_create_user_support_conversation(request.user)
@@ -158,7 +173,7 @@ class MarkReadView(APIView):
     POST /api/support-chat/mark-read/
     """
     permission_classes = [IsAuthenticated]
-    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+    authentication_classes = [CustomJWTAuthentication, FirebaseAuthentication]
 
     def post(self, request):
         conversation = get_or_create_user_support_conversation(request.user)
@@ -186,7 +201,7 @@ class UnreadCountView(APIView):
     GET /api/support-chat/unread-count/
     """
     permission_classes = [IsAuthenticated]
-    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+    authentication_classes = [CustomJWTAuthentication, FirebaseAuthentication]
 
     def get(self, request):
         conversation = get_or_create_user_support_conversation(request.user)
@@ -206,7 +221,7 @@ class AdminConversationListView(APIView):
     GET /api/support-chat/admin/conversations/
     """
     permission_classes = [IsAuthenticated, IsAdminUser]
-    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+    authentication_classes = [CustomJWTAuthentication, FirebaseAuthentication]
 
     def get(self, request):
         conversations = SupportConversation.objects.all().order_by('-last_message_at')
@@ -230,7 +245,7 @@ class AdminReplyView(APIView):
     POST /api/support-chat/admin/reply/
     """
     permission_classes = [IsAuthenticated, IsAdminUser]
-    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+    authentication_classes = [CustomJWTAuthentication, FirebaseAuthentication]
 
     def post(self, request):
         serializer = AdminReplyInputSerializer(data=request.data)
@@ -275,6 +290,9 @@ class AdminReplyView(APIView):
         conversation.last_message_at = timezone.now()
         conversation.assigned_admin = request.user
         conversation.save(update_fields=['unread_admin_count', 'unread_user_count', 'status', 'last_message_at', 'assigned_admin', 'updated_at'])
+
+        # Notify User via Email
+        send_user_admin_reply_notification(message, request=request)
 
         message_serializer = SupportMessageSerializer(message, context={'request': request})
         return standard_response(
