@@ -206,7 +206,17 @@
                 ""
               ]
             },
-            "description": "Logout user and blacklist refresh token."
+            "description": "Logout user and blacklist refresh token.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         }
       ]
@@ -396,7 +406,17 @@
                 ""
               ]
             },
-            "description": "Change password for currently authenticated user."
+            "description": "Change password for currently authenticated user.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         }
       ]
@@ -426,7 +446,17 @@
                 ""
               ]
             },
-            "description": "Get current user profile (supports Bearer JWT token or Firebase ID token)."
+            "description": "Get current user profile (supports Bearer JWT token or Firebase ID token).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -459,7 +489,17 @@
                 ""
               ]
             },
-            "description": "Full update of user profile data (name, profile_picture)."
+            "description": "Full update of user profile data (name, profile_picture).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -492,7 +532,17 @@
                 ""
               ]
             },
-            "description": "Partial update of user profile fields (name, profile_picture)."
+            "description": "Partial update of user profile fields (name, profile_picture).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -525,7 +575,17 @@
                 ""
               ]
             },
-            "description": "Delete user account from within the mobile app (requires password verification)."
+            "description": "Delete user account from within the mobile app (requires password verification).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         }
       ]
@@ -563,7 +623,17 @@
                 ""
               ]
             },
-            "description": "Log or update daily hearing machine wear time duration in hours and minutes."
+            "description": "Log or update daily hearing machine wear time duration in hours and minutes.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -588,7 +658,17 @@
                 ""
               ]
             },
-            "description": "Get today's logged wear time, weekly and monthly average wear hours, and daily log history."
+            "description": "Get today's logged wear time, weekly and monthly average wear hours, and daily log history.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -613,7 +693,17 @@
                 ""
               ]
             },
-            "description": "Returns single Hearing Score number (1-100) along with status classification (Excellent, Good, Average, Poor, Bad) acknowledging user's progress."
+            "description": "Returns single Hearing Score number (1-100) along with status classification (Excellent, Good, Average, Poor, Bad) acknowledging user's progress.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -638,7 +728,17 @@
                 ""
               ]
             },
-            "description": "Returns how many hours and minutes the user wore their hearing aid today vs their daily target goal (default 8 hrs, customizable by admin)."
+            "description": "Returns how many hours and minutes the user wore their hearing aid today vs their daily target goal (default 8 hrs, customizable by admin).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -663,7 +763,17 @@
                 ""
               ]
             },
-            "description": "Returns user's daily activity score scaled between 1 and 5 (1=Getting Started, 5=Outstanding) based on today's completed activities."
+            "description": "Returns user's daily activity score scaled between 1 and 5 (1=Getting Started, 5=Outstanding) based on today's completed activities.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -695,7 +805,17 @@
                 }
               ]
             },
-            "description": "Returns graph-friendly progress score breakdown grouped for monthly or yearly UI charts."
+            "description": "Returns graph-friendly progress score breakdown grouped for monthly or yearly UI charts.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -728,7 +848,17 @@
                 ""
               ]
             },
-            "description": "Get or update target daily wear goal hours for the user."
+            "description": "Get or update target daily wear goal hours for the user.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -760,7 +890,17 @@
                 }
               ]
             },
-            "description": "Returns wear time vs target goal time breakdown formatted specifically for frontend Bar Charts. Period: weekly (every day of the week) or monthly (every week of the month)."
+            "description": "Returns wear time vs target goal time breakdown formatted specifically for frontend Bar Charts. Period: weekly (every day of the week) or monthly (every week of the month).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         }
       ]
@@ -834,7 +974,17 @@
                 ""
               ]
             },
-            "description": "Fetch all question 1 and question 2 choices and labels for rendering the onboarding UI."
+            "description": "Fetch all question 1 and question 2 choices and labels for rendering the onboarding UI.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -867,7 +1017,17 @@
                 ""
               ]
             },
-            "description": "Submit onboarding responses. hearing_journey takes 1 option, improvement_goals takes exactly 3 options."
+            "description": "Submit onboarding responses. hearing_journey takes 1 option, improvement_goals takes exactly 3 options.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -892,7 +1052,17 @@
                 ""
               ]
             },
-            "description": "Retrieve currently authenticated user's onboarding responses and completion status."
+            "description": "Retrieve currently authenticated user's onboarding responses and completion status.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         }
       ]
@@ -923,7 +1093,17 @@
                 ""
               ]
             },
-            "description": "Fetch daily check-in question ('How are you hearing today?') and available choices."
+            "description": "Fetch daily check-in question ('How are you hearing today?') and available choices.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -956,7 +1136,17 @@
                 ""
               ]
             },
-            "description": "Submit or update today's daily check-in. When status is 'good', what_went_well text can be included."
+            "description": "Submit or update today's daily check-in. When status is 'good', what_went_well text can be included.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -989,7 +1179,17 @@
                 ""
               ]
             },
-            "description": "Submit or update today's daily check-in. When status is 'okay', what_went_okay text can be included."
+            "description": "Submit or update today's daily check-in. When status is 'okay', what_went_okay text can be included.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1022,7 +1222,17 @@
                 ""
               ]
             },
-            "description": "Submit or update today's daily check-in. When status is 'struggling' or 'frustrated', why_struggling text can be included."
+            "description": "Submit or update today's daily check-in. When status is 'struggling' or 'frustrated', why_struggling text can be included.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1055,7 +1265,17 @@
                 ""
               ]
             },
-            "description": "Submit or update today's daily check-in for frustrated status with reason why struggling."
+            "description": "Submit or update today's daily check-in for frustrated status with reason why struggling.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1088,7 +1308,17 @@
                 ""
               ]
             },
-            "description": "Partial update of today's check-in (e.g. submitting what_went_well after status selection)."
+            "description": "Partial update of today's check-in (e.g. submitting what_went_well after status selection).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1113,7 +1343,17 @@
                 ""
               ]
             },
-            "description": "Retrieve whether user checked in today, today's check-in response, recent check-in history, and any upcoming care team appointment."
+            "description": "Retrieve whether user checked in today, today's check-in response, recent check-in history, and any upcoming care team appointment.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         }
       ]
@@ -1152,7 +1392,17 @@
                 ""
               ]
             },
-            "description": "Submit a request from the app to book an appointment with the Care Team / Audiologist. Admin can review in Django Admin, accept, assign date & time, or cancel."
+            "description": "Submit a request from the app to book an appointment with the Care Team / Audiologist. Admin can review in Django Admin, accept, assign date & time, or cancel.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1178,7 +1428,17 @@
                 ""
               ]
             },
-            "description": "Retrieve all appointment requests submitted by the authenticated user with current status (pending, accepted, cancelled) and any linked scheduled appointment."
+            "description": "Retrieve all appointment requests submitted by the authenticated user with current status (pending, accepted, cancelled) and any linked scheduled appointment.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1205,7 +1465,17 @@
                 ""
               ]
             },
-            "description": "Retrieve details of a specific appointment request by its ID."
+            "description": "Retrieve details of a specific appointment request by its ID.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1230,7 +1500,17 @@
                 ""
               ]
             },
-            "description": "Retrieve all care appointments scheduled for the authenticated user by the admin / audiologist care team."
+            "description": "Retrieve all care appointments scheduled for the authenticated user by the admin / audiologist care team.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1261,7 +1541,17 @@
                 }
               ]
             },
-            "description": "Retrieve all future scheduled / confirmed appointments for the authenticated user."
+            "description": "Retrieve all future scheduled / confirmed appointments for the authenticated user.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1287,7 +1577,17 @@
                 ""
               ]
             },
-            "description": "Retrieve the single next upcoming appointment to display on the dashboard or check-in screen."
+            "description": "Retrieve the single next upcoming appointment to display on the dashboard or check-in screen.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1313,7 +1613,17 @@
                 ""
               ]
             },
-            "description": "Retrieve detailed information for a specific appointment including specialist name, date, time, meeting link, and notes."
+            "description": "Retrieve detailed information for a specific appointment including specialist name, date, time, meeting link, and notes.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         }
       ]
@@ -1344,7 +1654,17 @@
                 ""
               ]
             },
-            "description": "Fetch the list of selectable issue categories: Sound Quality, Bluetooth & Syncing, Battery & Charging, Hardware Fit & Comfort, Other."
+            "description": "Fetch the list of selectable issue categories: Sound Quality, Bluetooth & Syncing, Battery & Charging, Hardware Fit & Comfort, Other.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1378,7 +1698,17 @@
                 ""
               ]
             },
-            "description": "Submit a new problem report. Categories: sound_quality, bluetooth_syncing, battery_charging, hardware_fit_comfort, other. Admin will review and reply via email."
+            "description": "Submit a new problem report. Categories: sound_quality, bluetooth_syncing, battery_charging, hardware_fit_comfort, other. Admin will review and reply via email.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1403,7 +1733,17 @@
                 ""
               ]
             },
-            "description": "List all issues submitted by the authenticated user with resolution status and admin replies."
+            "description": "List all issues submitted by the authenticated user with resolution status and admin replies.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1429,7 +1769,17 @@
                 ""
               ]
             },
-            "description": "Retrieve details of a specific issue report, including care team admin reply and email dispatch status."
+            "description": "Retrieve details of a specific issue report, including care team admin reply and email dispatch status.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         }
       ]
@@ -1467,7 +1817,17 @@
                 ""
               ]
             },
-            "description": "Send a question to the AI Hearing Assistant (powered by OpenAI). Returns clinical answers, auditory exercises, and live user hearing progress stats."
+            "description": "Send a question to the AI Hearing Assistant (powered by OpenAI). Returns clinical answers, auditory exercises, and live user hearing progress stats.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1492,7 +1852,17 @@
                 ""
               ]
             },
-            "description": "Fetch suggested quick prompt question chips for the mobile app chatbot screen."
+            "description": "Fetch suggested quick prompt question chips for the mobile app chatbot screen.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1517,7 +1887,17 @@
                 ""
               ]
             },
-            "description": "List all previous AI chat sessions and topics for the authenticated user."
+            "description": "List all previous AI chat sessions and topics for the authenticated user.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1543,7 +1923,17 @@
                 ""
               ]
             },
-            "description": "Retrieve the full message turn history of a specific conversation session."
+            "description": "Retrieve the full message turn history of a specific conversation session.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1569,7 +1959,17 @@
                 ""
               ]
             },
-            "description": "Delete an individual conversation session and its messages."
+            "description": "Delete an individual conversation session and its messages.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1602,7 +2002,17 @@
                 ""
               ]
             },
-            "description": "Clear all chat history or clear messages of a specific session."
+            "description": "Clear all chat history or clear messages of a specific session.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         }
       ]
@@ -1632,7 +2042,17 @@
                 ""
               ]
             },
-            "description": "Fetch list of active check-in tutorials, instructions, and video URLs."
+            "description": "Fetch list of active check-in tutorials, instructions, and video URLs.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1658,7 +2078,17 @@
                 ""
               ]
             },
-            "description": "Fetch tutorial details, troubleshooting text, and video stream URL by slug or ID."
+            "description": "Fetch tutorial details, troubleshooting text, and video stream URL by slug or ID.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1684,7 +2114,17 @@
                 ""
               ]
             },
-            "description": "Fetch tutorial details, video stream URL, and 'This still feels wrong' options for 'I hear but don't understand'."
+            "description": "Fetch tutorial details, video stream URL, and 'This still feels wrong' options for 'I hear but don't understand'.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1710,7 +2150,17 @@
                 ""
               ]
             },
-            "description": "Fetch tutorial details and video stream URL for 'Background noise is distracting'."
+            "description": "Fetch tutorial details and video stream URL for 'Background noise is distracting'.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1736,7 +2186,17 @@
                 ""
               ]
             },
-            "description": "Fetch tutorial details and video stream URL for 'Restaurants are hard'."
+            "description": "Fetch tutorial details and video stream URL for 'Restaurants are hard'.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1762,7 +2222,17 @@
                 ""
               ]
             },
-            "description": "Fetch tutorial details and video stream URL for 'TV is unclear'."
+            "description": "Fetch tutorial details and video stream URL for 'TV is unclear'.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1788,7 +2258,17 @@
                 ""
               ]
             },
-            "description": "Fetch tutorial details and video stream URL for 'I feel overwhelmed'."
+            "description": "Fetch tutorial details and video stream URL for 'I feel overwhelmed'.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1814,7 +2294,17 @@
                 ""
               ]
             },
-            "description": "Fetch tutorial details and text prompt flow metadata for 'Other' option."
+            "description": "Fetch tutorial details and text prompt flow metadata for 'Other' option.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1848,7 +2338,17 @@
                 ""
               ]
             },
-            "description": "Submit user's custom challenge text response when selecting the 'Other' tutorial option."
+            "description": "Submit user's custom challenge text response when selecting the 'Other' tutorial option.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1882,7 +2382,17 @@
                 ""
               ]
             },
-            "description": "Submit 'This still feels wrong' feedback when a tutorial doesn't fix the user's issue. Options: 'just_today', 'a_few_days', 'more_than_1_week', 'getting_worse'."
+            "description": "Submit 'This still feels wrong' feedback when a tutorial doesn't fix the user's issue. Options: 'just_today', 'a_few_days', 'more_than_1_week', 'getting_worse'.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         }
       ]
@@ -1912,7 +2422,17 @@
                 ""
               ]
             },
-            "description": "Fetch user's current week number (1 to 6), dashboard banner message, and active weekly tutorial details."
+            "description": "Fetch user's current week number (1 to 6), dashboard banner message, and active weekly tutorial details.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1936,7 +2456,17 @@
                 ""
               ]
             },
-            "description": "Fetch overview list of all 6 weekly tutorials with unlock, active, and completion status per week."
+            "description": "Fetch overview list of all 6 weekly tutorials with unlock, active, and completion status per week.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1961,7 +2491,17 @@
                 ""
               ]
             },
-            "description": "Get detailed tutorial content for Week 1 (Awareness)."
+            "description": "Get detailed tutorial content for Week 1 (Awareness).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -1986,7 +2526,17 @@
                 ""
               ]
             },
-            "description": "Get detailed tutorial content for Week 2 (Adjustment)."
+            "description": "Get detailed tutorial content for Week 2 (Adjustment).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -2012,7 +2562,17 @@
                 ""
               ]
             },
-            "description": "Mark Week 1 as completed for the authenticated user."
+            "description": "Mark Week 1 as completed for the authenticated user.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -2045,7 +2605,17 @@
                 ""
               ]
             },
-            "description": "Set user's 6-week journey start date (useful for testing week progression)."
+            "description": "Set user's 6-week journey start date (useful for testing week progression).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         }
       ]
@@ -2075,7 +2645,17 @@
                 ""
               ]
             },
-            "description": "Returns all video playlists and tutorial videos across the entire application in one single API call (Overview videos, Daily Lessons playlist, What's Normal video playlist, Device Care tutorial videos, and Weekly program tutorials)."
+            "description": "Returns all video playlists and tutorial videos across the entire application in one single API call (Overview videos, Daily Lessons playlist, What's Normal video playlist, Device Care tutorial videos, and Weekly program tutorials).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -2100,7 +2680,17 @@
                 ""
               ]
             },
-            "description": "Fetch the Welcome Tutorial Video (title, subtitle, description, video_url, thumbnail, and duration) uploaded by admin."
+            "description": "Fetch the Welcome Tutorial Video (title, subtitle, description, video_url, thumbnail, and duration) uploaded by admin.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -2125,7 +2715,17 @@
                 ""
               ]
             },
-            "description": "Fetch the Check-in Overview Video (title, subtitle, description, video_url, thumbnail, and duration) uploaded by admin."
+            "description": "Fetch the Check-in Overview Video (title, subtitle, description, video_url, thumbnail, and duration) uploaded by admin.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -2150,7 +2750,17 @@
                 ""
               ]
             },
-            "description": "Fetch the Care Team Support Video (title, subtitle, description, video_url, thumbnail, and duration) uploaded by admin."
+            "description": "Fetch the Care Team Support Video (title, subtitle, description, video_url, thumbnail, and duration) uploaded by admin.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -2175,7 +2785,17 @@
                 ""
               ]
             },
-            "description": "Fetch the Progress Overview Video (title, subtitle, description, video_url, thumbnail, and duration) uploaded by admin."
+            "description": "Fetch the Progress Overview Video (title, subtitle, description, video_url, thumbnail, and duration) uploaded by admin.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -2200,7 +2820,17 @@
                 ""
               ]
             },
-            "description": "Fetch Today's sequential daily lesson containing video URL, audio URL, title, subtitle, description, and key takeaways."
+            "description": "Fetch Today's sequential daily lesson containing video URL, audio URL, title, subtitle, description, and key takeaways.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         }
       ]
@@ -2230,7 +2860,17 @@
                 ""
               ]
             },
-            "description": "Returns list of all active What's Normal videos (id, title, subtitle, thumbnail, duration, order)."
+            "description": "Returns list of all active What's Normal videos (id, title, subtitle, thumbnail, duration, order).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -2256,7 +2896,17 @@
                 ""
               ]
             },
-            "description": "Detail view for a specific video containing video_url, description, thumbnail, and duration."
+            "description": "Detail view for a specific video containing video_url, description, thumbnail, and duration.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -2281,7 +2931,17 @@
                 ""
               ]
             },
-            "description": "Returns list of all active What's Normal audio tracks (id, title, subtitle, thumbnail, duration, order)."
+            "description": "Returns list of all active What's Normal audio tracks (id, title, subtitle, thumbnail, duration, order).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -2307,7 +2967,17 @@
                 ""
               ]
             },
-            "description": "Detail view & play URL for a specific audio track containing audio_url, description, thumbnail, and duration."
+            "description": "Detail view & play URL for a specific audio track containing audio_url, description, thumbnail, and duration.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         }
       ]
@@ -2336,7 +3006,17 @@
                 ""
               ]
             },
-            "description": "Returns full overview of all 4 sections in Skills & Strategies with their audio items."
+            "description": "Returns full overview of all 4 sections in Skills & Strategies with their audio items.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -2364,7 +3044,17 @@
                     ""
                   ]
                 },
-                "description": "Returns list of all 5 Everyday Listening Tips audio lessons."
+                "description": "Returns list of all 5 Everyday Listening Tips audio lessons.",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
               }
             },
             {
@@ -2390,7 +3080,17 @@
                     ""
                   ]
                 },
-                "description": "Fetch audio stream and guidance for 'Reduce background noise'."
+                "description": "Fetch audio stream and guidance for 'Reduce background noise'.",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
               }
             },
             {
@@ -2416,7 +3116,17 @@
                     ""
                   ]
                 },
-                "description": "Fetch audio stream and guidance for 'Face the speaker'."
+                "description": "Fetch audio stream and guidance for 'Face the speaker'.",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
               }
             },
             {
@@ -2442,7 +3152,17 @@
                     ""
                   ]
                 },
-                "description": "Fetch audio stream and guidance for 'Take breaks'."
+                "description": "Fetch audio stream and guidance for 'Take breaks'.",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
               }
             },
             {
@@ -2468,7 +3188,17 @@
                     ""
                   ]
                 },
-                "description": "Fetch audio stream and guidance for 'Use visual cues'."
+                "description": "Fetch audio stream and guidance for 'Use visual cues'.",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
               }
             },
             {
@@ -2494,7 +3224,17 @@
                     ""
                   ]
                 },
-                "description": "Fetch audio stream and guidance for 'Ask for repetition'."
+                "description": "Fetch audio stream and guidance for 'Ask for repetition'.",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
               }
             }
           ]
@@ -2524,7 +3264,17 @@
                     ""
                   ]
                 },
-                "description": "Returns list of all 5 Communication Strategies audio lessons."
+                "description": "Returns list of all 5 Communication Strategies audio lessons.",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
               }
             },
             {
@@ -2550,7 +3300,17 @@
                     ""
                   ]
                 },
-                "description": "Fetch audio stream and guidance for 'Start the conversation'."
+                "description": "Fetch audio stream and guidance for 'Start the conversation'.",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
               }
             },
             {
@@ -2576,7 +3336,17 @@
                     ""
                   ]
                 },
-                "description": "Fetch audio stream and guidance for 'Manage group conversations'."
+                "description": "Fetch audio stream and guidance for 'Manage group conversations'.",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
               }
             },
             {
@@ -2602,7 +3372,17 @@
                     ""
                   ]
                 },
-                "description": "Fetch audio stream and guidance for 'Improve understanding'."
+                "description": "Fetch audio stream and guidance for 'Improve understanding'.",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
               }
             },
             {
@@ -2628,7 +3408,17 @@
                     ""
                   ]
                 },
-                "description": "Fetch audio stream and guidance for 'Handle misunderstandings'."
+                "description": "Fetch audio stream and guidance for 'Handle misunderstandings'.",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
               }
             },
             {
@@ -2654,7 +3444,17 @@
                     ""
                   ]
                 },
-                "description": "Fetch audio stream and guidance for 'Build stronger connections'."
+                "description": "Fetch audio stream and guidance for 'Build stronger connections'.",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
               }
             }
           ]
@@ -2684,7 +3484,17 @@
                     ""
                   ]
                 },
-                "description": "Returns list of all 5 Building Confidence audio lessons."
+                "description": "Returns list of all 5 Building Confidence audio lessons.",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
               }
             },
             {
@@ -2710,7 +3520,17 @@
                     ""
                   ]
                 },
-                "description": "Fetch audio stream and guidance for 'Start small'."
+                "description": "Fetch audio stream and guidance for 'Start small'.",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
               }
             },
             {
@@ -2736,7 +3556,17 @@
                     ""
                   ]
                 },
-                "description": "Fetch audio stream and guidance for 'Prepare before conversations'."
+                "description": "Fetch audio stream and guidance for 'Prepare before conversations'.",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
               }
             },
             {
@@ -2762,7 +3592,17 @@
                     ""
                   ]
                 },
-                "description": "Fetch audio stream and guidance for 'Be patient with yourself'."
+                "description": "Fetch audio stream and guidance for 'Be patient with yourself'.",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
               }
             },
             {
@@ -2788,7 +3628,17 @@
                     ""
                   ]
                 },
-                "description": "Fetch audio stream and guidance for 'Practice every day'."
+                "description": "Fetch audio stream and guidance for 'Practice every day'.",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
               }
             },
             {
@@ -2814,7 +3664,17 @@
                     ""
                   ]
                 },
-                "description": "Fetch audio stream and guidance for 'Celebrate progress'."
+                "description": "Fetch audio stream and guidance for 'Celebrate progress'.",
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
               }
             }
           ]
@@ -2841,7 +3701,17 @@
                 ""
               ]
             },
-            "description": "Overview of Section 4: Practice and Progress (wear time, check-in, and hearing health score tracking)."
+            "description": "Overview of Section 4: Practice and Progress (wear time, check-in, and hearing health score tracking).",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         }
       ]
@@ -2871,7 +3741,17 @@
                 ""
               ]
             },
-            "description": "Returns list of all active hearing aid brands (Phonak, Oticon, ReSound, Widex, Starkey, etc.) with brand logos and model counts."
+            "description": "Returns list of all active hearing aid brands (Phonak, Oticon, ReSound, Widex, Starkey, etc.) with brand logos and model counts.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -2897,7 +3777,17 @@
                 ""
               ]
             },
-            "description": "Get brand details and all hearing aid models belonging to Phonak."
+            "description": "Get brand details and all hearing aid models belonging to Phonak.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -2922,7 +3812,17 @@
                 ""
               ]
             },
-            "description": "Returns list of all hearing aid device models across all brands."
+            "description": "Returns list of all hearing aid device models across all brands.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -2948,7 +3848,17 @@
                 ""
               ]
             },
-            "description": "Complete device model detail containing all 4 sections (Cleaning Guide, Care Tips, Troubleshooting, User Manual) with text, manual link, and multiple tutorial videos."
+            "description": "Complete device model detail containing all 4 sections (Cleaning Guide, Care Tips, Troubleshooting, User Manual) with text, manual link, and multiple tutorial videos.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -2974,7 +3884,17 @@
                 ""
               ]
             },
-            "description": "Detail view for a specific care section containing text instructions, live user manual URL, and tutorial videos."
+            "description": "Detail view for a specific care section containing text instructions, live user manual URL, and tutorial videos.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         }
       ]
@@ -3004,7 +3924,17 @@
                 ""
               ]
             },
-            "description": "Fetch the full support chat message history between the mobile user and the Care Team specialists."
+            "description": "Fetch the full support chat message history between the mobile user and the Care Team specialists.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -3037,7 +3967,17 @@
                 ""
               ]
             },
-            "description": "Post a new message to the Care Team. Supports text or multipart file attachments (pictures/images, videos, audio voice notes, documents). Automatically alerts admin via email."
+            "description": "Post a new message to the Care Team. Supports text or multipart file attachments (pictures/images, videos, audio voice notes, documents). Automatically alerts admin via email.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         },
         {
@@ -3062,7 +4002,17 @@
                 ""
               ]
             },
-            "description": "Mark all care team specialist messages as read for the current user and reset unread message counter."
+            "description": "Mark all care team specialist messages as read for the current user and reset unread message counter.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
           }
         }
       ]
