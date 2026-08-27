@@ -2980,10 +2980,10 @@
       ]
     },
     {
-      "name": "Care Team & Admin Support Chat System",
+      "name": "Care Team Support Chat",
       "item": [
         {
-          "name": "Get User Active Support Thread & History",
+          "name": "Get Full Support Chat History",
           "request": {
             "method": "GET",
             "header": [
@@ -2993,22 +2993,22 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/support-chat/my-conversation/",
+              "raw": "{{base_url}}/api/support-chat/messages/",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "support-chat",
-                "my-conversation",
+                "messages",
                 ""
               ]
             },
-            "description": "Fetch mobile user's active care team support chat conversation and full message thread history."
+            "description": "Fetch the full support chat message history between the mobile user and the Care Team specialists."
           }
         },
         {
-          "name": "Send User Message to Care Team",
+          "name": "Send Message to Support (Text, Picture, Video, Audio, File)",
           "request": {
             "method": "POST",
             "header": [
@@ -3037,36 +3037,11 @@
                 ""
               ]
             },
-            "description": "User sends message (text, image, audio voice note, file attachment) to Care Team."
+            "description": "Post a new message to the Care Team. Supports text or multipart file attachments (pictures/images, videos, audio voice notes, documents). Automatically alerts admin via email."
           }
         },
         {
-          "name": "List Messages in Support Thread",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/support-chat/messages/",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "support-chat",
-                "messages",
-                ""
-              ]
-            },
-            "description": "Get message history for current user conversation with optional ?since_id= query param for real-time polling."
-          }
-        },
-        {
-          "name": "Mark Care Team Messages Read",
+          "name": "Mark Support Messages as Read",
           "request": {
             "method": "POST",
             "header": [
@@ -3087,92 +3062,7 @@
                 ""
               ]
             },
-            "description": "Mark all care team messages as read for current user."
-          }
-        },
-        {
-          "name": "Get User Unread Message Count",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/support-chat/unread-count/",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "support-chat",
-                "unread-count",
-                ""
-              ]
-            },
-            "description": "Get count of unread care team messages for the logged-in user."
-          }
-        },
-        {
-          "name": "Care Team Admin: List All User Conversations",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/support-chat/admin/conversations/",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "support-chat",
-                "admin",
-                "conversations",
-                ""
-              ]
-            },
-            "description": "Care Team Admin endpoint to list all user support conversations with unread indicators and status."
-          }
-        },
-        {
-          "name": "Care Team Admin: Reply to User Conversation",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"conversation_id\": 1,\n  \"message_text\": \"Hello! I'd be happy to assist you with your hearing aid cleaning guide.\",\n  \"attachment_type\": \"text\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/support-chat/admin/reply/",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "support-chat",
-                "admin",
-                "reply",
-                ""
-              ]
-            },
-            "description": "Care Team Admin sends a reply message to a user conversation."
+            "description": "Mark all care team specialist messages as read for the current user and reset unread message counter."
           }
         }
       ]

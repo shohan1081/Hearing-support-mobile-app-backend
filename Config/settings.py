@@ -90,12 +90,7 @@ UNFOLD = {
                 "collapsible": False,
                 "items": [
                     {
-                        "title": "💬 User Support Messages (Live Feed)",
-                        "icon": "mark_chat_unread",
-                        "link": reverse_lazy("admin:support_chat_supportmessage_changelist"),
-                    },
-                    {
-                        "title": "📬 Support Chat Threads",
+                        "title": "💬 User Support Chat",
                         "icon": "forum",
                         "link": reverse_lazy("admin:support_chat_supportconversation_changelist"),
                     },

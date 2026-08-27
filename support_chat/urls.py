@@ -1,25 +1,21 @@
-from django.urls import path
+﻿from django.urls import path
 from .views import (
     UserConversationView,
     SendMessageView,
-    MessageListView,
     MarkReadView,
-    UnreadCountView,
-    AdminConversationListView,
-    AdminReplyView,
 )
 
 app_name = 'support_chat'
 
 urlpatterns = [
-    # Mobile User Support Chat APIs
+    # 1. Get Full Support Chat History
+    path('messages/', UserConversationView.as_view(), name='message-list'),
+    path('conversation/', UserConversationView.as_view(), name='conversation'),
     path('my-conversation/', UserConversationView.as_view(), name='my-conversation'),
-    path('send/', SendMessageView.as_view(), name='send-message'),
-    path('messages/', MessageListView.as_view(), name='message-list'),
-    path('mark-read/', MarkReadView.as_view(), name='mark-read'),
-    path('unread-count/', UnreadCountView.as_view(), name='unread-count'),
 
-    # Care Team Admin APIs
-    path('admin/conversations/', AdminConversationListView.as_view(), name='admin-conversations'),
-    path('admin/reply/', AdminReplyView.as_view(), name='admin-reply'),
+    # 2. Post Message to Support (Text, Picture, Video, Audio, File)
+    path('send/', SendMessageView.as_view(), name='send-message'),
+
+    # 3. Mark Support Messages as Read
+    path('mark-read/', MarkReadView.as_view(), name='mark-read'),
 ]

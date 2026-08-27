@@ -26,8 +26,8 @@ class SupportConversationAdminForm(forms.ModelForm):
     )
     admin_reply_attachment = forms.FileField(
         required=False,
-        label=_("📎 Attach File / Voice Note / Image (Optional)"),
-        help_text=_("Upload an optional image, audio voice note (MP3/WAV), or document to send alongside your reply.")
+        label=_("📎 Attach File / Picture / Video / Audio (Optional)"),
+        help_text=_("Upload an optional picture, video clip, audio voice note, or document to send alongside your reply.")
     )
 
     class Meta:
@@ -52,6 +52,14 @@ class SupportMessageInline(StackedInline):
                 '<img src="{}" style="max-height: 120px; border-radius: 6px; border: 1px solid #e2e8f0;" />'
                 '</a>',
                 url, url
+            )
+        elif obj.attachment_type == SupportMessage.TYPE_VIDEO:
+            return format_html(
+                '<video controls preload="metadata" style="max-height: 120px; max-width: 220px; border-radius: 6px;">'
+                '<source src="{}">'
+                'Your browser does not support video.'
+                '</video>',
+                url
             )
         elif obj.attachment_type == SupportMessage.TYPE_AUDIO:
             return format_html(
@@ -99,7 +107,7 @@ class SupportConversationAdmin(ModelAdmin):
         }),
         (_('💬 Full Conversation History Timeline'), {
             'fields': ('conversation_chat_feed',),
-            'description': _("Live chronological conversation feed between client and care specialists.")
+            'description': _("Live chronological conversation feed between client and care specialists with picture, video, and audio player.")
         }),
         (_('✍️ Reply to Client (In-App Chat & Email Notification)'), {
             'fields': ('admin_reply_text', 'admin_reply_attachment'),
@@ -128,9 +136,11 @@ class SupportConversationAdmin(ModelAdmin):
             attachment_type = SupportMessage.TYPE_TEXT
             if reply_attachment:
                 fname = reply_attachment.name.lower()
-                if fname.endswith(('.jpg', '.jpeg', '.png', '.gif', '.webp')):
+                if fname.endswith(('.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg')):
                     attachment_type = SupportMessage.TYPE_IMAGE
-                elif fname.endswith(('.mp3', '.wav', '.aac', '.m4a', '.ogg')):
+                elif fname.endswith(('.mp4', '.mov', '.avi', '.mkv', '.webm', '.3gp', '.m4v')):
+                    attachment_type = SupportMessage.TYPE_VIDEO
+                elif fname.endswith(('.mp3', '.wav', '.aac', '.m4a', '.ogg', '.flac', '.wma')):
                     attachment_type = SupportMessage.TYPE_AUDIO
                 else:
                     attachment_type = SupportMessage.TYPE_FILE
@@ -261,19 +271,21 @@ class SupportConversationAdmin(ModelAdmin):
         html_blocks = ['<div style="background: #f1f5f9; padding: 16px; border-radius: 8px; max-height: 480px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; border: 1px solid #cbd5e1;">']
         for msg in messages:
             created = msg.created_at.strftime('%b %d, %Y %I:%M %p')
+            att_html = ""
+            if msg.attachment:
+                url = msg.get_attachment_url()
+                if msg.attachment_type == SupportMessage.TYPE_IMAGE:
+                    att_html = f'<div style="margin-top: 6px;"><a href="{url}" target="_blank"><img src="{url}" style="max-height: 120px; border-radius: 6px; border: 1px solid #e2e8f0;" /></a></div>'
+                elif msg.attachment_type == SupportMessage.TYPE_VIDEO:
+                    att_html = f'<div style="margin-top: 6px;"><video controls preload="metadata" style="max-height: 140px; max-width: 260px; border-radius: 6px;"><source src="{url}"></video></div>'
+                elif msg.attachment_type == SupportMessage.TYPE_AUDIO:
+                    att_html = f'<div style="margin-top: 6px;"><audio controls preload="none" style="height: 28px; width: 190px;"><source src="{url}"></audio></div>'
+                else:
+                    att_html = f'<div style="margin-top: 6px;"><a href="{url}" target="_blank" style="font-weight: 500;">📥 Download Attachment</a></div>'
+
             if msg.is_from_admin:
                 # Care Team Message (Right Aligned, Light Green)
                 sender = msg.sender_name or "Care Specialist"
-                att_html = ""
-                if msg.attachment:
-                    url = msg.get_attachment_url()
-                    if msg.attachment_type == SupportMessage.TYPE_IMAGE:
-                        att_html = f'<div style="margin-top: 6px;"><a href="{url}" target="_blank"><img src="{url}" style="max-height: 100px; border-radius: 6px;" /></a></div>'
-                    elif msg.attachment_type == SupportMessage.TYPE_AUDIO:
-                        att_html = f'<div style="margin-top: 6px;"><audio controls preload="none" style="height: 28px; width: 180px;"><source src="{url}"></audio></div>'
-                    else:
-                        att_html = f'<div style="margin-top: 6px;"><a href="{url}" target="_blank" style="color: #047857; font-weight: 500;">📥 Attachment</a></div>'
-
                 html_blocks.append(
                     f'<div style="align-self: flex-end; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px 12px 2px 12px; padding: 10px 14px; max-width: 75%;">'
                     f'<div style="font-size: 11px; font-weight: 700; color: #047857;">🩺 {sender} <span style="font-weight: 400; color: #6ee7b7; margin-left: 6px;">{created}</span></div>'
@@ -284,16 +296,6 @@ class SupportConversationAdmin(ModelAdmin):
             else:
                 # User Message (Left Aligned, Light Blue)
                 sender = msg.sender_name or getattr(obj.user, 'name', '') or obj.user.email
-                att_html = ""
-                if msg.attachment:
-                    url = msg.get_attachment_url()
-                    if msg.attachment_type == SupportMessage.TYPE_IMAGE:
-                        att_html = f'<div style="margin-top: 6px;"><a href="{url}" target="_blank"><img src="{url}" style="max-height: 100px; border-radius: 6px;" /></a></div>'
-                    elif msg.attachment_type == SupportMessage.TYPE_AUDIO:
-                        att_html = f'<div style="margin-top: 6px;"><audio controls preload="none" style="height: 28px; width: 180px;"><source src="{url}"></audio></div>'
-                    else:
-                        att_html = f'<div style="margin-top: 6px;"><a href="{url}" target="_blank" style="color: #1d4ed8; font-weight: 500;">📥 Attachment</a></div>'
-
                 html_blocks.append(
                     f'<div style="align-self: flex-start; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px 12px 12px 2px; padding: 10px 14px; max-width: 75%;">'
                     f'<div style="font-size: 11px; font-weight: 700; color: #1d4ed8;">👤 {sender} <span style="font-weight: 400; color: #93c5fd; margin-left: 6px;">{created}</span></div>'
@@ -305,125 +307,3 @@ class SupportConversationAdmin(ModelAdmin):
         html_blocks.append('</div>')
         return mark_safe(''.join(html_blocks))
     conversation_chat_feed.short_description = _("Live Message Timeline")
-
-
-@admin.register(SupportMessage)
-class SupportMessageAdmin(ModelAdmin):
-    list_display = (
-        'id',
-        'sender_type_badge',
-        'user_badge',
-        'message_preview',
-        'attachment_preview',
-        'read_badge',
-        'created_at',
-    )
-    list_display_links = ('id', 'sender_type_badge', 'user_badge')
-    list_filter = ('is_from_admin', 'is_read', 'attachment_type', 'created_at')
-    search_fields = (
-        'message_text',
-        'sender__email',
-        'sender__name',
-        'sender_name',
-        'conversation__user__email',
-        'conversation__user__name'
-    )
-    ordering = ('-created_at',)
-    readonly_fields = ('conversation_link', 'media_viewer', 'created_at')
-
-    fieldsets = (
-        (_('Sender & Conversation Context'), {
-            'fields': ('conversation_link', 'conversation', 'sender', 'is_from_admin', 'sender_name')
-        }),
-        (_('Message Content & Media Attachment'), {
-            'fields': ('message_text', 'attachment', 'attachment_type', 'media_viewer')
-        }),
-        (_('Read Receipt & Audit'), {
-            'fields': ('is_read', 'read_at', 'created_at')
-        }),
-    )
-
-    def conversation_link(self, obj):
-        if not obj or not obj.conversation:
-            return "-"
-        url = f"/admin/support_chat/supportconversation/{obj.conversation.id}/change/"
-        return format_html(
-            '<a href="{}" style="background: #2563eb; color: #ffffff; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">'
-            '💬 Open Full Conversation Thread & Reply to User'
-            '</a>',
-            url
-        )
-    conversation_link.short_description = _("Conversation Thread")
-
-    def sender_type_badge(self, obj):
-        if obj.is_from_admin:
-            return format_html('<span style="background: #dcfce7; color: #16a34a; padding: 3px 8px; border-radius: 9999px; font-weight: 600; font-size: 11px;">🩺 Care Team</span>')
-        return format_html('<span style="background: #eff6ff; color: #2563eb; padding: 3px 8px; border-radius: 9999px; font-weight: 600; font-size: 11px;">👤 User</span>')
-    sender_type_badge.short_description = _('Sender Type')
-
-    def user_badge(self, obj):
-        user = obj.conversation.user if obj.conversation and obj.conversation.user else obj.sender
-        name = getattr(user, 'name', '') or ''
-        email = getattr(user, 'email', '')
-        display = f"{name} ({email})" if name else email
-        return format_html('<div style="font-weight: 500; color: #1e293b;">{}</div>', display)
-    user_badge.short_description = _('User / Client')
-
-    def message_preview(self, obj):
-        if obj.message_text:
-            return obj.message_text[:50]
-        if obj.attachment:
-            return f"[{obj.attachment_type.upper()} Attachment]"
-        return "-"
-    message_preview.short_description = _('Message Text')
-
-    def attachment_preview(self, obj):
-        if not obj.attachment:
-            return format_html('<span style="color: #94a3b8;">None</span>')
-        url = obj.get_attachment_url()
-        if obj.attachment_type == SupportMessage.TYPE_IMAGE:
-            return format_html('<a href="{}" target="_blank">🖼️ Image</a>', url)
-        elif obj.attachment_type == SupportMessage.TYPE_AUDIO:
-            return format_html(
-                '<audio controls preload="none" style="height: 26px; width: 150px;"><source src="{}"></audio>',
-                url
-            )
-        return format_html('<a href="{}" target="_blank">📎 File</a>', url)
-    attachment_preview.short_description = _('Attachment')
-
-    def read_badge(self, obj):
-        if not obj.is_read:
-            return format_html('<span style="background: #fee2e2; color: #dc2626; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 11px;">🔴 NEW</span>')
-        return format_html('<span style="color: #10b981; font-weight: 500;">✓ Read</span>')
-    read_badge.short_description = _('Read Status')
-
-    def media_viewer(self, obj):
-        if not obj or not obj.attachment:
-            return format_html('<span style="color: #9ca3af;">No file attached.</span>')
-        url = obj.get_attachment_url()
-        if obj.attachment_type == SupportMessage.TYPE_IMAGE:
-            return format_html(
-                '<div style="margin-top: 6px;">'
-                '<a href="{}" target="_blank">'
-                '<img src="{}" style="max-height: 200px; border-radius: 8px; border: 1px solid #e2e8f0;" />'
-                '</a>'
-                '</div>',
-                url, url
-            )
-        elif obj.attachment_type == SupportMessage.TYPE_AUDIO:
-            return format_html(
-                '<div style="margin-top: 6px;">'
-                '<audio controls preload="metadata" style="width: 320px;">'
-                '<source src="{}" type="audio/mpeg">'
-                'Your browser does not support audio.'
-                '</audio>'
-                '</div>',
-                url
-            )
-        return format_html(
-            '<div style="margin-top: 6px;">'
-            '<a href="{}" target="_blank" style="display: inline-block; background: #f1f5f9; padding: 8px 14px; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: 600; color: #1e293b;">📥 Download File ({})</a>'
-            '</div>',
-            url, obj.attachment.name
-        )
-    media_viewer.short_description = _("Media Viewer")

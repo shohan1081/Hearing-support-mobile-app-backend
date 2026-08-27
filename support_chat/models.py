@@ -1,4 +1,4 @@
-from django.db import models
+﻿from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -83,18 +83,21 @@ class SupportConversation(models.Model):
 
 class SupportMessage(models.Model):
     """
-    Individual message sent within a support chat conversation
+    Individual message sent within a support chat conversation.
+    Supports text, pictures (images), videos, audio voice notes, and document files.
     """
     TYPE_TEXT = 'text'
     TYPE_IMAGE = 'image'
+    TYPE_VIDEO = 'video'
     TYPE_AUDIO = 'audio'
     TYPE_FILE = 'file'
 
     TYPE_CHOICES = (
         (TYPE_TEXT, _('Text')),
-        (TYPE_IMAGE, _('Image')),
-        (TYPE_AUDIO, _('Audio Voice Note')),
-        (TYPE_FILE, _('Document File')),
+        (TYPE_IMAGE, _('Image / Picture')),
+        (TYPE_VIDEO, _('Video')),
+        (TYPE_AUDIO, _('Audio / Voice Note')),
+        (TYPE_FILE, _('Document / File')),
     )
 
     conversation = models.ForeignKey(
@@ -132,14 +135,14 @@ class SupportMessage(models.Model):
         upload_to='support_chat/attachments/',
         null=True,
         blank=True,
-        help_text=_("Uploaded image, audio voice note, or document attachment")
+        help_text=_("Uploaded picture, video, audio voice note, or document attachment")
     )
     attachment_type = models.CharField(
         _('attachment type'),
         max_length=20,
         choices=TYPE_CHOICES,
         default=TYPE_TEXT,
-        help_text=_("Type of attachment: text, image, audio, or file")
+        help_text=_("Type of attachment: text, image, video, audio, or file")
     )
     is_read = models.BooleanField(
         _('is read'),
