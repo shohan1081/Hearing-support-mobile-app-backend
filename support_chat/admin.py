@@ -3,12 +3,36 @@ from django import forms
 from django.utils import timezone
 from django.utils.html import format_html, mark_safe
 from django.utils.translation import gettext_lazy as _
-from django.shortcuts import redirect
 from django.contrib import messages as django_messages
 from unfold.admin import ModelAdmin, StackedInline
 
 from .models import SupportConversation, SupportMessage
 from .utils import send_user_admin_reply_notification
+
+
+class SupportConversationAdminForm(forms.ModelForm):
+    """
+    Custom admin form with dedicated Care Team Reply box
+    """
+    admin_reply_text = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'rows': 4,
+            'placeholder': '💬 Type your care team reply to the client here...\n\nWhen you click SAVE below, this message will immediately be sent to the user in their mobile app support chat, and an instant email notification will be delivered to their registered email address.',
+            'style': 'width: 100%; border: 2px solid #3b82f6; border-radius: 8px; padding: 12px; font-size: 14px; background: #ffffff;'
+        }),
+        required=False,
+        label=_("💬 Care Specialist Reply Message"),
+        help_text=_("Enter your response message to the client. Saving this page will deliver this message to the mobile app chat and send an email alert to the client.")
+    )
+    admin_reply_attachment = forms.FileField(
+        required=False,
+        label=_("📎 Attach File / Voice Note / Image (Optional)"),
+        help_text=_("Upload an optional image, audio voice note (MP3/WAV), or document to send alongside your reply.")
+    )
+
+    class Meta:
+        model = SupportConversation
+        fields = '__all__'
 
 
 class SupportMessageInline(StackedInline):
@@ -43,6 +67,7 @@ class SupportMessageInline(StackedInline):
 
 @admin.register(SupportConversation)
 class SupportConversationAdmin(ModelAdmin):
+    form = SupportConversationAdminForm
     list_display = (
         'id',
         'client_name_badge',
@@ -69,21 +94,86 @@ class SupportConversationAdmin(ModelAdmin):
     inlines = [SupportMessageInline]
 
     fieldsets = (
-        (_('Client Information'), {
+        (_('👤 Client Information'), {
             'fields': ('client_info_display',)
         }),
-        (_('Conversation Thread & Full Chat History'), {
+        (_('💬 Full Conversation History Timeline'), {
             'fields': ('conversation_chat_feed',),
-            'description': _("Live chronological conversation feed between client and care team specialists.")
+            'description': _("Live chronological conversation feed between client and care specialists.")
         }),
-        (_('Conversation Management & Care Status'), {
-            'fields': ('subject', 'status', 'assigned_admin', 'unread_admin_count', 'unread_user_count')
+        (_('✍️ Reply to Client (In-App Chat & Email Notification)'), {
+            'fields': ('admin_reply_text', 'admin_reply_attachment'),
+            'description': _(
+                "Type your response to the user below and click SAVE (or Save and continue editing). "
+                "The message will be delivered to the client's mobile app in real-time, "
+                "and an email notification will be dispatched to their registered email address."
+            )
+        }),
+        (_('⚙️ Conversation Management & Status'), {
+            'fields': ('status', 'assigned_admin', 'subject', 'unread_admin_count', 'unread_user_count')
         }),
         (_('Timestamps'), {
             'fields': ('last_message_at', 'created_at', 'updated_at'),
             'classes': ('collapse',)
         }),
     )
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+
+        reply_text = form.cleaned_data.get('admin_reply_text', '').strip()
+        reply_attachment = form.cleaned_data.get('admin_reply_attachment')
+
+        if reply_text or reply_attachment:
+            attachment_type = SupportMessage.TYPE_TEXT
+            if reply_attachment:
+                fname = reply_attachment.name.lower()
+                if fname.endswith(('.jpg', '.jpeg', '.png', '.gif', '.webp')):
+                    attachment_type = SupportMessage.TYPE_IMAGE
+                elif fname.endswith(('.mp3', '.wav', '.aac', '.m4a', '.ogg')):
+                    attachment_type = SupportMessage.TYPE_AUDIO
+                else:
+                    attachment_type = SupportMessage.TYPE_FILE
+
+            admin_name = getattr(request.user, 'name', '') or "Care Team Specialist"
+
+            message = SupportMessage.objects.create(
+                conversation=obj,
+                sender=request.user,
+                is_from_admin=True,
+                sender_name=admin_name,
+                message_text=reply_text,
+                attachment=reply_attachment,
+                attachment_type=attachment_type,
+                is_read=False
+            )
+
+            # Mark all previous user messages as read for admin
+            obj.messages.filter(is_from_admin=False, is_read=False).update(
+                is_read=True,
+                read_at=timezone.now()
+            )
+
+            # Update conversation state
+            obj.unread_admin_count = 0
+            obj.unread_user_count += 1
+            obj.status = SupportConversation.STATUS_IN_PROGRESS
+            obj.last_message_at = timezone.now()
+            obj.assigned_admin = request.user
+            obj.save(update_fields=['unread_admin_count', 'unread_user_count', 'status', 'last_message_at', 'assigned_admin', 'updated_at'])
+
+            # Send email notification to the user
+            send_user_admin_reply_notification(message, request=request)
+
+            client_name = getattr(obj.user, 'name', '') or obj.user.email
+            django_messages.success(
+                request,
+                format_html(
+                    '✅ <strong>Care Team reply successfully sent to {}!</strong> '
+                    'The message has been added to their support chat thread and an email alert was delivered.',
+                    client_name
+                )
+            )
 
     def client_name_badge(self, obj):
         name = getattr(obj.user, 'name', '') or 'User'
@@ -239,11 +329,11 @@ class SupportMessageAdmin(ModelAdmin):
         'conversation__user__name'
     )
     ordering = ('-created_at',)
-    readonly_fields = ('media_viewer', 'created_at')
+    readonly_fields = ('conversation_link', 'media_viewer', 'created_at')
 
     fieldsets = (
         (_('Sender & Conversation Context'), {
-            'fields': ('conversation', 'sender', 'is_from_admin', 'sender_name')
+            'fields': ('conversation_link', 'conversation', 'sender', 'is_from_admin', 'sender_name')
         }),
         (_('Message Content & Media Attachment'), {
             'fields': ('message_text', 'attachment', 'attachment_type', 'media_viewer')
@@ -252,6 +342,18 @@ class SupportMessageAdmin(ModelAdmin):
             'fields': ('is_read', 'read_at', 'created_at')
         }),
     )
+
+    def conversation_link(self, obj):
+        if not obj or not obj.conversation:
+            return "-"
+        url = f"/admin/support_chat/supportconversation/{obj.conversation.id}/change/"
+        return format_html(
+            '<a href="{}" style="background: #2563eb; color: #ffffff; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">'
+            '💬 Open Full Conversation Thread & Reply to User'
+            '</a>',
+            url
+        )
+    conversation_link.short_description = _("Conversation Thread")
 
     def sender_type_badge(self, obj):
         if obj.is_from_admin:

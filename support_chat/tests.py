@@ -1,4 +1,4 @@
-﻿from django.test import TestCase
+from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.core import mail
@@ -135,3 +135,55 @@ class SupportChatTestCase(TestCase):
         sent_mail = mail.outbox[0]
         self.assertIn("Hearing Care Support: New Reply", sent_mail.subject)
         self.assertIn(self.user.email, sent_mail.to)
+
+    def test_admin_panel_form_reply_submission(self):
+        """Verify that an admin replying via the Django admin changeform sends message and email"""
+        from django.test import Client
+        admin_web_client = Client()
+        admin_web_client.force_login(self.admin_user)
+
+        conv = SupportConversation.objects.create(
+            user=self.user,
+            subject="Care Consultation",
+            status=SupportConversation.STATUS_OPEN,
+            unread_admin_count=1
+        )
+        SupportMessage.objects.create(
+            conversation=conv,
+            sender=self.user,
+            is_from_admin=False,
+            message_text="How can I pair Bluetooth?"
+        )
+
+        mail.outbox = []
+        change_url = reverse('admin:support_chat_supportconversation_change', args=[conv.id])
+        post_data = {
+            'user': str(self.user.id),
+            'subject': conv.subject,
+            'status': SupportConversation.STATUS_OPEN,
+            'unread_admin_count': 0,
+            'unread_user_count': 0,
+            'admin_reply_text': 'Press and hold the pairing button for 5 seconds until the LED flashes blue.',
+            'messages-TOTAL_FORMS': '1',
+            'messages-INITIAL_FORMS': '1',
+            'messages-MIN_NUM_FORMS': '0',
+            'messages-MAX_NUM_FORMS': '1000',
+            'messages-0-id': str(conv.messages.first().id),
+            'messages-0-conversation': str(conv.id),
+            'messages-0-sender': str(self.user.id),
+            'messages-0-sender_name': self.user.name,
+            'messages-0-message_text': 'How can I pair Bluetooth?',
+            'messages-0-attachment_type': 'text',
+            '_save': 'Save'
+        }
+        res = admin_web_client.post(change_url, post_data)
+        self.assertEqual(res.status_code, 302)  # Redirect on successful save
+
+        # Verify admin message was created
+        admin_msg = conv.messages.filter(is_from_admin=True).first()
+        self.assertIsNotNone(admin_msg)
+        self.assertIn("LED flashes blue", admin_msg.message_text)
+
+        # Verify email was dispatched to the client
+        self.assertGreaterEqual(len(mail.outbox), 1)
+        self.assertIn(self.user.email, mail.outbox[0].to)
