@@ -1,0 +1,17 @@
+postgres_data
+redis_data
+certbot
+staticfiles
+media
+.git
+.gitignore
+.env
+.env.*
+venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.sqlite3
+*.log
