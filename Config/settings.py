@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     #third party apps can be added here
+    'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
     # coustom apps can be added here
@@ -294,6 +295,7 @@ AUTH_USER_MODEL = 'users.User'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -469,8 +471,30 @@ if USE_S3:
 OPENAI_API_KEY = config('OPENAI_API_KEY', default='')
 OPENAI_CHAT_MODEL = config('OPENAI_CHAT_MODEL', default='gpt-4o-mini')
 
-    
+# ==============================================================================
+# Domain, Security & Reverse Proxy (Nginx / HTTPS / navriel.app)
+# ==============================================================================
 
+# Inform Django it is behind an HTTPS reverse proxy (Nginx)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
+# CSRF Trusted Origins (Required for Django 4+ and 5+ on custom domains & HTTPS admin)
+CSRF_TRUSTED_ORIGINS = config(
+    'CSRF_TRUSTED_ORIGINS',
+    default='https://navriel.app,https://api.navriel.app,https://www.navriel.app,http://localhost:8000,http://127.0.0.1:8000',
+    cast=lambda v: [s.strip() for s in v.split(',') if s.strip()]
+)
 
+# CORS (Cross-Origin Resource Sharing)
+CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=True, cast=bool)
+CORS_ALLOWED_ORIGINS = config(
+    'CORS_ALLOWED_ORIGINS',
+    default='https://navriel.app,https://api.navriel.app,https://www.navriel.app',
+    cast=lambda v: [s.strip() for s in v.split(',') if s.strip()]
+)
+CORS_ALLOW_CREDENTIALS = True
 
+# Production SSL redirects (enabled when SECURE_SSL_REDIRECT=True in .env.production)
+SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=False, cast=bool)
+SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', default=False, cast=bool)
+CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', default=False, cast=bool)

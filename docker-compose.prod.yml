@@ -89,6 +89,23 @@ services:
     networks:
       - app-network
 
+  # ----------------------------------------------------------------------------
+  # Certbot SSL Auto-Renewal Service
+  # ----------------------------------------------------------------------------
+  certbot:
+    image: certbot/certbot:latest
+    container_name: hearing_app_certbot
+    restart: always
+    volumes:
+      - certbot_etc:/etc/letsencrypt
+      - certbot_var:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    depends_on:
+      - nginx
+    networks:
+      - app-network
+
+
 volumes:
   certbot_etc:
   certbot_var:
