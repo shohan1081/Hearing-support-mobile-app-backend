@@ -2294,3 +2294,381 @@ class UserIssueReportDetailView(APIView):
 
 
 
+
+# ============================================================================
+# Hearing Rehab Plan & Milestones (Progress screens)
+# ============================================================================
+
+# Fixed 5-stage rehabilitation journey every user moves through, keyed to the
+# number of days since they started. end_day = None means the final, open-ended
+# stage the user stays in from then on.
+REHAB_PLAN_STAGES = [
+    {
+        "key": "awareness",
+        "title": "Awareness",
+        "timeframe": "Days 1-7",
+        "start_day": 1,
+        "end_day": 7,
+        "description": "Getting used to new sounds. Wear your hearing machine in quiet places and notice what you hear.",
+    },
+    {
+        "key": "consistency",
+        "title": "Consistency",
+        "timeframe": "Weeks 1-2",
+        "start_day": 8,
+        "end_day": 14,
+        "description": "Building a daily habit. Aim to reach your wear goal every day and log a check-in.",
+    },
+    {
+        "key": "coordination",
+        "title": "Coordination",
+        "timeframe": "Weeks 2-4",
+        "start_day": 15,
+        "end_day": 28,
+        "description": "Your brain starts coordinating sounds. Practice listening in busier places like shops and cafes.",
+    },
+    {
+        "key": "clarity",
+        "title": "Clarity",
+        "timeframe": "Weeks 4-5",
+        "start_day": 29,
+        "end_day": 35,
+        "description": "Speech becomes clearer. Focus on conversations and fine-tuning your comfort levels.",
+    },
+    {
+        "key": "optimization",
+        "title": "Optimization",
+        "timeframe": "Ongoing",
+        "start_day": 36,
+        "end_day": None,
+        "description": "Long-term maintenance. Keep wearing daily, review your progress, and adjust with your care team.",
+    },
+]
+
+
+def get_journey_start_date(user):
+    """
+    Return the date the user's rehab journey started.
+
+    Uses the earliest reliable signal we have: onboarding creation, the first
+    logged wear time, or the account creation date as the final fallback.
+    """
+    candidates = []
+
+    joined = getattr(user, 'date_joined', None)
+    if joined:
+        candidates.append(timezone.localtime(joined).date() if timezone.is_aware(joined) else joined.date())
+
+    onboarding = getattr(user, 'onboarding', None)
+    if onboarding is not None and getattr(onboarding, 'created_at', None):
+        created = onboarding.created_at
+        candidates.append(timezone.localtime(created).date() if timezone.is_aware(created) else created.date())
+
+    first_log = HearingAidWearTime.objects.filter(user=user).order_by('date').first()
+    if first_log:
+        candidates.append(first_log.date)
+
+    if not candidates:
+        return timezone.now().date()
+
+    return min(candidates)
+
+
+def get_wear_streak_days(user, reference_date=None):
+    """
+    Count consecutive days the user logged any hearing machine wear time,
+    counting backwards from today.
+
+    Today only counts when it has a log, so an unlogged today does not break a
+    streak that is still alive from yesterday.
+    """
+    if reference_date is None:
+        reference_date = timezone.now().date()
+
+    logged_dates = set(
+        HearingAidWearTime.objects.filter(
+            user=user,
+            date__lte=reference_date,
+            date__gte=reference_date - timezone.timedelta(days=365),
+        ).exclude(hours=0, minutes=0).values_list('date', flat=True)
+    )
+
+    if not logged_dates:
+        return 0
+
+    cursor = reference_date
+    if cursor not in logged_dates:
+        cursor = cursor - timezone.timedelta(days=1)
+
+    streak = 0
+    while cursor in logged_dates:
+        streak += 1
+        cursor = cursor - timezone.timedelta(days=1)
+
+    return streak
+
+
+def get_average_wear_hours(user, start_date, end_date):
+    """
+    Average wear hours per day across the given inclusive date range.
+    Days with no log count as zero so the average reflects real consistency.
+    """
+    days = (end_date - start_date).days + 1
+    if days <= 0:
+        return 0.0
+
+    logs = HearingAidWearTime.objects.filter(user=user, date__range=[start_date, end_date])
+    total_hours = sum([log.total_hours for log in logs])
+    return round(total_hours / float(days), 1)
+
+
+def build_rehab_plan(user):
+    """
+    Build the 5-stage rehab plan with each stage marked completed, current or upcoming.
+    """
+    today = timezone.now().date()
+    start_date = get_journey_start_date(user)
+    day_number = max(1, (today - start_date).days + 1)
+
+    stages = []
+    current_stage = None
+
+    for index, stage in enumerate(REHAB_PLAN_STAGES):
+        start_day = stage['start_day']
+        end_day = stage['end_day']
+
+        if end_day is not None and day_number > end_day:
+            stage_status = "completed"
+        elif day_number >= start_day:
+            stage_status = "current"
+        else:
+            stage_status = "upcoming"
+
+        stage_start_date = start_date + timezone.timedelta(days=start_day - 1)
+        stage_end_date = start_date + timezone.timedelta(days=end_day - 1) if end_day else None
+
+        if end_day is not None:
+            total_days = end_day - start_day + 1
+            days_done = max(0, min(total_days, day_number - start_day + 1))
+            percentage = round((days_done / float(total_days)) * 100.0, 1)
+        else:
+            total_days = None
+            days_done = max(0, day_number - start_day + 1)
+            percentage = 100.0 if stage_status == "current" else 0.0
+
+        stage_data = {
+            "key": stage['key'],
+            "order": index + 1,
+            "title": stage['title'],
+            "timeframe": stage['timeframe'],
+            "description": stage['description'],
+            "status": stage_status,
+            "is_completed": stage_status == "completed",
+            "is_current": stage_status == "current",
+            "is_upcoming": stage_status == "upcoming",
+            "label": "You are here" if stage_status == "current" else None,
+            "start_day": start_day,
+            "end_day": end_day,
+            "start_date": str(stage_start_date),
+            "end_date": str(stage_end_date) if stage_end_date else None,
+            "days_completed": days_done,
+            "total_days": total_days,
+            "completion_percentage": percentage,
+        }
+
+        if stage_status == "current":
+            current_stage = stage_data
+
+        stages.append(stage_data)
+
+    completed_count = len([s for s in stages if s['is_completed']])
+    overall_percentage = round((completed_count / float(len(stages))) * 100.0, 1)
+
+    return {
+        "journey_start_date": str(start_date),
+        "current_day": day_number,
+        "current_week": ((day_number - 1) // 7) + 1,
+        "current_stage": {
+            "key": current_stage['key'],
+            "title": current_stage['title'],
+            "timeframe": current_stage['timeframe'],
+            "order": current_stage['order'],
+        } if current_stage else None,
+        "total_stages": len(stages),
+        "completed_stages": completed_count,
+        "overall_completion_percentage": overall_percentage,
+        "stages": stages,
+    }
+
+
+def build_milestones(user):
+    """
+    Build the milestone list shown on the Progress screen.
+
+    Every milestone is derived from existing wear time and journey data, so
+    nothing extra needs to be stored.
+    """
+    today = timezone.now().date()
+    start_date = get_journey_start_date(user)
+    day_number = max(1, (today - start_date).days + 1)
+
+    streak = get_wear_streak_days(user)
+
+    # Last 14 days average, used for the "consistent wearer" milestone. The
+    # window never reaches back past the journey start, so a new user is not
+    # penalised for days before they began.
+    recent_window_start = max(start_date, today - timezone.timedelta(days=13))
+    avg_recent = get_average_wear_hours(user, recent_window_start, today)
+
+    # This week vs last week, used for the "first goal improved" milestone.
+    this_week_avg = get_average_wear_hours(user, today - timezone.timedelta(days=6), today)
+    last_week_avg = get_average_wear_hours(
+        user,
+        today - timezone.timedelta(days=13),
+        today - timezone.timedelta(days=7)
+    )
+    # Needs two full weeks of journey behind it, otherwise the earlier week is
+    # padded with pre-journey zeros and any improvement would be an artefact.
+    has_baseline = day_number >= 14 and last_week_avg > 0
+    has_improved = has_baseline and this_week_avg > last_week_avg
+
+    consistent_target_hours = 10.0
+
+    definitions = [
+        {
+            "key": "first_week_complete",
+            "title": "First week complete",
+            "subtitle": "Great job!",
+            "icon": "star",
+            "is_achieved": day_number >= 7,
+            "current": min(day_number, 7),
+            "target": 7,
+            "unit": "days",
+            "achieved_at": str(start_date + timezone.timedelta(days=6)) if day_number >= 7 else None,
+        },
+        {
+            "key": "seven_day_streak",
+            "title": "7-day streak",
+            "subtitle": "Keep it up!",
+            "icon": "flame",
+            "is_achieved": streak >= 7,
+            "current": min(streak, 7),
+            "target": 7,
+            "unit": "days",
+            "achieved_at": str(today) if streak >= 7 else None,
+        },
+        {
+            "key": "consistent_wearer",
+            "title": "Consistent wearer",
+            "subtitle": "10+ hrs/day average",
+            "icon": "clock",
+            "is_achieved": avg_recent >= consistent_target_hours,
+            "current": avg_recent,
+            "target": consistent_target_hours,
+            "unit": "hours",
+            "achieved_at": str(today) if avg_recent >= consistent_target_hours else None,
+        },
+        {
+            "key": "first_goal_improved",
+            "title": "First goal improved",
+            "subtitle": "On track",
+            "icon": "trending-up",
+            "is_achieved": has_improved,
+            "current": this_week_avg,
+            # Null until there is a full previous week to measure against.
+            "target": last_week_avg if has_baseline else None,
+            "unit": "hours",
+            "achieved_at": str(today) if has_improved else None,
+        },
+        {
+            "key": "thirty_day_milestone",
+            "title": "30-day milestone",
+            "subtitle": "Keep going!",
+            "icon": "calendar",
+            "is_achieved": day_number >= 30,
+            "current": min(day_number, 30),
+            "target": 30,
+            "unit": "days",
+            "achieved_at": str(start_date + timezone.timedelta(days=29)) if day_number >= 30 else None,
+        },
+    ]
+
+    milestones = []
+    for index, item in enumerate(definitions):
+        target = float(item['target']) if item['target'] else 0.0
+        current = float(item['current'])
+
+        if item['is_achieved']:
+            percentage = 100.0
+        elif target > 0:
+            percentage = round(min(100.0, (current / target) * 100.0), 1)
+        else:
+            percentage = 0.0
+
+        milestones.append({
+            "key": item['key'],
+            "order": index + 1,
+            "title": item['title'],
+            "subtitle": item['subtitle'],
+            "icon": item['icon'],
+            "is_achieved": item['is_achieved'],
+            "is_locked": not item['is_achieved'],
+            "achieved_at": item['achieved_at'],
+            "progress": {
+                "current": item['current'],
+                "target": item['target'],
+                "unit": item['unit'],
+                "percentage": percentage,
+            },
+        })
+
+    achieved_count = len([m for m in milestones if m['is_achieved']])
+
+    return {
+        "journey_start_date": str(start_date),
+        "current_day": day_number,
+        "total_milestones": len(milestones),
+        "achieved_count": achieved_count,
+        "locked_count": len(milestones) - achieved_count,
+        "current_streak_days": streak,
+        "average_wear_hours": avg_recent,
+        "this_week_average_hours": this_week_avg,
+        "last_week_average_hours": last_week_avg,
+        "milestones": milestones,
+    }
+
+
+class RehabPlanView(APIView):
+    """
+    API endpoint returning the user's 5-stage hearing rehab plan timeline
+
+    GET /api/users/rehab-plan/
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+
+    def get(self, request):
+        return standard_response(
+            success=True,
+            message="Hearing rehab plan retrieved successfully",
+            data=build_rehab_plan(request.user),
+            status_code=status.HTTP_200_OK
+        )
+
+
+class MilestonesView(APIView):
+    """
+    API endpoint returning the user's achieved and locked milestones
+
+    GET /api/users/milestones/
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, FirebaseAuthentication]
+
+    def get(self, request):
+        return standard_response(
+            success=True,
+            message="Milestones retrieved successfully",
+            data=build_milestones(request.user),
+            status_code=status.HTTP_200_OK
+        )
