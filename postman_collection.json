@@ -906,6 +906,81 @@
       ]
     },
     {
+      "name": "Hearing Rehab Plan & Milestones",
+      "item": [
+        {
+          "name": "Get Your Hearing Rehab Plan (5-Stage Journey Timeline)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/rehab-plan/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "rehab-plan",
+                ""
+              ]
+            },
+            "description": "Get the user's 5-stage hearing rehab plan: Awareness (Days 1-7), Consistency (Weeks 1-2), Coordination (Weeks 2-4), Clarity (Weeks 4-5) and Optimization (Ongoing). Each stage is returned as completed, current or upcoming, with the current stage labelled 'You are here'. Also returns journey start date, current day, current week, completed stage count and overall completion percentage.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Milestones (Achieved & Locked)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/milestones/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "milestones",
+                ""
+              ]
+            },
+            "description": "Get the user's milestone list with achieved and locked states: First week complete (7 days since journey start), 7-day streak (7 consecutive days with a wear log), Consistent wearer (10+ hrs/day average over the last 14 days), First goal improved (this week's average beats last week's, evaluated from day 14) and 30-day milestone (30 days since journey start). Each milestone includes a progress block with current, target, unit and percentage.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "Legal Pages",
       "item": [
         {
