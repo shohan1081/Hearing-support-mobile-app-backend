@@ -34,6 +34,8 @@ from .views import (
     ProgressChartView,
     UserWearGoalView,
     ConsistencyReportView,
+    RehabPlanView,
+    MilestonesView,
     UserAppointmentListView,
     UpcomingAppointmentView,
     UserAppointmentDetailView,
@@ -57,6 +59,10 @@ urlpatterns = [
     path('progress-chart/', ProgressChartView.as_view(), name='progress-chart'),
     path('consistency-report/', ConsistencyReportView.as_view(), name='consistency-report'),
     path('wear-goal/', UserWearGoalView.as_view(), name='wear-goal'),
+
+    # Hearing Rehab Plan & Milestones APIs
+    path('rehab-plan/', RehabPlanView.as_view(), name='rehab-plan'),
+    path('milestones/', MilestonesView.as_view(), name='milestones'),
 
     # Authentication endpoints
     path('signup/', UserRegistrationView.as_view(), name='signup'),
