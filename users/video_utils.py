@@ -283,17 +283,16 @@ def render_video_preview_html(obj):
     if stream_url:
         return format_html(
             '<div style="margin-top: 8px;">'
-            '<video width="360" height="202" controls preload="metadata" playsinline style="border-radius: 8px; background: #000; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">'
+            '<video width="480" height="270" controls preload="auto" playsinline style="border-radius: 8px; background: #000; box-shadow: 0 2px 8px rgba(0,0,0,0.15); max-width: 100%;">'
             '<source src="{}" type="video/mp4">'
             'Your browser does not support the video tag.'
             '</video>'
-            '<p style="font-size: 12px; color: #6b7280; margin-top: 4px;">'
-            'Stream Source: <a href="{}" target="_blank" style="color: #2563eb; text-decoration: underline;">{}</a>'
+            '<p style="font-size: 12px; color: #6b7280; margin-top: 6px;">'
+            'Direct Link: <a href="{}" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: underline; font-weight: 500;">Open video in new tab / download</a>'
             '</p>'
             '</div>',
             stream_url,
-            stream_url,
-            stream_url[:60] + '...' if len(stream_url) > 60 else stream_url
+            stream_url
         )
 
     return format_html('<span style="color: #9ca3af;">No video uploaded or linked yet.</span>')
