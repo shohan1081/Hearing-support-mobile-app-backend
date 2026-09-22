@@ -498,3 +498,10 @@ CORS_ALLOW_CREDENTIALS = True
 SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=False, cast=bool)
 SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', default=False, cast=bool)
 CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', default=False, cast=bool)
+
+# ==============================================================================
+# Media & Video Upload Size Configuration (500MB)
+# ==============================================================================
+MAX_VIDEO_UPLOAD_SIZE_MB = config('MAX_VIDEO_UPLOAD_SIZE_MB', default=500, cast=int)
+DATA_UPLOAD_MAX_MEMORY_SIZE = config('DATA_UPLOAD_MAX_MEMORY_SIZE', default=524288000, cast=int)  # 500 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = config('FILE_UPLOAD_MAX_MEMORY_SIZE', default=104857600, cast=int)  # 100 MB
