@@ -5,9 +5,14 @@ from .models import HearingAidBrand, HearingAidModel, DeviceCareSection, DeviceC
 class DeviceCareVideoSerializer(serializers.ModelSerializer):
     """
     Serializer for tutorial videos inside care sections (e.g. cleaning tutorials)
+    Supports both uploaded video file and external Video URL / YouTube link.
     """
     video_url = serializers.SerializerMethodField()
+    video_embed_url = serializers.SerializerMethodField()
+    is_youtube = serializers.SerializerMethodField()
+    youtube_id = serializers.SerializerMethodField()
     has_video = serializers.SerializerMethodField()
+    thumbnail = serializers.SerializerMethodField()
 
     class Meta:
         model = DeviceCareVideo
@@ -17,6 +22,9 @@ class DeviceCareVideoSerializer(serializers.ModelSerializer):
             'title',
             'description',
             'video_url',
+            'video_embed_url',
+            'is_youtube',
+            'youtube_id',
             'has_video',
             'thumbnail',
             'duration_seconds',
@@ -27,8 +35,21 @@ class DeviceCareVideoSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         return obj.get_video_stream_url(request=request)
 
+    def get_video_embed_url(self, obj):
+        return obj.get_embed_url()
+
+    def get_is_youtube(self, obj):
+        return obj.is_youtube_video()
+
+    def get_youtube_id(self, obj):
+        return obj.get_youtube_id()
+
     def get_has_video(self, obj):
-        return bool(obj.video_file)
+        return bool(obj.video_file or obj.video_url)
+
+    def get_thumbnail(self, obj):
+        request = self.context.get('request')
+        return obj.get_effective_thumbnail_url(request=request)
 
 
 class DeviceCareSectionSerializer(serializers.ModelSerializer):
