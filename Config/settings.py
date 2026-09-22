@@ -458,18 +458,6 @@ if USE_S3:
     AWS_LOCATION = 'media'
     AWS_S3_CUSTOM_DOMAIN = config('AWS_S3_CUSTOM_DOMAIN', default='') or None
 
-    # Multi-threaded parallel multipart uploads for fast large video transfers to S3
-    try:
-        from boto3.s3.transfer import TransferConfig
-        AWS_S3_TRANSFER_CONFIG = TransferConfig(
-            multipart_threshold=8 * 1024 * 1024,   # 8 MB threshold
-            max_concurrency=10,                    # 10 parallel upload threads
-            multipart_chunksize=8 * 1024 * 1024,   # 8 MB chunk size
-            use_threads=True,
-        )
-    except ImportError:
-        AWS_S3_TRANSFER_CONFIG = None
-
     # Media files S3 Storage (Django 5.1+ STORAGES API)
     STORAGES = {
         "default": {
@@ -517,4 +505,4 @@ CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', default=False, cast=bool)
 # ==============================================================================
 MAX_VIDEO_UPLOAD_SIZE_MB = config('MAX_VIDEO_UPLOAD_SIZE_MB', default=500, cast=int)
 DATA_UPLOAD_MAX_MEMORY_SIZE = config('DATA_UPLOAD_MAX_MEMORY_SIZE', default=524288000, cast=int)  # 500 MB
-FILE_UPLOAD_MAX_MEMORY_SIZE = config('FILE_UPLOAD_MAX_MEMORY_SIZE', default=104857600, cast=int)  # 100 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = config('FILE_UPLOAD_MAX_MEMORY_SIZE', default=2621440, cast=int)    # 2.5 MB (streams directly to disk to prevent server RAM exhaustion)
