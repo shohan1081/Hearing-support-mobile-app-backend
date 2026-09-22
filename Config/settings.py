@@ -449,15 +449,28 @@ if USE_S3:
     AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME', default='')
     AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME', default='us-east-1')
     AWS_S3_OBJECT_PARAMETERS = {
-        'CacheControl': 'max-age=86400',
+        'CacheControl': 'max-age=2592000, public',
+        'ContentDisposition': 'inline',
     }
     AWS_DEFAULT_ACL = None
-    AWS_QUERYSTRING_AUTH = True       
-    AWS_QUERYSTRING_EXPIRE = 3600     
+    AWS_QUERYSTRING_AUTH = config('AWS_QUERYSTRING_AUTH', default=True, cast=bool)       
+    AWS_QUERYSTRING_EXPIRE = config('AWS_QUERYSTRING_EXPIRE', default=3600, cast=int)     
     AWS_LOCATION = 'media'
+    AWS_S3_CUSTOM_DOMAIN = config('AWS_S3_CUSTOM_DOMAIN', default='') or None
 
-    # Media files S3 Storage
-        # Media files S3 Storage (Django 5.1+ নতুন STORAGES API)
+    # Multi-threaded parallel multipart uploads for fast large video transfers to S3
+    try:
+        from boto3.s3.transfer import TransferConfig
+        AWS_S3_TRANSFER_CONFIG = TransferConfig(
+            multipart_threshold=8 * 1024 * 1024,   # 8 MB threshold
+            max_concurrency=10,                    # 10 parallel upload threads
+            multipart_chunksize=8 * 1024 * 1024,   # 8 MB chunk size
+            use_threads=True,
+        )
+    except ImportError:
+        AWS_S3_TRANSFER_CONFIG = None
+
+    # Media files S3 Storage (Django 5.1+ STORAGES API)
     STORAGES = {
         "default": {
             "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
