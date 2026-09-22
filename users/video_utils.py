@@ -283,7 +283,7 @@ def render_video_preview_html(obj):
     if stream_url:
         return format_html(
             '<div style="margin-top: 8px;">'
-            '<video width="360" height="202" controls style="border-radius: 8px; background: #000; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">'
+            '<video width="360" height="202" controls preload="metadata" playsinline style="border-radius: 8px; background: #000; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">'
             '<source src="{}" type="video/mp4">'
             'Your browser does not support the video tag.'
             '</video>'
