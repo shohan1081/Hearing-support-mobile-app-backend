@@ -1,5 +1,11 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from users.video_utils import (
+    validate_video_file_size,
+    extract_youtube_id,
+    get_youtube_embed_url,
+    get_youtube_thumbnail_url,
+)
 
 
 class HearingAidBrand(models.Model):
@@ -236,14 +242,22 @@ class DeviceCareVideo(models.Model):
         upload_to='device_care/videos/',
         null=True,
         blank=True,
-        help_text=_("Upload video file (MP4, MOV, etc.) or external link")
+        validators=[validate_video_file_size],
+        help_text=_("Upload video file directly (MP4, MOV, WebM, etc. Max: 500MB) OR enter a Video URL below.")
+    )
+    video_url = models.URLField(
+        _('video URL / YouTube link'),
+        max_length=1000,
+        null=True,
+        blank=True,
+        help_text=_("External video URL or YouTube link (e.g. https://www.youtube.com/watch?v=... or https://youtu.be/...). Set YouTube video to 'Unlisted' so patients can watch without signing in.")
     )
     thumbnail = models.ImageField(
         _('thumbnail'),
         upload_to='device_care/video_thumbnails/',
         null=True,
         blank=True,
-        help_text=_("Cover thumbnail image for the video")
+        help_text=_("Custom cover thumbnail image for the video (available for both file upload and YouTube/video URL)")
     )
     duration_seconds = models.PositiveIntegerField(
         _('duration in seconds'),
@@ -273,7 +287,7 @@ class DeviceCareVideo(models.Model):
         return self.title
 
     def get_video_stream_url(self, request=None):
-        """Return absolute video stream URL"""
+        """Return absolute video stream URL or external video_url"""
         if self.video_file:
             try:
                 url = self.video_file.url
@@ -282,4 +296,31 @@ class DeviceCareVideo(models.Model):
                 return url
             except Exception:
                 return str(self.video_file)
+        return self.video_url or ""
+
+    def get_embed_url(self):
+        """Return iframe embed URL (especially for YouTube videos)"""
+        return get_youtube_embed_url(self.video_url) if self.video_url else ""
+
+    def get_youtube_id(self):
+        """Extract YouTube video ID if video_url is a YouTube link"""
+        return extract_youtube_id(self.video_url) if self.video_url else None
+
+    def is_youtube_video(self):
+        """Check if video source is YouTube"""
+        return bool(self.get_youtube_id())
+
+    def get_effective_thumbnail_url(self, request=None):
+        """Return custom thumbnail URL or auto YouTube thumbnail if available"""
+        if self.thumbnail:
+            try:
+                url = self.thumbnail.url
+                if request and not url.startswith('http'):
+                    return request.build_absolute_uri(url)
+                return url
+            except Exception:
+                return str(self.thumbnail)
+        yt_id = self.get_youtube_id()
+        if yt_id:
+            return get_youtube_thumbnail_url(yt_id)
         return ""
