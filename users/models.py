@@ -5,6 +5,12 @@ from django.utils.translation import gettext_lazy as _
 from .managers import UserManager
 import uuid
 from django.contrib.auth.hashers import make_password, check_password
+from .video_utils import (
+    validate_video_file_size,
+    extract_youtube_id,
+    get_youtube_embed_url,
+    get_youtube_thumbnail_url,
+)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -457,19 +463,20 @@ class CheckInTutorial(models.Model):
         upload_to='tutorials/videos/',
         null=True,
         blank=True,
-        help_text=_("Upload video file directly (MP4, MOV, etc.)")
+        validators=[validate_video_file_size],
+        help_text=_("Upload video file directly (MP4, MOV, WebM, etc. Max: 500MB) OR enter a Video URL below.")
     )
     video_url = models.URLField(
-        max_length=500,
+        max_length=1000,
         null=True,
         blank=True,
-        help_text=_("External video URL (e.g. Cloudinary, S3, YouTube, Vimeo)")
+        help_text=_("External video URL or YouTube link (e.g. https://www.youtube.com/watch?v=... or https://youtu.be/...). Set YouTube video to 'Unlisted' so patients can watch without signing in.")
     )
     thumbnail = models.ImageField(
         upload_to='tutorials/thumbnails/',
         null=True,
         blank=True,
-        help_text=_("Thumbnail image for the video")
+        help_text=_("Custom cover thumbnail image for the video (available for both file upload and YouTube/video URL)")
     )
     duration_seconds = models.PositiveIntegerField(
         default=0,
@@ -498,10 +505,41 @@ class CheckInTutorial(models.Model):
     def get_video_stream_url(self, request=None):
         """Return uploaded video file URL or external video_url"""
         if self.video_file:
-            if request:
-                return request.build_absolute_uri(self.video_file.url)
-            return self.video_file.url
+            try:
+                url = self.video_file.url
+                if request and not url.startswith('http'):
+                    return request.build_absolute_uri(url)
+                return url
+            except Exception:
+                return str(self.video_file)
         return self.video_url or ""
+
+    def get_embed_url(self):
+        """Return iframe embed URL (especially for YouTube videos)"""
+        return get_youtube_embed_url(self.video_url) if self.video_url else ""
+
+    def get_youtube_id(self):
+        """Extract YouTube video ID if video_url is a YouTube link"""
+        return extract_youtube_id(self.video_url) if self.video_url else None
+
+    def is_youtube_video(self):
+        """Check if video source is YouTube"""
+        return bool(self.get_youtube_id())
+
+    def get_effective_thumbnail_url(self, request=None):
+        """Return custom thumbnail URL or auto YouTube thumbnail if available"""
+        if self.thumbnail:
+            try:
+                url = self.thumbnail.url
+                if request and not url.startswith('http'):
+                    return request.build_absolute_uri(url)
+                return url
+            except Exception:
+                return str(self.thumbnail)
+        yt_id = self.get_youtube_id()
+        if yt_id:
+            return get_youtube_thumbnail_url(yt_id)
+        return ""
 
 
 class CheckInTutorialFeedback(models.Model):
