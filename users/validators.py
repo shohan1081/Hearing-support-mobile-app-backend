@@ -216,3 +216,7 @@ def validate_password_match(password, confirm_password):
             _('Passwords do not match.'),
             code='password_mismatch'
         )
+
+
+# Import video and audio validators from video_utils
+from .video_utils import validate_video_file_size, validate_audio_file_size
