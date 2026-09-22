@@ -92,33 +92,13 @@ class CheckInTutorialAdmin(ModelAdmin):
     )
 
     def video_status(self, obj):
-        if obj.video_file:
-            return format_html('<span style="color: #16a34a; font-weight: 600;">📁 Uploaded File</span>')
-        elif obj.video_url:
-            return format_html('<span style="color: #2563eb; font-weight: 600;">🔗 External URL</span>')
-        return format_html('<span style="color: #dc2626; font-weight: 500;">❌ No Video</span>')
+        from .video_utils import get_video_status_badge
+        return get_video_status_badge(obj)
     video_status.short_description = _("Video Source")
 
     def video_preview(self, obj):
-        if not obj or not obj.id:
-            return _("Save tutorial first to view video preview.")
-        stream_url = obj.get_video_stream_url()
-        if stream_url:
-            return format_html(
-                '<div style="margin-top: 5px;">'
-                '<video width="320" height="180" controls style="border-radius: 8px; background: #000;">'
-                '<source src="{}" type="video/mp4">'
-                'Your browser does not support the video tag.'
-                '</video>'
-                '<p style="font-size: 12px; color: #6b7280; margin-top: 4px;">'
-                'Source: <a href="{}" target="_blank" style="color: #2563eb;">{}</a>'
-                '</p>'
-                '</div>',
-                stream_url,
-                stream_url,
-                stream_url[:50] + '...' if len(stream_url) > 50 else stream_url
-            )
-        return format_html('<span style="color: #9ca3af;">No video uploaded yet.</span>')
+        from .video_utils import render_video_preview_html
+        return render_video_preview_html(obj)
     video_preview.short_description = _("Video Preview")
 
 
