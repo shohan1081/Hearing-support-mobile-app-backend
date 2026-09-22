@@ -1,12 +1,14 @@
 from django.contrib import admin
+from django.utils.translation import gettext_lazy as _
 from unfold.admin import ModelAdmin, TabularInline, StackedInline
+from users.video_utils import get_video_status_badge, render_video_preview_html
 from .models import HearingAidBrand, HearingAidModel, DeviceCareSection, DeviceCareVideo
 
 
 class DeviceCareVideoInline(TabularInline):
     model = DeviceCareVideo
     extra = 1
-    fields = ('title', 'video_file', 'thumbnail', 'duration_seconds', 'order', 'is_active')
+    fields = ('title', 'video_file', 'video_url', 'thumbnail', 'duration_seconds', 'order', 'is_active')
 
 
 class DeviceCareSectionInline(StackedInline):
@@ -106,21 +108,48 @@ class DeviceCareSectionAdmin(ModelAdmin):
 
 @admin.register(DeviceCareVideo)
 class DeviceCareVideoAdmin(ModelAdmin):
-    list_display = ('title_display', 'section', 'order', 'is_active', 'updated_at')
+    list_display = ('title_display', 'section', 'video_status', 'order', 'is_active', 'updated_at')
     list_editable = ('order', 'is_active')
     list_filter = ('section__section_type', 'section__model', 'is_active')
     search_fields = ('title', 'description', 'section__title')
     ordering = ('section', 'order')
+    readonly_fields = ('video_preview', 'created_at', 'updated_at')
 
     fieldsets = (
         (None, {
             'fields': ('section', 'title', 'order', 'is_active')
         }),
-        ('Video Description & File', {
-            'fields': ('description', 'video_file', 'thumbnail')
+        ('Video Description & Notes', {
+            'fields': ('description',)
+        }),
+        ('Video Media (Upload File or Enter URL)', {
+            'fields': (
+                'video_file',
+                'video_url',
+                'thumbnail',
+                'video_preview',
+                'duration_seconds',
+            ),
+            'description': _(
+                "Upload a video file directly (Max 500MB) OR enter a video URL / YouTube link. "
+                "For YouTube videos, ensure they are set to <strong>Unlisted</strong> so patients can play them without signing in. "
+                "You can upload a custom thumbnail for either option."
+            )
+        }),
+        ('Metadata', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
         }),
     )
 
     def title_display(self, obj):
         return obj.title
     title_display.short_description = 'Video Title'
+
+    def video_status(self, obj):
+        return get_video_status_badge(obj)
+    video_status.short_description = _("Video Source")
+
+    def video_preview(self, obj):
+        return render_video_preview_html(obj)
+    video_preview.short_description = _("Video Preview")
