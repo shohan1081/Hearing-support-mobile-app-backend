@@ -3,11 +3,20 @@ from django.conf import settings
 from django.utils import timezone
 from django.core.validators import MinValueValidator
 from django.utils.translation import gettext_lazy as _
+from users.video_utils import (
+    validate_video_file_size,
+    validate_audio_file_size,
+    extract_youtube_id,
+    get_youtube_embed_url,
+    get_youtube_thumbnail_url,
+    resolve_video_data,
+)
 
 
 class DailyLesson(models.Model):
     """
-    Admin-managed daily lesson content (video and audio) for sequential daily learning
+    Admin-managed daily lesson content (video and audio) for sequential daily learning.
+    Supports either direct video file upload (up to 500MB) or external Video URL / YouTube link.
     """
     day_number = models.PositiveIntegerField(
         _('day number'),
@@ -36,21 +45,37 @@ class DailyLesson(models.Model):
         upload_to='learn/videos/',
         null=True,
         blank=True,
-        help_text=_("Upload video file (MP4, MOV, etc.) or external link")
+        validators=[validate_video_file_size],
+        help_text=_("Upload video file directly (MP4, MOV, WebM, etc. Max: 500MB) OR enter a Video URL below.")
+    )
+    video_url = models.URLField(
+        _('video URL / YouTube link'),
+        max_length=1000,
+        null=True,
+        blank=True,
+        help_text=_("External video URL or YouTube link (e.g. https://www.youtube.com/watch?v=... or https://youtu.be/...). Set YouTube video to 'Unlisted' so patients can watch without signing in.")
     )
     audio_file = models.FileField(
         _('audio file'),
         upload_to='learn/audios/',
         null=True,
         blank=True,
-        help_text=_("Upload audio file (MP3, WAV, AAC, etc.) or external link")
+        validators=[validate_audio_file_size],
+        help_text=_("Upload audio file directly (MP3, WAV, AAC, etc. Max: 100MB) OR enter an Audio URL below.")
+    )
+    audio_url = models.URLField(
+        _('audio URL / stream link'),
+        max_length=1000,
+        null=True,
+        blank=True,
+        help_text=_("External audio stream URL (MP3, AAC, podcast link, etc.)")
     )
     thumbnail = models.ImageField(
         _('thumbnail'),
         upload_to='learn/thumbnails/',
         null=True,
         blank=True,
-        help_text=_("Cover thumbnail image for the lesson")
+        help_text=_("Custom cover thumbnail image for the lesson (available for both file upload and YouTube/video URL)")
     )
     duration_seconds = models.PositiveIntegerField(
         _('duration in seconds'),
@@ -81,7 +106,7 @@ class DailyLesson(models.Model):
         return f"Day {self.day_number}: {self.title}"
 
     def get_video_stream_url(self, request=None):
-        """Return absolute video file URL"""
+        """Return uploaded video file URL or external video_url"""
         if self.video_file:
             try:
                 url = self.video_file.url
@@ -90,10 +115,37 @@ class DailyLesson(models.Model):
                 return url
             except Exception:
                 return str(self.video_file)
+        return self.video_url or ""
+
+    def get_embed_url(self):
+        """Return iframe embed URL (especially for YouTube videos)"""
+        return get_youtube_embed_url(self.video_url) if self.video_url else ""
+
+    def get_youtube_id(self):
+        """Extract YouTube video ID if video_url is a YouTube link"""
+        return extract_youtube_id(self.video_url) if self.video_url else None
+
+    def is_youtube_video(self):
+        """Check if video source is YouTube"""
+        return bool(self.get_youtube_id())
+
+    def get_effective_thumbnail_url(self, request=None):
+        """Return custom thumbnail URL or auto YouTube thumbnail if available"""
+        if self.thumbnail:
+            try:
+                url = self.thumbnail.url
+                if request and not url.startswith('http'):
+                    return request.build_absolute_uri(url)
+                return url
+            except Exception:
+                return str(self.thumbnail)
+        yt_id = self.get_youtube_id()
+        if yt_id:
+            return get_youtube_thumbnail_url(yt_id)
         return ""
 
     def get_audio_stream_url(self, request=None):
-        """Return absolute audio file URL"""
+        """Return absolute audio file URL or audio_url"""
         if self.audio_file:
             try:
                 url = self.audio_file.url
@@ -102,12 +154,13 @@ class DailyLesson(models.Model):
                 return url
             except Exception:
                 return str(self.audio_file)
-        return ""
+        return self.audio_url or ""
 
 
 class WelcomeTutorial(models.Model):
     """
-    Admin-managed Welcome Tutorial video for introducing users to the learning program
+    Admin-managed Welcome Tutorial video for introducing users to the learning program.
+    Supports either direct video file upload (up to 500MB) or external Video URL / YouTube link.
     """
     title = models.CharField(
         _('title'),
@@ -133,14 +186,22 @@ class WelcomeTutorial(models.Model):
         upload_to='learn/welcome_videos/',
         null=True,
         blank=True,
-        help_text=_("Upload welcome tutorial video file (MP4, MOV, etc.) or link")
+        validators=[validate_video_file_size],
+        help_text=_("Upload welcome tutorial video file directly (MP4, MOV, WebM, etc. Max: 500MB) OR enter a Video URL below.")
+    )
+    video_url = models.URLField(
+        _('video URL / YouTube link'),
+        max_length=1000,
+        null=True,
+        blank=True,
+        help_text=_("External video URL or YouTube link (e.g. https://www.youtube.com/watch?v=... or https://youtu.be/...). Set YouTube video to 'Unlisted' so patients can watch without signing in.")
     )
     thumbnail = models.ImageField(
         _('thumbnail'),
         upload_to='learn/welcome_thumbnails/',
         null=True,
         blank=True,
-        help_text=_("Cover thumbnail image for welcome video")
+        help_text=_("Custom cover thumbnail image for welcome video (available for both file upload and YouTube/video URL)")
     )
     duration_seconds = models.PositiveIntegerField(
         _('duration in seconds'),
@@ -165,7 +226,7 @@ class WelcomeTutorial(models.Model):
         return self.title
 
     def get_video_stream_url(self, request=None):
-        """Return absolute video stream URL"""
+        """Return absolute video file URL or external video_url"""
         if self.video_file:
             try:
                 url = self.video_file.url
@@ -174,12 +235,40 @@ class WelcomeTutorial(models.Model):
                 return url
             except Exception:
                 return str(self.video_file)
+        return self.video_url or ""
+
+    def get_embed_url(self):
+        """Return iframe embed URL (especially for YouTube videos)"""
+        return get_youtube_embed_url(self.video_url) if self.video_url else ""
+
+    def get_youtube_id(self):
+        """Extract YouTube video ID if video_url is a YouTube link"""
+        return extract_youtube_id(self.video_url) if self.video_url else None
+
+    def is_youtube_video(self):
+        """Check if video source is YouTube"""
+        return bool(self.get_youtube_id())
+
+    def get_effective_thumbnail_url(self, request=None):
+        """Return custom thumbnail URL or auto YouTube thumbnail if available"""
+        if self.thumbnail:
+            try:
+                url = self.thumbnail.url
+                if request and not url.startswith('http'):
+                    return request.build_absolute_uri(url)
+                return url
+            except Exception:
+                return str(self.thumbnail)
+        yt_id = self.get_youtube_id()
+        if yt_id:
+            return get_youtube_thumbnail_url(yt_id)
         return ""
 
 
 class CheckInOverviewVideo(models.Model):
     """
-    Admin-managed Check-in Overview Video explaining how daily check-ins work
+    Admin-managed Check-in Overview Video explaining how daily check-ins work.
+    Supports either direct video file upload (up to 500MB) or external Video URL / YouTube link.
     """
     title = models.CharField(
         _('title'),
@@ -205,14 +294,22 @@ class CheckInOverviewVideo(models.Model):
         upload_to='learn/checkin_overview_videos/',
         null=True,
         blank=True,
-        help_text=_("Upload check-in overview video file (MP4, MOV, etc.) or link")
+        validators=[validate_video_file_size],
+        help_text=_("Upload check-in overview video file directly (MP4, MOV, WebM, etc. Max: 500MB) OR enter a Video URL below.")
+    )
+    video_url = models.URLField(
+        _('video URL / YouTube link'),
+        max_length=1000,
+        null=True,
+        blank=True,
+        help_text=_("External video URL or YouTube link (e.g. https://www.youtube.com/watch?v=... or https://youtu.be/...). Set YouTube video to 'Unlisted' so patients can watch without signing in.")
     )
     thumbnail = models.ImageField(
         _('thumbnail'),
         upload_to='learn/checkin_overview_thumbnails/',
         null=True,
         blank=True,
-        help_text=_("Cover thumbnail image")
+        help_text=_("Custom cover thumbnail image (available for both file upload and YouTube/video URL)")
     )
     duration_seconds = models.PositiveIntegerField(
         _('duration in seconds'),
@@ -237,7 +334,7 @@ class CheckInOverviewVideo(models.Model):
         return self.title
 
     def get_video_stream_url(self, request=None):
-        """Return absolute video stream URL"""
+        """Return absolute video stream URL or external video_url"""
         if self.video_file:
             try:
                 url = self.video_file.url
@@ -246,12 +343,40 @@ class CheckInOverviewVideo(models.Model):
                 return url
             except Exception:
                 return str(self.video_file)
+        return self.video_url or ""
+
+    def get_embed_url(self):
+        """Return iframe embed URL (especially for YouTube videos)"""
+        return get_youtube_embed_url(self.video_url) if self.video_url else ""
+
+    def get_youtube_id(self):
+        """Extract YouTube video ID if video_url is a YouTube link"""
+        return extract_youtube_id(self.video_url) if self.video_url else None
+
+    def is_youtube_video(self):
+        """Check if video source is YouTube"""
+        return bool(self.get_youtube_id())
+
+    def get_effective_thumbnail_url(self, request=None):
+        """Return custom thumbnail URL or auto YouTube thumbnail if available"""
+        if self.thumbnail:
+            try:
+                url = self.thumbnail.url
+                if request and not url.startswith('http'):
+                    return request.build_absolute_uri(url)
+                return url
+            except Exception:
+                return str(self.thumbnail)
+        yt_id = self.get_youtube_id()
+        if yt_id:
+            return get_youtube_thumbnail_url(yt_id)
         return ""
 
 
 class CareTeamSupportVideo(models.Model):
     """
-    Admin-managed Care Team Support Video explaining how audiologists & care team assist the user
+    Admin-managed Care Team Support Video explaining how audiologists & care team assist the user.
+    Supports either direct video file upload (up to 500MB) or external Video URL / YouTube link.
     """
     title = models.CharField(
         _('title'),
@@ -277,14 +402,22 @@ class CareTeamSupportVideo(models.Model):
         upload_to='learn/care_team_videos/',
         null=True,
         blank=True,
-        help_text=_("Upload care team support video file (MP4, MOV, etc.) or link")
+        validators=[validate_video_file_size],
+        help_text=_("Upload care team support video file directly (MP4, MOV, WebM, etc. Max: 500MB) OR enter a Video URL below.")
+    )
+    video_url = models.URLField(
+        _('video URL / YouTube link'),
+        max_length=1000,
+        null=True,
+        blank=True,
+        help_text=_("External video URL or YouTube link (e.g. https://www.youtube.com/watch?v=... or https://youtu.be/...). Set YouTube video to 'Unlisted' so patients can watch without signing in.")
     )
     thumbnail = models.ImageField(
         _('thumbnail'),
         upload_to='learn/care_team_thumbnails/',
         null=True,
         blank=True,
-        help_text=_("Cover thumbnail image")
+        help_text=_("Custom cover thumbnail image (available for both file upload and YouTube/video URL)")
     )
     duration_seconds = models.PositiveIntegerField(
         _('duration in seconds'),
@@ -309,7 +442,7 @@ class CareTeamSupportVideo(models.Model):
         return self.title
 
     def get_video_stream_url(self, request=None):
-        """Return absolute video stream URL"""
+        """Return absolute video stream URL or external video_url"""
         if self.video_file:
             try:
                 url = self.video_file.url
@@ -318,12 +451,40 @@ class CareTeamSupportVideo(models.Model):
                 return url
             except Exception:
                 return str(self.video_file)
+        return self.video_url or ""
+
+    def get_embed_url(self):
+        """Return iframe embed URL (especially for YouTube videos)"""
+        return get_youtube_embed_url(self.video_url) if self.video_url else ""
+
+    def get_youtube_id(self):
+        """Extract YouTube video ID if video_url is a YouTube link"""
+        return extract_youtube_id(self.video_url) if self.video_url else None
+
+    def is_youtube_video(self):
+        """Check if video source is YouTube"""
+        return bool(self.get_youtube_id())
+
+    def get_effective_thumbnail_url(self, request=None):
+        """Return custom thumbnail URL or auto YouTube thumbnail if available"""
+        if self.thumbnail:
+            try:
+                url = self.thumbnail.url
+                if request and not url.startswith('http'):
+                    return request.build_absolute_uri(url)
+                return url
+            except Exception:
+                return str(self.thumbnail)
+        yt_id = self.get_youtube_id()
+        if yt_id:
+            return get_youtube_thumbnail_url(yt_id)
         return ""
 
 
 class ProgressOverviewVideo(models.Model):
     """
-    Admin-managed Progress Overview Video explaining how user progress and streaks are tracked
+    Admin-managed Progress Overview Video explaining how user progress and streaks are tracked.
+    Supports either direct video file upload (up to 500MB) or external Video URL / YouTube link.
     """
     title = models.CharField(
         _('title'),
@@ -349,14 +510,22 @@ class ProgressOverviewVideo(models.Model):
         upload_to='learn/progress_overview_videos/',
         null=True,
         blank=True,
-        help_text=_("Upload progress overview video file (MP4, MOV, etc.) or link")
+        validators=[validate_video_file_size],
+        help_text=_("Upload progress overview video file directly (MP4, MOV, WebM, etc. Max: 500MB) OR enter a Video URL below.")
+    )
+    video_url = models.URLField(
+        _('video URL / YouTube link'),
+        max_length=1000,
+        null=True,
+        blank=True,
+        help_text=_("External video URL or YouTube link (e.g. https://www.youtube.com/watch?v=... or https://youtu.be/...). Set YouTube video to 'Unlisted' so patients can watch without signing in.")
     )
     thumbnail = models.ImageField(
         _('thumbnail'),
         upload_to='learn/progress_overview_thumbnails/',
         null=True,
         blank=True,
-        help_text=_("Cover thumbnail image")
+        help_text=_("Custom cover thumbnail image (available for both file upload and YouTube/video URL)")
     )
     duration_seconds = models.PositiveIntegerField(
         _('duration in seconds'),
@@ -381,7 +550,7 @@ class ProgressOverviewVideo(models.Model):
         return self.title
 
     def get_video_stream_url(self, request=None):
-        """Return absolute video stream URL"""
+        """Return absolute video stream URL or external video_url"""
         if self.video_file:
             try:
                 url = self.video_file.url
@@ -390,6 +559,33 @@ class ProgressOverviewVideo(models.Model):
                 return url
             except Exception:
                 return str(self.video_file)
+        return self.video_url or ""
+
+    def get_embed_url(self):
+        """Return iframe embed URL (especially for YouTube videos)"""
+        return get_youtube_embed_url(self.video_url) if self.video_url else ""
+
+    def get_youtube_id(self):
+        """Extract YouTube video ID if video_url is a YouTube link"""
+        return extract_youtube_id(self.video_url) if self.video_url else None
+
+    def is_youtube_video(self):
+        """Check if video source is YouTube"""
+        return bool(self.get_youtube_id())
+
+    def get_effective_thumbnail_url(self, request=None):
+        """Return custom thumbnail URL or auto YouTube thumbnail if available"""
+        if self.thumbnail:
+            try:
+                url = self.thumbnail.url
+                if request and not url.startswith('http'):
+                    return request.build_absolute_uri(url)
+                return url
+            except Exception:
+                return str(self.thumbnail)
+        yt_id = self.get_youtube_id()
+        if yt_id:
+            return get_youtube_thumbnail_url(yt_id)
         return ""
 
 
