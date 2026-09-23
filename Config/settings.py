@@ -506,3 +506,19 @@ CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', default=False, cast=bool)
 MAX_VIDEO_UPLOAD_SIZE_MB = config('MAX_VIDEO_UPLOAD_SIZE_MB', default=500, cast=int)
 DATA_UPLOAD_MAX_MEMORY_SIZE = config('DATA_UPLOAD_MAX_MEMORY_SIZE', default=524288000, cast=int)  # 500 MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = config('FILE_UPLOAD_MAX_MEMORY_SIZE', default=2621440, cast=int)    # 2.5 MB (streams directly to disk to prevent server RAM exhaustion)
+
+# ==============================================================================
+# Video Upload & Streaming Optimization
+# ==============================================================================
+# Admin uploads go straight from the browser to S3 (parallel multipart), bypassing EC2.
+# Requires USE_S3=True and a CORS rule on the bucket (python manage.py configure_s3_cors).
+VIDEO_DIRECT_UPLOAD = config('VIDEO_DIRECT_UPLOAD', default=True, cast=bool)
+# Optional: S3 Transfer Acceleration for faster uploads from far regions (enable it on the bucket first).
+VIDEO_UPLOAD_ACCELERATE = config('VIDEO_UPLOAD_ACCELERATE', default=False, cast=bool)
+# Re-encode uploaded videos in the background (ffmpeg) to 720p H.264 + faststart for smooth mobile playback.
+VIDEO_AUTO_OPTIMIZE = config('VIDEO_AUTO_OPTIMIZE', default=True, cast=bool)
+VIDEO_OPTIMIZE_MAX_SHORT_SIDE = config('VIDEO_OPTIMIZE_MAX_SHORT_SIDE', default=720, cast=int)
+VIDEO_OPTIMIZE_MAX_KBPS = config('VIDEO_OPTIMIZE_MAX_KBPS', default=2500, cast=int)
+VIDEO_OPTIMIZE_CRF = config('VIDEO_OPTIMIZE_CRF', default=23, cast=int)
+VIDEO_OPTIMIZE_PRESET = config('VIDEO_OPTIMIZE_PRESET', default='veryfast')
+VIDEO_OPTIMIZE_THREADS = config('VIDEO_OPTIMIZE_THREADS', default=2, cast=int)
