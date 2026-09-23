@@ -1,7 +1,10 @@
 from django.contrib import admin
 from django.urls import path, include
 
+from users.direct_upload import urlpatterns as direct_upload_urls
+
 urlpatterns = [
+    path('admin/video-upload/', include(direct_upload_urls)),
     path('admin/', admin.site.urls),
     path('api/users/', include('users.urls')),
     path('api/legal/', include('legal_pages.urls')),
