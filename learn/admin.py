@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
+from users.direct_upload import DirectVideoUploadAdminMixin
 from unfold.admin import ModelAdmin
 from users.video_utils import get_video_status_badge, render_video_preview_html
 from .models import (
@@ -13,7 +14,7 @@ from .models import (
 
 
 @admin.register(DailyLesson)
-class DailyLessonAdmin(ModelAdmin):
+class DailyLessonAdmin(DirectVideoUploadAdminMixin, ModelAdmin):
     list_display = ('day_number', 'title', 'subtitle', 'video_status', 'is_active', 'updated_at')
     list_editable = ('is_active',)
     list_filter = ('is_active',)
@@ -64,7 +65,7 @@ class DailyLessonAdmin(ModelAdmin):
 
 
 @admin.register(WelcomeTutorial)
-class WelcomeTutorialAdmin(ModelAdmin):
+class WelcomeTutorialAdmin(DirectVideoUploadAdminMixin, ModelAdmin):
     list_display = ('title', 'subtitle', 'video_status', 'is_active', 'updated_at')
     list_editable = ('is_active',)
     list_filter = ('is_active',)
@@ -107,7 +108,7 @@ class WelcomeTutorialAdmin(ModelAdmin):
 
 
 @admin.register(CheckInOverviewVideo)
-class CheckInOverviewVideoAdmin(ModelAdmin):
+class CheckInOverviewVideoAdmin(DirectVideoUploadAdminMixin, ModelAdmin):
     list_display = ('title', 'subtitle', 'video_status', 'is_active', 'updated_at')
     list_editable = ('is_active',)
     list_filter = ('is_active',)
@@ -150,7 +151,7 @@ class CheckInOverviewVideoAdmin(ModelAdmin):
 
 
 @admin.register(CareTeamSupportVideo)
-class CareTeamSupportVideoAdmin(ModelAdmin):
+class CareTeamSupportVideoAdmin(DirectVideoUploadAdminMixin, ModelAdmin):
     list_display = ('title', 'subtitle', 'video_status', 'is_active', 'updated_at')
     list_editable = ('is_active',)
     list_filter = ('is_active',)
@@ -193,7 +194,7 @@ class CareTeamSupportVideoAdmin(ModelAdmin):
 
 
 @admin.register(ProgressOverviewVideo)
-class ProgressOverviewVideoAdmin(ModelAdmin):
+class ProgressOverviewVideoAdmin(DirectVideoUploadAdminMixin, ModelAdmin):
     list_display = ('title', 'subtitle', 'video_status', 'is_active', 'updated_at')
     list_editable = ('is_active',)
     list_filter = ('is_active',)
