@@ -99,6 +99,20 @@ def _s3_key(name):
     return f"{location}/{name}" if location else name
 
 
+def _object_exists(name):
+    # Not default_storage.exists(): django-storages 1.14.4 always returns False there
+    # when AWS_S3_FILE_OVERWRITE is True (the default), without asking S3.
+    from botocore.exceptions import ClientError
+
+    try:
+        _s3_client().head_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=_s3_key(name))
+        return True
+    except ClientError as err:
+        if err.response.get('ResponseMetadata', {}).get('HTTPStatusCode') == 404:
+            return False
+        raise
+
+
 def _json_body(request):
     try:
         return json.loads(request.body or b'{}')
@@ -257,7 +271,7 @@ class DirectS3VideoFormField(forms.FileField):
                 name = signing.loads(data, salt=SIGNING_SALT, max_age=TOKEN_MAX_AGE)['name']
             except (signing.BadSignature, KeyError, TypeError):
                 raise forms.ValidationError(_("Upload expired or invalid. Please select the video again."))
-            if not default_storage.exists(name):
+            if not _object_exists(name):
                 raise forms.ValidationError(_("Uploaded video was not found in storage. Please upload again."))
             return name
         return super().to_python(data)
