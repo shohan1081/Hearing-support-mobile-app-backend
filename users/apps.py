@@ -26,5 +26,9 @@ class UsersConfig(AppConfig):
             print(f"Warning: Failed to initialize Firebase: {str(e)}")
             print("Firebase authentication will not be available.")
         
+        # Auto-optimize uploaded videos for mobile streaming
+        from .video_processing import connect_signals
+        connect_signals()
+
         # Import signals if you have any
         # import users.signals
