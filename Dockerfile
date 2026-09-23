@@ -43,6 +43,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
     curl \
     netcat-openbsd \
+    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy built wheels from builder stage
