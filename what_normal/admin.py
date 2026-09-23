@@ -1,12 +1,13 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
+from users.direct_upload import DirectVideoUploadAdminMixin
 from unfold.admin import ModelAdmin
 from users.video_utils import get_video_status_badge, render_video_preview_html
 from .models import WhatNormalVideo, WhatNormalAudio
 
 
 @admin.register(WhatNormalVideo)
-class WhatNormalVideoAdmin(ModelAdmin):
+class WhatNormalVideoAdmin(DirectVideoUploadAdminMixin, ModelAdmin):
     list_display = ('title', 'order', 'subtitle', 'video_status', 'is_active', 'updated_at')
     list_editable = ('order', 'is_active')
     list_filter = ('is_active',)
