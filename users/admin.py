@@ -3,6 +3,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils import timezone
 from datetime import time, timedelta
 from django.utils.translation import gettext_lazy as _
+from .direct_upload import DirectVideoUploadAdminMixin
 from unfold.admin import ModelAdmin
 from unfold.forms import UserChangeForm, UserCreationForm
 from .models import (
@@ -41,7 +42,7 @@ class CheckInTutorialFeedbackAdmin(ModelAdmin):
 
 
 @admin.register(CheckInTutorial)
-class CheckInTutorialAdmin(ModelAdmin):
+class CheckInTutorialAdmin(DirectVideoUploadAdminMixin, ModelAdmin):
     list_display = ('title', 'category', 'video_status', 'order', 'is_active', 'created_at')
     list_filter = ('category', 'is_active')
     search_fields = ('title', 'category', 'description')
