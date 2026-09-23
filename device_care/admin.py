@@ -1,11 +1,12 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
+from users.direct_upload import DirectVideoUploadAdminMixin
 from unfold.admin import ModelAdmin, TabularInline, StackedInline
 from users.video_utils import get_video_status_badge, render_video_preview_html
 from .models import HearingAidBrand, HearingAidModel, DeviceCareSection, DeviceCareVideo
 
 
-class DeviceCareVideoInline(TabularInline):
+class DeviceCareVideoInline(DirectVideoUploadAdminMixin, TabularInline):
     model = DeviceCareVideo
     extra = 1
     fields = ('title', 'video_file', 'video_url', 'thumbnail', 'duration_seconds', 'order', 'is_active')
@@ -107,7 +108,7 @@ class DeviceCareSectionAdmin(ModelAdmin):
 
 
 @admin.register(DeviceCareVideo)
-class DeviceCareVideoAdmin(ModelAdmin):
+class DeviceCareVideoAdmin(DirectVideoUploadAdminMixin, ModelAdmin):
     list_display = ('title_display', 'section', 'video_status', 'order', 'is_active', 'updated_at')
     list_editable = ('order', 'is_active')
     list_filter = ('section__section_type', 'section__model', 'is_active')
